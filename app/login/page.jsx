@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+const ERROR_MAP = {
+  'Invalid login credentials': 'Email atau password salah.',
+  'Email not confirmed': 'Email belum dikonfirmasi. Periksa inbox email Anda.',
+  'Email link is invalid or has expired': 'Link login tidak valid atau sudah kedaluwarsa.',
+  'Rate limit exceeded': 'Terlalu banyak percobaan. Silakan coba lagi nanti.',
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -12,19 +19,23 @@ export default function LoginPage() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     async function checkSession() {
       try {
         const { createClient } = await import('@/lib/supabase-browser');
         const supabase = createClient();
         const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          router.push('/admin');
+        if (session && mounted) {
+          router.replace('/admin');
           return;
         }
-      } catch {}
-      setChecking(false);
+      } catch (e) {
+        console.log('Session check skipped (no Supabase):', e.message);
+      }
+      if (mounted) setChecking(false);
     }
     checkSession();
+    return () => { mounted = false; };
   }, [router]);
 
   const handleSubmit = async (e) => {
@@ -35,20 +46,43 @@ export default function LoginPage() {
     try {
       const { createClient } = await import('@/lib/supabase-browser');
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
+
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
       if (authError) {
-        setError('Email atau password salah');
+        console.error('Login error:', authError.message);
+        setError(ERROR_MAP[authError.message] || authError.message);
         setLoading(false);
         return;
       }
 
-      router.push('/admin');
-      router.refresh();
+      console.log('Login success, session:', !!data?.session);
+
+      // Verify session is stored before redirect
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        console.log('Session confirmed, redirecting...');
+        router.replace('/admin');
+      } else {
+        console.log('Session not yet available, waiting...');
+        // Retry a few times
+        for (let i = 0; i < 5; i++) {
+          await new Promise((r) => setTimeout(r, 300));
+          const { data: { session: s } } = await supabase.auth.getSession();
+          if (s) {
+            console.log('Session confirmed after retry, redirecting...');
+            router.replace('/admin');
+            return;
+          }
+        }
+        setError('Gagal menyimpan sesi. Silakan coba lagi.');
+        setLoading(false);
+      }
     } catch (err) {
+      console.error('Login exception:', err);
       setError('Terjadi kesalahan. Silakan coba lagi.');
       setLoading(false);
     }
