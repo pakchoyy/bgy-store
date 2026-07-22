@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // Allow auth routes to pass through
+  // Allow auth routes to pass through (signout, etc.)
   if (pathname.startsWith('/auth')) {
     return NextResponse.next()
   }
@@ -20,28 +20,29 @@ export async function middleware(request) {
     try {
       const supabase = createServerClient(supabaseUrl, supabaseKey, {
         cookies: {
-          get(name) {
-            return request.cookies.get(name)?.value
+          getAll() {
+            return request.cookies.getAll()
           },
-          set(name, value, options) {
-            response.cookies.set({ name, value, ...options })
-          },
-          remove(name, options) {
-            response.cookies.set({ name, value: '', ...options })
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options)
+            })
           },
         },
       })
       const { data } = await supabase.auth.getSession()
       session = data?.session
     } catch (e) {
-      console.error('Middleware Supabase error:', e)
+      console.error('Middleware auth check failed:', e)
     }
   }
 
-  // Admin route protection
+  // Admin route protection — redirect to /login if no session
   if (pathname.startsWith('/admin')) {
     if (!session) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
     }
     return response
   }

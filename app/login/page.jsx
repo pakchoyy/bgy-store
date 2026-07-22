@@ -1,99 +1,107 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
-const ERROR_MAP = {
-  'Invalid login credentials': 'Email atau password salah.',
-  'Email not confirmed': 'Email belum dikonfirmasi. Periksa inbox email Anda.',
-  'Email link is invalid or has expired': 'Link login tidak valid atau sudah kedaluwarsa.',
-  'Rate limit exceeded': 'Terlalu banyak percobaan. Silakan coba lagi nanti.',
-};
+import { useState, useEffect, useRef } from 'react';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [debug, setDebug] = useState('');
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+  const supabaseRef = useRef(null);
+
+  // create supabase client once, reuse
+  async function getSupabase() {
+    if (!supabaseRef.current) {
+      const { createClient } = await import('@/lib/supabase-browser')
+      supabaseRef.current = createClient()
+    }
+    return supabaseRef.current
+  }
 
   useEffect(() => {
-    let mounted = true;
+    let mounted = true
     async function checkSession() {
       try {
-        const { createClient } = await import('@/lib/supabase-browser');
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const supabase = await getSupabase()
+        const { data: { session } } = await supabase.auth.getSession()
         if (session && mounted) {
-          router.replace('/admin');
-          return;
+          window.location.href = '/admin'
+          return
         }
       } catch (e) {
-        console.log('Session check skipped (no Supabase):', e.message);
+        console.log('Session check skipped:', e?.message)
       }
-      if (mounted) setChecking(false);
+      if (mounted) setChecking(false)
     }
-    checkSession();
-    return () => { mounted = false; };
-  }, [router]);
+    checkSession()
+    return () => { mounted = false }
+  }, [])
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    e.preventDefault()
+    setError('')
+    setDebug('')
+    setLoading(true)
 
     try {
-      const { createClient } = await import('@/lib/supabase-browser');
-      const supabase = createClient();
+      const supabase = await getSupabase()
+
+      // Check if Supabase is configured
+      if (!supabase) {
+        setError('Koneksi database tidak tersedia.')
+        setLoading(false)
+        return
+      }
 
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
-      });
+      })
 
       if (authError) {
-        console.error('Login error:', authError.message);
-        setError(ERROR_MAP[authError.message] || authError.message);
-        setLoading(false);
-        return;
+        console.error('Supabase auth error:', authError)
+        setDebug(`Error code: ${authError.status || '-'} | ${authError.message}`)
+        setError('Email atau password salah. Silakan coba lagi.')
+        setLoading(false)
+        return
       }
 
-      console.log('Login success, session:', !!data?.session);
-
-      // Verify session is stored before redirect
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log('Session confirmed, redirecting...');
-        router.replace('/admin');
-      } else {
-        console.log('Session not yet available, waiting...');
-        // Retry a few times
-        for (let i = 0; i < 5; i++) {
-          await new Promise((r) => setTimeout(r, 300));
-          const { data: { session: s } } = await supabase.auth.getSession();
-          if (s) {
-            console.log('Session confirmed after retry, redirecting...');
-            router.replace('/admin');
-            return;
-          }
-        }
-        setError('Gagal menyimpan sesi. Silakan coba lagi.');
-        setLoading(false);
+      // signInWithPassword succeeded but no session returned
+      if (!data?.session) {
+        console.error('Login succeeded but no session:', data)
+        setError('Login berhasil tetapi sesi tidak tersimpan. Silakan coba lagi.')
+        setLoading(false)
+        return
       }
+
+      // Explicitly persist session to cookie
+      await supabase.auth.setSession(data.session)
+
+      // Verify cookie was set
+      const { data: { session: verified } } = await supabase.auth.getSession()
+      if (!verified) {
+        console.warn('Session not persisted after setSession')
+      }
+
+      console.log('Login OK, redirecting...')
+      // Full page navigation to ensure cookies are sent with request
+      window.location.href = '/admin'
     } catch (err) {
-      console.error('Login exception:', err);
-      setError('Terjadi kesalahan. Silakan coba lagi.');
-      setLoading(false);
+      console.error('Login exception:', err)
+      setDebug(err?.message || String(err))
+      setError('Terjadi kesalahan. Silakan coba lagi.')
+      setLoading(false)
     }
-  };
+  }
 
   if (checking) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
       </div>
-    );
+    )
   }
 
   return (
@@ -144,6 +152,12 @@ export default function LoginPage() {
               </div>
             )}
 
+            {debug && (
+              <div className="bg-gray-50 border border-gray-200 text-gray-500 text-xs rounded-xl px-4 py-2.5 break-all font-mono">
+                {debug}
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
@@ -162,10 +176,10 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-xs text-white/50 text-center mt-6">
+        <p className="text-xs text-white/50 text-center mt-5">
           Hanya untuk admin Bantu Guru Yuk
         </p>
       </div>
     </div>
-  );
+  )
 }
