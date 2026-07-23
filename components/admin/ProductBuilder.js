@@ -345,6 +345,33 @@ export default function ProductBuilder({ products: initialProducts, categories =
                   )}
                   {previewList.map((p) => {
                     const hi = selectedId === p.id
+                    const layout = p.card_layout || 'compact'
+                    if (layout === 'portrait' || layout === 'square') {
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setSelectedId(p.id)}
+                          className={`w-[48%] inline-block align-top mr-[4%] odd:mr-0 text-left bg-white rounded-2xl overflow-hidden shadow-sm border transition-all ${
+                            hi ? 'border-[#0ea5a0] ring-2 ring-[#0ea5a0]/25' : 'border-transparent'
+                          }`}
+                        >
+                          <div
+                            className={`${layout === 'square' ? 'aspect-square' : 'aspect-[3/4]'} flex items-center justify-center text-white text-[10px] font-bold ${
+                              p.type === 'free'
+                                ? 'bg-gradient-to-br from-sky-400 to-sky-600'
+                                : 'bg-gradient-to-br from-amber-400 to-orange-500'
+                            }`}
+                          >
+                            {p.type === 'free' ? 'FREE' : 'PAID'}
+                          </div>
+                          <div className="p-2">
+                            <p className="text-[10px] font-bold text-gray-900 line-clamp-2">{p.title}</p>
+                            <p className="text-[9px] font-extrabold text-[#0ea5a0] mt-0.5">{priceLabel(p)}</p>
+                          </div>
+                        </button>
+                      )
+                    }
                     return (
                       <button
                         key={p.id}
@@ -376,6 +403,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                                 </span>
                               )}
                             </p>
+                            <p className="text-[9px] text-gray-400 mt-0.5 capitalize">{layout}</p>
                           </div>
                         </div>
                       </button>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { generateSlug, formatRupiah, calcDiscount } from '@/lib/utils'
+import { generateSlug, formatRupiah, calcDiscount, CARD_LAYOUTS } from '@/lib/utils'
 import FAQEditor from '@/components/admin/FAQEditor'
 
 const BADGE_OPTIONS = [
@@ -36,6 +36,7 @@ export default function ProductForm({ initialData, categories = [] }) {
     cover_path: initialData?.cover_path || '',
     file_path: initialData?.file_path || '',
     file_size: initialData?.file_size || '',
+    card_layout: initialData?.card_layout || 'landscape',
     is_active: true,
     meta_title: '',
     meta_description: '',
@@ -44,6 +45,7 @@ export default function ProductForm({ initialData, categories = [] }) {
     sale_price: initialData?.sale_price ?? 0,
     original_price: initialData?.original_price ?? '',
     stock_qty: initialData?.stock_qty ?? 1,
+    card_layout: initialData?.card_layout || 'landscape',
   })
 
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
@@ -363,6 +365,47 @@ export default function ProductForm({ initialData, categories = [] }) {
             )}
           </div>
         )}
+      </CardSection>
+
+      {/* Tata Letak Blok */}
+      <CardSection title="Tata Letak Blok">
+        <p className="text-xs text-gray-500 -mt-2 mb-2">
+          Bentuk kartu produk di halaman toko (per produk)
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          {CARD_LAYOUTS.map((layout) => {
+            const active = form.card_layout === layout.value
+            return (
+              <button
+                key={layout.value}
+                type="button"
+                onClick={() => updateField('card_layout', layout.value)}
+                className={`rounded-xl border-2 p-3 text-left transition-all ${
+                  active
+                    ? 'border-[#0ea5a0] bg-teal-50 ring-2 ring-[#0ea5a0]/20'
+                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                }`}
+              >
+                <div className="h-12 mb-2 flex items-end justify-center gap-1">
+                  {layout.value === 'compact' ? (
+                    <div className="w-full h-6 rounded bg-gray-300" />
+                  ) : layout.value === 'square' ? (
+                    <div className="w-10 h-10 rounded bg-gray-300" />
+                  ) : layout.value === 'portrait' ? (
+                    <div className="w-8 h-11 rounded bg-gray-300" />
+                  ) : layout.value === 'wide' ? (
+                    <div className="w-full h-5 rounded bg-gray-300" />
+                  ) : (
+                    <div className="w-full h-8 rounded bg-gray-300" />
+                  )}
+                </div>
+                <p className={`text-[11px] font-bold ${active ? 'text-[#0ea5a0]' : 'text-gray-700'}`}>
+                  {layout.label}
+                </p>
+              </button>
+            )
+          })}
+        </div>
       </CardSection>
 
       {/* Media */}

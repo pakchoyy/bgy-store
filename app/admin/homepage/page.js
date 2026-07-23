@@ -1,11 +1,16 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import { demoSections, demoProducts, demoCategories } from '@/lib/demo-data'
-import HomepageBuilder from '@/components/admin/HomepageBuilder'
+import {
+  demoSettings,
+  demoNavItems,
+  demoProducts,
+} from '@/lib/demo-data'
+import { getAppearance, settingsToMap } from '@/lib/utils'
+import AppearanceBuilder from '@/components/admin/AppearanceBuilder'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminHomepage() {
+export default async function AdminAppearance() {
   const supabase = await createClient()
   const {
     data: { session },
@@ -16,37 +21,33 @@ export default async function AdminHomepage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_supabase_url'
 
-  let sections = []
-  let products = []
-  let categories = []
+  let settings = { ...demoSettings }
+  let navItems = demoNavItems
+  let products = demoProducts
 
   if (hasSupabase) {
-    const [secRes, prodRes, catRes] = await Promise.all([
-      supabase.from('homepage_sections').select('*').order('sort_order', { ascending: true }),
+    const [setRes, navRes, prodRes] = await Promise.all([
+      supabase.from('settings').select('*'),
+      supabase.from('navigation_items').select('*').order('sort_order'),
       supabase
         .from('products')
-        .select('id, title, type, sale_price, is_featured, is_active')
+        .select('id, title, type, sale_price, is_active, sort_order, card_layout')
         .eq('is_active', true)
         .is('deleted_at', null)
         .order('sort_order')
         .limit(12),
-      supabase.from('categories').select('id, name, color, slug').order('sort_order').limit(10),
     ])
-    sections = secRes.data || []
-    products = prodRes.data || []
-    categories = catRes.data || []
+    if (setRes.data?.length) settings = { ...settings, ...settingsToMap(setRes.data) }
+    if (navRes.data?.length) navItems = navRes.data
+    if (prodRes.data?.length) products = prodRes.data
   }
 
-  if (!sections.length) sections = demoSections
-  if (!products.length) products = demoProducts
-  if (!categories.length) categories = demoCategories
-
   return (
-    <HomepageBuilder
-      initialSections={sections}
+    <AppearanceBuilder
+      initialAppearance={getAppearance(settings)}
+      navItems={navItems}
       products={products}
-      categories={categories}
-      siteName="BGY"
+      siteName={settings.site_name || 'BGY'}
     />
   )
 }

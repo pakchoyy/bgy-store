@@ -19,3 +19,11 @@ body {
   background-color: var(--bg);
   color: var(--text);
 }
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

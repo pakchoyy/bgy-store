@@ -38,7 +38,7 @@ function Sidebar({ userName }) {
     {
       label: 'Tampilan',
       items: [
-        { href: '/admin/homepage', label: 'Homepage', icon: 'home' },
+        { href: '/admin/homepage', label: 'Appearance', icon: 'home' },
         { href: '/admin/navigation', label: 'Navigation', icon: 'menu' },
         { href: '/admin/footer', label: 'Footer', icon: 'rectangle' },
         { href: '/admin/theme', label: 'Theme', icon: 'palette' },
@@ -50,13 +50,6 @@ function Sidebar({ userName }) {
       items: [
         { href: '/admin/media', label: 'Media Library', icon: 'image' },
         { href: '/admin/assets', label: 'Asset Manager', icon: 'database' },
-      ],
-    },
-    {
-      label: 'Data',
-      items: [
-        { href: '/admin/links', label: 'Link Manager', icon: 'link' },
-        { href: '/admin/contacts', label: 'Contact Manager', icon: 'phone' },
       ],
     },
     {
