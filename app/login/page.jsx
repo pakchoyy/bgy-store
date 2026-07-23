@@ -43,10 +43,17 @@ export default function LoginPage() {
         body: JSON.stringify({ email: email.trim(), password }),
       })
 
-      const data = await res.json()
+      // Try to read response body as text first, then parse
+      const text = await res.text()
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch {
+        data = { error: text || '(respon kosong)' }
+      }
 
       if (!res.ok) {
-        console.error('Login API error:', data)
+        console.error('Login API error:', res.status, data)
         setDebug(`HTTP ${res.status}: ${data.error}`)
         setError('Email atau password salah. Silakan coba lagi.')
         setLoading(false)
