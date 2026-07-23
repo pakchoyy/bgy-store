@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -9,29 +9,20 @@ export default function LoginPage() {
   const [debug, setDebug] = useState('');
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
-  const supabaseRef = useRef(null);
-
-  // create supabase client once, reuse
-  async function getSupabase() {
-    if (!supabaseRef.current) {
-      const { createClient } = await import('@/lib/supabase-browser')
-      supabaseRef.current = createClient()
-    }
-    return supabaseRef.current
-  }
 
   useEffect(() => {
     let mounted = true
     async function checkSession() {
       try {
-        const supabase = await getSupabase()
+        const { createClient } = await import('@/lib/supabase-browser')
+        const supabase = createClient()
         const { data: { session } } = await supabase.auth.getSession()
         if (session && mounted) {
           window.location.href = '/admin'
           return
         }
       } catch (e) {
-        console.log('Session check skipped:', e?.message)
+        console.log('Session check skip:', e?.message)
       }
       if (mounted) setChecking(false)
     }
@@ -46,52 +37,28 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const supabase = await getSupabase()
-
-      // Check if Supabase is configured
-      if (!supabase) {
-        setError('Koneksi database tidak tersedia.')
-        setLoading(false)
-        return
-      }
-
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
       })
 
-      if (authError) {
-        console.error('Supabase auth error:', authError)
-        setDebug(`Error code: ${authError.status || '-'} | ${authError.message}`)
+      const data = await res.json()
+
+      if (!res.ok) {
+        console.error('Login API error:', data)
+        setDebug(`HTTP ${res.status}: ${data.error}`)
         setError('Email atau password salah. Silakan coba lagi.')
         setLoading(false)
         return
       }
 
-      // signInWithPassword succeeded but no session returned
-      if (!data?.session) {
-        console.error('Login succeeded but no session:', data)
-        setError('Login berhasil tetapi sesi tidak tersimpan. Silakan coba lagi.')
-        setLoading(false)
-        return
-      }
-
-      // Explicitly persist session to cookie
-      await supabase.auth.setSession(data.session)
-
-      // Verify cookie was set
-      const { data: { session: verified } } = await supabase.auth.getSession()
-      if (!verified) {
-        console.warn('Session not persisted after setSession')
-      }
-
-      console.log('Login OK, redirecting...')
-      // Full page navigation to ensure cookies are sent with request
+      console.log('Login OK via API')
       window.location.href = '/admin'
     } catch (err) {
-      console.error('Login exception:', err)
+      console.error('Login fetch error:', err)
       setDebug(err?.message || String(err))
-      setError('Terjadi kesalahan. Silakan coba lagi.')
+      setError('Terjadi kesalahan jaringan. Silakan coba lagi.')
       setLoading(false)
     }
   }
