@@ -6,11 +6,13 @@ export default async function AdminLayout({ children }) {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (!session) {
+  const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url';
+
+  if (!isDemo && !session) {
     redirect('/login');
   }
 
-  const userName = session.user?.email?.split('@')[0] || 'Admin';
+  const userName = session?.user?.email?.split('@')[0] || 'Admin';
 
   return (
     <div className="flex min-h-screen bg-gray-50">

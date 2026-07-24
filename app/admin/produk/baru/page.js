@@ -13,9 +13,12 @@ async function getCategories() {
 }
 
 export default async function AdminProdukBaru() {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
+  const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
+  if (!isDemo) {
+    const supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) redirect('/login')
+  }
 
   const categories = await getCategories()
 

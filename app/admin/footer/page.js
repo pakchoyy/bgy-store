@@ -6,10 +6,6 @@ async function saveFooter(formData) {
   'use server'
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
@@ -34,10 +30,6 @@ function getConfig(configs, key, fallback = '') {
 
 export default async function AdminFooter({ searchParams }) {
   const supabase = await createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
 
   const toast = searchParams?.toast
   const isDemo =

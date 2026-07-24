@@ -6,8 +6,6 @@ async function saveAnnouncement(formData) {
   'use server'
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/announcement?toast=demo')
   const configs = [
     { key: 'announcement_active', value: raw.active === 'true' ? 'true' : 'false' },
@@ -53,11 +51,16 @@ function ToastBar({ toast }) {
 }
 
 export default async function AdminAnnouncement({ searchParams }) {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
+  const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
+  let supabase
+  if (!isDemo) {
+    supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) redirect('/login')
+  } else {
+    supabase = await createClient()
+  }
   const toast = searchParams?.toast
-  const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
   let settings = {}
   if (!isDemo) {
     const { data } = await supabase.from('settings').select('*')

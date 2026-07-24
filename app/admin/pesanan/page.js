@@ -60,8 +60,6 @@ const demoOrders = [
 
 export default async function AdminPesanan({ searchParams }) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   const toast = searchParams?.toast
   const statusFilter = searchParams?.status || 'all'
   const search = searchParams?.search || ''

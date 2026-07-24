@@ -11,13 +11,15 @@ import AppearanceBuilder from '@/components/admin/AppearanceBuilder'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminAppearance() {
-  const supabase = await createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
+  const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
+  let supabase
+  if (!isDemo) {
+    supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) redirect('/login')
+  }
 
-  const hasSupabase =
+  const hasSupabase = !isDemo
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_supabase_url'
 

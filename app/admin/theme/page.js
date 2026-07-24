@@ -6,8 +6,6 @@ async function saveTheme(formData) {
   'use server'
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/theme?toast=demo')
   const configs = [
     { key: 'theme_primary_color', value: raw.primary_color },
@@ -51,8 +49,6 @@ function ToastBar({ toast }) {
 
 export default async function AdminTheme({ searchParams }) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   const toast = searchParams?.toast
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
   let settings = {}

@@ -10,9 +10,17 @@ function priceLabel(p) {
 }
 
 export default function ProductBuilder({ products: initialProducts, categories = [], siteName = 'BGY' }) {
-  const [products, setProducts] = useState(() =>
-    [...initialProducts].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-  )
+  const [products, setProducts] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]')
+        if (saved.length) {
+          return [...saved].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+        }
+      } catch {}
+    }
+    return [...initialProducts].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+  })
   const [tab, setTab] = useState('all') // all | free | paid
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState(initialProducts[0]?.id || null)

@@ -39,6 +39,9 @@ export async function middleware(request) {
 
   // Admin route protection — redirect to /login if no session
   if (pathname.startsWith('/admin')) {
+    if (!hasSupabase) {
+      return response
+    }
     if (!session) {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('redirect', pathname)

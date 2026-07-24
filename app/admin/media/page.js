@@ -4,8 +4,6 @@ import { redirect } from 'next/navigation'
 async function saveMedia(formData) {
   'use server'
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/media?toast=demo')
   redirect('/admin/media?toast=success')
 }
@@ -54,8 +52,6 @@ const demoMedia = [
 
 export default async function AdminMedia({ searchParams }) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   const toast = searchParams?.toast
   const filter = searchParams?.filter || 'all'
   const selectedId = searchParams?.selected

@@ -6,8 +6,6 @@ async function saveCustom404(formData) {
   'use server'
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/custom-404?toast=demo')
   const configs = [
     { key: 'custom_404_title', value: raw.title || '' },
@@ -52,8 +50,6 @@ function ToastBar({ toast }) {
 
 export default async function AdminCustom404({ searchParams }) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   const toast = searchParams?.toast
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
   let settings = {}

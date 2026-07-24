@@ -4,8 +4,6 @@ import { redirect } from 'next/navigation'
 async function saveAsset(formData) {
   'use server'
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/assets?toast=demo')
   redirect('/admin/assets?toast=success')
 }
@@ -13,8 +11,6 @@ async function saveAsset(formData) {
 async function deleteAsset(formData) {
   'use server'
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/assets?toast=demo')
   redirect('/admin/assets?toast=success')
 }
@@ -62,8 +58,6 @@ const assetSlots = [
 
 export default async function AdminAssets({ searchParams }) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   const toast = searchParams?.toast
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
   let assets = {}

@@ -6,8 +6,6 @@ async function saveNav(formData) {
   'use server'
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/navigation?toast=demo')
   const payload = {
     label: raw.label,
@@ -27,8 +25,6 @@ async function deleteNav(formData) {
   'use server'
   const id = formData.get('id')
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/navigation?toast=demo')
   const { error } = await supabase.from('navigation_items').delete().eq('id', id)
   if (error) redirect('/admin/navigation?toast=error')
@@ -69,8 +65,6 @@ function targetTypeLabel(type) {
 
 export default async function AdminNavigation({ searchParams }) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/login')
   const toast = searchParams?.toast
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
   let items = []
