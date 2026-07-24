@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase-server'
 import { generateSlug } from '@/lib/utils'
 
-function sanitizeProduct(body, includeCardLayout = true) {
-  const product = {
+function sanitizeProduct(body) {
+  return {
     title: (body.title || '').trim(),
     slug: (body.slug || generateSlug(body.title || '')).trim(),
     description: (body.description || '').trim(),
@@ -19,21 +19,41 @@ function sanitizeProduct(body, includeCardLayout = true) {
     preview_path: body.preview_path || null,
     file_path: body.file_path || null,
     file_size: body.file_size || null,
+    card_layout: body.card_layout || 'landscape',
     meta_title: body.meta_title || null,
     meta_description: body.meta_description || null,
     is_active: body.is_active !== false,
     published_at: body.is_active ? new Date().toISOString() : null,
     deleted_at: null,
   }
-  if (includeCardLayout) {
-    product.card_layout = body.card_layout || 'landscape'
+}
+
+function sanitizeMinimalProduct(body) {
+  return {
+    title: (body.title || '').trim(),
+    slug: (body.slug || generateSlug(body.title || '')).trim(),
+    description: (body.description || '').trim(),
+    category_id: body.category_id || null,
+    type: body.type === 'paid' ? 'paid' : 'free',
+    sale_price: typeof body.sale_price === 'number' ? body.sale_price : 0,
+    original_price: typeof body.original_price === 'number' ? body.original_price : null,
+    stock_type: body.stock_type === 'limited' ? 'limited' : 'unlimited',
+    stock_qty: typeof body.stock_qty === 'number' ? body.stock_qty : null,
+    badge: body.badge || null,
+    badge_custom: body.badge_custom || null,
+    is_featured: !!body.is_featured,
+    cover_path: body.cover_path || null,
+    file_path: body.file_path || null,
+    file_size: body.file_size || null,
+    is_active: body.is_active !== false,
+    published_at: body.is_active ? new Date().toISOString() : null,
+    deleted_at: null,
   }
-  return product
 }
 
 function isMissingColumnError(error) {
   const msg = (error?.message || '').toLowerCase()
-  return msg.includes('card_layout') || msg.includes('column') || msg.includes('does not exist')
+  return msg.includes('column') || msg.includes('does not exist') || msg.includes('schema cache')
 }
 
 export async function POST(request) {
@@ -70,9 +90,9 @@ export async function POST(request) {
     let result = await supabase.from('products').insert(product).select().single()
 
     if (result.error && isMissingColumnError(result.error)) {
-      console.warn('POST /api/admin/products card_layout column missing, retrying without it')
-      const productWithoutLayout = sanitizeProduct(body, false)
-      result = await supabase.from('products').insert(productWithoutLayout).select().single()
+      console.warn('POST /api/admin/products missing column, retrying with minimal schema')
+      const minimalProduct = sanitizeMinimalProduct(body)
+      result = await supabase.from('products').insert(minimalProduct).select().single()
     }
 
     if (result.error) {
@@ -117,9 +137,9 @@ export async function PUT(request) {
     let result = await supabase.from('products').update(product).eq('id', id).select().single()
 
     if (result.error && isMissingColumnError(result.error)) {
-      console.warn('PUT /api/admin/products card_layout column missing, retrying without it')
-      const productWithoutLayout = sanitizeProduct(rest, false)
-      result = await supabase.from('products').update(productWithoutLayout).eq('id', id).select().single()
+      console.warn('PUT /api/admin/products missing column, retrying with minimal schema')
+      const minimalProduct = sanitizeMinimalProduct(rest)
+      result = await supabase.from('products').update(minimalProduct).eq('id', id).select().single()
     }
 
     if (result.error) {
