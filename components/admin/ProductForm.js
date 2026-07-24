@@ -97,6 +97,11 @@ export default function ProductForm({ initialData, categories = [] }) {
     }))
   }
 
+  const showToast = (type, message) => {
+    setToast({ type, message })
+    setTimeout(() => setToast(null), 3000)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
