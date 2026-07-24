@@ -5,8 +5,10 @@ import { demoProducts } from '@/lib/demo-data'
 
 async function getData() {
   if (!hasSupabase()) {
-    const featured = demoProducts.filter((p) => p.is_active && (p.is_featured || p.type === 'paid'))
-    const rest = demoProducts.filter((p) => p.is_active && !featured.find((f) => f.id === p.id))
+    const saved = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]') : []
+    const allProducts = saved.length ? saved : demoProducts
+    const featured = allProducts.filter((p) => p.is_active && (p.is_featured || p.type === 'paid'))
+    const rest = allProducts.filter((p) => p.is_active && !featured.find((f) => f.id === p.id))
     return demoShellData({
       products: [...featured, ...rest].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
     })

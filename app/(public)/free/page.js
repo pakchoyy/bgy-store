@@ -1,16 +1,16 @@
 import { Suspense } from 'react'
 import LynkShell from '@/components/public/LynkShell'
-import ProductStack from '@/components/public/ProductStack'
 import FreePageClient from './FreePageClient'
-import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
+import { fetchStoreShell, demoShellDataWithProducts, hasSupabase } from '@/lib/store-shell'
 import { demoProducts, demoCategories } from '@/lib/demo-data'
 
 async function getData() {
   if (!hasSupabase()) {
-    return demoShellData({
-      products: demoProducts.filter((p) => p.type === 'free' && p.is_active),
-      categories: demoCategories,
-    })
+    const saved = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]') : []
+    return demoShellDataWithProducts(
+      (saved.length ? saved : demoProducts).filter((p) => p.type === 'free' && p.is_active),
+      { categories: demoCategories }
+    )
   }
 
   const shell = await fetchStoreShell()
@@ -39,10 +39,7 @@ export default async function FreePage() {
           </div>
         }
       >
-        <div className="space-y-3">
-          <FreePageClient products={products} categories={categories} settings={settings} />
-          {!products?.length && <ProductStack products={[]} emptyText="Belum ada produk gratis" />}
-        </div>
+        <FreePageClient products={products} categories={categories} settings={settings} />
       </Suspense>
     </LynkShell>
   )
