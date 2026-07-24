@@ -28,14 +28,16 @@ export default function ProductForm({ initialData, categories = [] }) {
     badges: [],
     badge_custom: '',
     is_featured: false,
-    is_best_seller: false,
     sale_price: 0,
     original_price: '',
     stock_type: 'unlimited',
     stock_qty: 1,
     cover_path: initialData?.cover_path || '',
     file_path: initialData?.file_path || '',
+    file_url: initialData?.file_url || '',
+    file_name: initialData?.file_name || '',
     file_size: initialData?.file_size || '',
+    mime_type: initialData?.mime_type || '',
     card_layout: initialData?.card_layout || 'landscape',
     is_active: true,
     meta_title: '',
@@ -124,7 +126,10 @@ export default function ProductForm({ initialData, categories = [] }) {
       cover_path: form.cover_path || null,
       preview_path: form.preview_path || null,
       file_path: form.file_path || null,
+      file_url: form.file_url || null,
+      file_name: form.file_name || null,
       file_size: form.file_size || null,
+      mime_type: form.mime_type || null,
       card_layout: form.card_layout || 'landscape',
       meta_title: form.meta_title || null,
       meta_description: form.meta_description || null,
@@ -322,15 +327,6 @@ export default function ProductForm({ initialData, categories = [] }) {
               className="rounded text-[#0ea5a0] focus:ring-[#0ea5a0]"
             />
             <span className="text-sm font-medium text-gray-700">Produk Unggulan</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.is_best_seller}
-              onChange={e => updateField('is_best_seller', e.target.checked)}
-              className="rounded text-[#0ea5a0] focus:ring-[#0ea5a0]"
-            />
-            <span className="text-sm font-medium text-gray-700">Produk Terlaris</span>
           </label>
         </div>
       </CardSection>

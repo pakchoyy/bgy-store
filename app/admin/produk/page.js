@@ -21,13 +21,7 @@ async function getData() {
       return { products, categories: categories || demoCategories }
     }
   } catch {}
-  const saved = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]') : []
-  const demoProductsToUse = saved.length ? saved : demoProducts
-  const productsWithCat = demoProductsToUse.map((p) => ({
-    ...p,
-    category: demoCategories.find((c) => c.id === p.category_id) || null,
-  }))
-  return { products: productsWithCat, categories: demoCategories }
+  return { products: demoProducts, categories: demoCategories }
 }
 
 export default async function AdminProduk() {
