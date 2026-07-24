@@ -40,14 +40,11 @@ function sanitizeMinimalProduct(body) {
     stock_type: body.stock_type === 'limited' ? 'limited' : 'unlimited',
     stock_qty: typeof body.stock_qty === 'number' ? body.stock_qty : null,
     badge: body.badge || null,
-    badge_custom: body.badge_custom || null,
     is_featured: !!body.is_featured,
     cover_path: body.cover_path || null,
     file_path: body.file_path || null,
     file_size: body.file_size || null,
     is_active: body.is_active !== false,
-    published_at: body.is_active ? new Date().toISOString() : null,
-    deleted_at: null,
   }
 }
 
