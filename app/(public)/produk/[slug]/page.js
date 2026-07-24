@@ -18,28 +18,46 @@ async function getProduct(slug) {
   }
 
   const shell = await fetchStoreShell()
-  const { createClient } = await import('@/lib/supabase-server')
-  const supabase = await createClient()
 
-  const { data: product } = await supabase
-    .from('products')
-    .select('*, category:categories(*)')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .is('deleted_at', null)
-    .single()
-
+  let product = null
   let faqs = []
-  if (product?.id) {
-    const { data } = await supabase
-      .from('product_faqs')
+
+  try {
+    const { createClient } = await import('@/lib/supabase-server')
+    const supabase = await createClient()
+
+    let query = supabase
+      .from('products')
       .select('*')
-      .eq('product_id', product.id)
-      .order('sort_order')
-    faqs = data || []
+      .eq('slug', slug)
+      .eq('is_active', true)
+
+    try {
+      query = query.is('deleted_at', null)
+    } catch {}
+
+    const { data } = await query.single()
+    product = data || null
+
+    if (product?.id) {
+      try {
+        const { data: faqData } = await supabase
+          .from('product_faqs')
+          .select('*')
+          .eq('product_id', product.id)
+          .order('sort_order')
+        faqs = faqData || []
+      } catch {}
+    }
+  } catch (e) {
+    console.error('produk/[slug] supabase error:', e)
   }
 
-  return { ...shell, product: product || null, faqs }
+  if (!product) {
+    product = demoProducts.find((p) => p.slug === slug && p.is_active) || null
+  }
+
+  return { ...shell, product, faqs }
 }
 
 function calcDiscount(original, sale) {
