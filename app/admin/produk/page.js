@@ -21,7 +21,9 @@ async function getData() {
       return { products, categories: categories || demoCategories }
     }
   } catch {}
-  const productsWithCat = demoProducts.map((p) => ({
+  const saved = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]') : []
+  const demoProductsToUse = saved.length ? saved : demoProducts
+  const productsWithCat = demoProductsToUse.map((p) => ({
     ...p,
     category: demoCategories.find((c) => c.id === p.category_id) || null,
   }))

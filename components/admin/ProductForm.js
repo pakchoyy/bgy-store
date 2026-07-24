@@ -100,11 +100,58 @@ export default function ProductForm({ initialData, categories = [] }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
-    await new Promise(r => setTimeout(r, 1000))
-    localStorage.removeItem(draftKey)
-    setToast({ type: 'success', message: isEditing ? 'Produk berhasil diperbarui!' : 'Produk berhasil disimpan!' })
-    setSaving(false)
-    setTimeout(() => router.push('/admin/produk'), 1500)
+    const isDemo =
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
+    const payload = {
+      title: form.title,
+      slug: form.slug,
+      description: form.description,
+      category_id: form.category_id || null,
+      type: form.type,
+      sale_price: Number(form.sale_price) || 0,
+      original_price: form.original_price ? Number(form.original_price) : null,
+      stock_type: form.stock_type,
+      stock_qty: Number(form.stock_qty) || 0,
+      badge: form.badges.includes('custom') ? 'custom' : form.badges[0] || null,
+      badge_custom: form.badge_custom || null,
+      is_featured: form.is_featured,
+      cover_path: form.cover_path || null,
+      preview_path: form.preview_path || null,
+      file_path: form.file_path || null,
+      file_size: form.file_size || null,
+      card_layout: form.card_layout || 'landscape',
+      meta_title: form.meta_title || null,
+      meta_description: form.meta_description || null,
+      is_active: form.is_active,
+      ...(isEditing ? { id: initialData.id } : {}),
+    }
+    try {
+      const res = await fetch('/api/admin/products', {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast('error', (data.error || 'Gagal menyimpan').replace(/[{}"]/g, ''))
+      } else {
+        showToast('success', isEditing ? 'Produk diperbarui!' : 'Produk berhasil disimpan!')
+        if (isDemo && typeof window !== 'undefined') {
+          const existing = JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]')
+          const next = isEditing
+            ? existing.map((p) => (p.id === initialData.id ? { ...p, ...payload, id: p.id } : p))
+            : [...existing, { ...payload, id: 'demo-' + Date.now(), is_active: true }]
+          localStorage.setItem('_bgym_demo_products', JSON.stringify(next))
+        }
+        localStorage.removeItem(draftKey)
+        setTimeout(() => router.push('/admin/produk'), 1000)
+      }
+    } catch (e) {
+      showToast('error', e.message || 'Gagal menyimpan')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const discount = calcDiscount(form.original_price, form.sale_price)
