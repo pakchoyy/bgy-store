@@ -139,7 +139,7 @@ export default async function ProdukDetailPage({ params }) {
           </div>
         </div>
       </LynkShell>
-      <StickyBuyBar product={product} onBuy={() => {}} />
+      <StickyBuyBar product={product} />
     </>
   )
 }

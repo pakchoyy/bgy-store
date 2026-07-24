@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-export default function StickyBuyBar({ product, onBuy }) {
+export default function StickyBuyBar({ product }) {
   const [visible, setVisible] = useState(false);
   const btnRef = useRef(null);
 
@@ -45,7 +45,7 @@ export default function StickyBuyBar({ product, onBuy }) {
           )}
         </div>
         <button
-          onClick={onBuy}
+          onClick={() => btnRef.current?.click()}
           disabled={isSoldOut}
           className={`px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 ${
             isSoldOut
