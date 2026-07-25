@@ -3,14 +3,14 @@
 -- Fixes: meta_desc→meta_description rename, add missing columns, triggers
 -- ===================================================================
 
--- 1. Rename meta_desc → meta_description (root cause of PGRST204 error)
+-- 1. Drop meta_desc (code uses meta_description which already exists)
 DO $$
 BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name = 'products' AND column_name = 'meta_desc'
   ) THEN
-    ALTER TABLE products RENAME COLUMN meta_desc TO meta_description;
+    ALTER TABLE products DROP COLUMN meta_desc;
   END IF;
 END $$;
 
