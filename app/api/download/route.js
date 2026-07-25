@@ -13,7 +13,7 @@ export async function GET(request) {
       && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_supabase_url';
 
     if (!hasSupabase) {
-      if (token === 'demo-download-token-abc123') {
+      if (token === 'demo-download-token-abc123' || token.startsWith('ORD-')) {
         return NextResponse.redirect('https://example.com/demo-file.pdf');
       }
       return NextResponse.json({ error: 'Token tidak valid atau kedaluwarsa' }, { status: 403 });

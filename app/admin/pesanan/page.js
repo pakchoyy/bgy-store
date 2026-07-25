@@ -249,7 +249,7 @@ export default async function AdminPesanan({ searchParams }) {
               </button>
             </form>
             <button onClick={async () => {
-              try { await navigator.clipboard.writeText(`${window.location.origin}/download/${selectedOrder.id}`) } catch {}
+              try { await navigator.clipboard.writeText(`${window.location.origin}/api/download?token=${selectedOrder.id}`) } catch {}
             }} className="bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
               Copy Link
             </button>

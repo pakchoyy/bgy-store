@@ -63,7 +63,13 @@ export default function Navbar({ items, siteName }) {
             {items?.map((item) => {
               const href = item.target_type === 'external'
                 ? item.target_url
-                : `/`;
+                : item.target_type === 'product'
+                  ? `/produk/${item.target_id}`
+                  : item.target_type === 'category'
+                    ? `/kategori/${item.target_id}`
+                    : item.target_type === 'page'
+                      ? `/halaman/${item.target_id}`
+                      : '/';
               return (
                 <Link
                   key={item.id}
