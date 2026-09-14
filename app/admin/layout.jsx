@@ -77,16 +77,17 @@ function Sidebar({ userName }) {
 
   return (
     <>
-    <details className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
-      <summary className="cursor-pointer select-none text-sm font-bold text-gray-800">
+    <details className="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-2">
+      <summary className="flex min-h-10 cursor-pointer select-none list-none items-center justify-between rounded-xl bg-gray-50 px-3 text-sm font-bold text-gray-800 [&::-webkit-details-marker]:hidden">
         Menu admin
+        <span aria-hidden="true" className="text-gray-400">⌄</span>
       </summary>
-      <nav aria-label="Menu admin ponsel" className="grid grid-cols-2 gap-2 pt-3">
+      <nav aria-label="Menu admin ponsel" className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto pt-3">
         {mobileItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="rounded-xl bg-gray-50 px-3 py-3 text-sm font-semibold text-gray-700"
+            className="rounded-xl bg-gray-50 px-3 py-2.5 text-sm font-semibold text-gray-700"
           >
             {item.label}
           </Link>

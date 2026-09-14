@@ -32,6 +32,17 @@ export default function LynkShell({
       : {
           backgroundImage: `linear-gradient(180deg, ${bgColor || '#0ea5a0'} 0%, ${bgColor || '#0ea5a0'}cc 35%, #f0fdfa 70%, #f8fafc 100%)`,
         }
+  const menuItems = [
+    { key: 'home', label: 'Home', href: '/' },
+    ...(navItems || []).filter((item) => item.is_visible !== false).map((item) => {
+      const href = navigationHref(item)
+      return {
+        key: item.id || item.label,
+        label: item.label === 'Tentang Kami' ? 'FAQ' : item.label,
+        href: item.label === 'Tentang Kami' ? '/halaman/faq' : href,
+      }
+    }),
+  ]
 
   return (
     <div className="min-h-screen" style={bg}>
@@ -50,12 +61,11 @@ export default function LynkShell({
             <span className="sr-only">Menu</span>
             <span aria-hidden="true" className="relative block h-4 w-5 border-y-2 border-white before:absolute before:left-0 before:top-1/2 before:h-0.5 before:w-5 before:-translate-y-1/2 before:bg-white" />
           </summary>
-          <div className="absolute left-0 top-12 w-64 rounded-2xl bg-white p-3 text-slate-900 shadow-2xl ring-1 ring-black/5">
-            <p className="px-3 pb-2 text-xs font-extrabold uppercase tracking-wide text-slate-400">Pages</p>
-            <nav className="grid gap-1">
-              <a href="/" className="rounded-xl px-3 py-2 text-sm font-bold hover:bg-slate-50">Home</a>
-              {(navItems || []).map((item) => (
-                <a key={item.id || item.label} href={navigationHref(item)} className="rounded-xl px-3 py-2 text-sm font-bold hover:bg-slate-50">
+          <div className="absolute left-0 top-12 w-56 overflow-hidden rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-black/5">
+            <p className="border-b border-slate-100 px-4 py-3 text-[11px] font-extrabold uppercase tracking-wide text-slate-400">Pages</p>
+            <nav className="max-h-72 overflow-y-auto py-1">
+              {menuItems.map((item) => (
+                <a key={item.key} href={item.href} className="block px-4 py-3 text-sm font-extrabold hover:bg-slate-50">
                   {item.label}
                 </a>
               ))}

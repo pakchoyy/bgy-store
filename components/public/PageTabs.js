@@ -14,7 +14,9 @@ export default function PageTabs({ items = [] }) {
     <div className="sticky top-0 z-20 -mx-1 px-1 py-2 bg-inherit/80 backdrop-blur-sm">
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {tabs.map((item) => {
-          const href = resolveNavHref(item)
+          const rawHref = resolveNavHref(item)
+          const href = item.label === 'Tentang Kami' ? '/halaman/faq' : rawHref
+          const label = item.label === 'Tentang Kami' ? 'FAQ' : item.label
           const active =
             href === '/'
               ? pathname === '/'
@@ -30,7 +32,7 @@ export default function PageTabs({ items = [] }) {
                   : 'bg-white/15 text-white hover:bg-white/25'
               }`}
             >
-              {item.label}
+              {label}
             </Link>
           )
         })}
