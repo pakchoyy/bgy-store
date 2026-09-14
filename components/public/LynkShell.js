@@ -2,6 +2,7 @@ import AnnouncementBar from '@/components/public/AnnouncementBar'
 import Footer from '@/components/public/Footer'
 import PageTabs from '@/components/public/PageTabs'
 import SocialIcons from '@/components/public/SocialIcons'
+import { navigationHref } from '@/lib/navigation'
 
 export default function LynkShell({
   appearance,
@@ -10,6 +11,7 @@ export default function LynkShell({
   announcement,
   children,
   activeTabLabel,
+  topBarTitle = 'Home',
 }) {
   const {
     profileName,
@@ -41,6 +43,40 @@ export default function LynkShell({
           textColor={announcement.textColor}
         />
       )}
+
+      <div className="sticky top-0 z-40 mx-auto flex h-14 max-w-md items-center justify-between bg-neutral-800 px-4 text-white shadow-lg shadow-black/10">
+        <details className="relative">
+          <summary aria-label="Buka menu" className="flex h-10 w-10 list-none items-center justify-center rounded-full hover:bg-white/10 [&::-webkit-details-marker]:hidden">
+            <span className="sr-only">Menu</span>
+            <span aria-hidden="true" className="relative block h-4 w-5 border-y-2 border-white before:absolute before:left-0 before:top-1/2 before:h-0.5 before:w-5 before:-translate-y-1/2 before:bg-white" />
+          </summary>
+          <div className="absolute left-0 top-12 w-64 rounded-2xl bg-white p-3 text-slate-900 shadow-2xl ring-1 ring-black/5">
+            <p className="px-3 pb-2 text-xs font-extrabold uppercase tracking-wide text-slate-400">Pages</p>
+            <nav className="grid gap-1">
+              <a href="/" className="rounded-xl px-3 py-2 text-sm font-bold hover:bg-slate-50">Home</a>
+              {(navItems || []).map((item) => (
+                <a key={item.id || item.label} href={navigationHref(item)} className="rounded-xl px-3 py-2 text-sm font-bold hover:bg-slate-50">
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+          </div>
+        </details>
+        <p className="text-lg font-extrabold">{topBarTitle}</p>
+        <div className="flex items-center gap-1">
+          <a href="/cari" aria-label="Cari produk" className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10">
+            <svg aria-hidden="true" className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="m21 21-4.35-4.35m1.1-5.4a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" />
+            </svg>
+          </a>
+          <a href="/produk" aria-label="Keranjang belanja" className="relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10">
+            <svg aria-hidden="true" className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M3 3h2l.5 3m0 0L7 15h10l3-9H5.5Zm3 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+            </svg>
+            <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-400 px-1 text-xs font-extrabold text-white">0</span>
+          </a>
+        </div>
+      </div>
 
       <div className="max-w-md mx-auto px-4 pt-8 pb-6">
         <header className="text-center text-white mb-4">
@@ -74,7 +110,7 @@ export default function LynkShell({
         <PageTabs items={navItems} />
 
         {activeTabLabel && (
-          <p className="text-xs font-bold text-white/70 uppercase tracking-wider mt-3 mb-2 px-1">
+          <p className="rounded-lg bg-neutral-800 px-4 py-3 text-center text-sm font-extrabold text-white shadow-sm mt-4 mb-3">
             {activeTabLabel}
           </p>
         )}

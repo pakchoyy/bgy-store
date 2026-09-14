@@ -34,7 +34,8 @@ export default async function HomePage() {
       navItems={navItems}
       footerConfig={footerConfig}
       announcement={announcement}
-      activeTabLabel="Home"
+      activeTabLabel="Last Updated 👇"
+      topBarTitle="Home"
     >
       <ProductStack products={products} emptyText="Belum ada produk ditampilkan" />
     </LynkShell>
