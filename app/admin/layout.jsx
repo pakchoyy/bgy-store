@@ -15,7 +15,7 @@ export default async function AdminLayout({ children }) {
   const userName = session?.user?.email?.split('@')[0] || 'Admin';
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
       <Sidebar userName={userName} />
       <div className="flex-1 lg:pl-64">
         <Header userName={userName} />
@@ -70,7 +70,29 @@ function Sidebar({ userName }) {
     },
   ];
 
+  const mobileItems = [
+    { href: '/admin', label: 'Dashboard' },
+    ...menuGroups.flatMap((group) => group.items),
+  ];
+
   return (
+    <>
+    <details className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+      <summary className="cursor-pointer select-none text-sm font-bold text-gray-800">
+        Menu admin
+      </summary>
+      <nav aria-label="Menu admin ponsel" className="grid grid-cols-2 gap-2 pt-3">
+        {mobileItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="rounded-xl bg-gray-50 px-3 py-3 text-sm font-semibold text-gray-700"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+    </details>
     <aside className="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col fixed inset-y-0 left-0 z-40">
       <Link href="/admin" className="h-12 flex items-center gap-2.5 px-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
         <div className="w-7 h-7 bg-gradient-to-br from-[#0ea5a0] to-[#0d7a8a] rounded-lg flex items-center justify-center shadow-sm">
@@ -110,6 +132,7 @@ function Sidebar({ userName }) {
         </div>
       </div>
     </aside>
+    </>
   );
 }
 
@@ -125,15 +148,16 @@ function Header({ userName }) {
         </Link>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Link
-          href="/admin"
-          className="text-sm font-semibold text-gray-700"
-        >
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-semibold text-gray-700">
           Dashboard Admin
-        </Link>
+        </span>
         <form action="/auth/signout" method="post">
-          <button className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-500 transition-colors">
+          <button
+            type="submit"
+            aria-label="Keluar dari admin"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors sm:h-auto sm:w-auto sm:gap-1.5 sm:rounded-none sm:hover:bg-transparent"
+          >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
