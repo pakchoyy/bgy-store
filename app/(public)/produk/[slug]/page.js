@@ -6,7 +6,7 @@ import StockIndicator from '@/components/public/StockIndicator'
 import ProductFAQ from '@/components/public/ProductFAQ'
 import ShareButtons from '@/components/public/ShareButtons'
 import FilePreview from '@/components/public/FilePreview'
-import StickyBuyBar from '@/components/public/StickyBuyBar'
+import ProductActions from '@/components/public/ProductActions'
 import { demoProducts } from '@/lib/demo-data'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import Link from 'next/link'
@@ -42,9 +42,13 @@ async function getProduct(slug) {
   return { ...shell, product: product || null, faqs }
 }
 
-function calcDiscount(original, sale) {
-  if (!original || original <= sale) return null
-  return Math.round(((original - sale) / original) * 100)
+export async function generateMetadata({ params }) {
+  const { product } = await getProduct(params.slug)
+  if (!product) return { title: 'Produk tidak ditemukan', robots: { index: false } }
+  return {
+    title: product.meta_title || `${product.title} | Bantu Guru Yuk`,
+    description: product.meta_description || product.meta_desc || (product.description || '').replace(/<[^>]*>/g, '').slice(0, 160),
+  }
 }
 
 export default async function ProdukDetailPage({ params }) {
@@ -67,79 +71,84 @@ export default async function ProdukDetailPage({ params }) {
   }
 
   const isSoldOut = product.stock_type === 'limited' && product.stock_qty <= 0
-  const discountPercent = calcDiscount(product.original_price, product.sale_price)
   const productUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bantuguruyuk.web.id'}/produk/${product.slug}`
 
   return (
-    <>
-      <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement}>
-        <div className="bg-white/95 rounded-2xl shadow-sm overflow-hidden mb-20">
-          <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
-            {product.cover_path ? (
-              <img src={product.cover_path} alt={product.title} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-300 font-bold">
-                {product.type === 'free' ? 'GRATIS' : 'PAID'}
-              </div>
-            )}
-            <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-              <ProductBadge badge={product.badge} badgeCustom={product.badge_custom} />
-              {isSoldOut && (
-                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                  Sold Out
-                </span>
-              )}
+    <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement}>
+      <article className="bg-white/95 rounded-[1.6rem] shadow-sm overflow-hidden mb-20 ring-1 ring-white/60">
+        <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
+          {product.cover_path ? (
+            <img src={product.cover_path} alt={product.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-300 font-extrabold">
+              {product.type === 'free' ? 'GRATIS' : 'PAID'}
             </div>
+          )}
+          <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+            <ProductBadge badge={product.badge} badgeCustom={product.badge_custom} />
+            {isSoldOut && (
+              <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase shadow-sm">
+                Sold Out
+              </span>
+            )}
           </div>
+        </div>
 
-          <div className="p-4 space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
+        <div className="p-5 space-y-6">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
               {product.category && <CategoryBadge category={product.category} />}
               <StockIndicator stockType={product.stock_type} stockQty={product.stock_qty} />
             </div>
+            <h1 className="text-2xl font-extrabold text-gray-950 leading-tight">{product.title}</h1>
+            <div className="mt-3">
+              <PriceBlock salePrice={product.sale_price} originalPrice={product.original_price} />
+            </div>
+          </div>
 
-            <h1 className="text-lg font-extrabold text-gray-900 leading-snug">{product.title}</h1>
-            <PriceBlock salePrice={product.sale_price} originalPrice={product.original_price} />
-
-            {discountPercent && (
-              <span className="inline-flex text-xs font-bold bg-red-50 text-red-500 px-2.5 py-1 rounded-full">
-                Hemat {discountPercent}%
-              </span>
-            )}
-
-            {product.description && (
+          {product.description && (
+            <section className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h2 className="mb-3 text-xl font-extrabold text-gray-950">Detail Produk</h2>
               <div
-                className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                className="rich-content text-base text-gray-700 leading-relaxed prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
-            )}
+            </section>
+          )}
 
-            <FilePreview
-              filePath={product.file_url}
-              previewPath={product.preview_path}
-              mimeType={product.mime_type}
-              fileSize={product.file_size}
-              fileName={product.file_name}
-            />
+          <section className="rounded-2xl bg-slate-950 px-5 py-6 text-center text-white">
+            <h2 className="text-2xl font-extrabold">Tingkatkan Sekarang</h2>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/80">
+              Nikmati akses file digital Bantu Guru Yuk dengan proses pembayaran cepat dan tautan unduhan otomatis.
+            </p>
+          </section>
 
-            <ProductFAQ faqs={faqs} />
-            <ShareButtons productUrl={productUrl} title={product.title} />
+          <FilePreview
+            filePath={product.file_url}
+            previewPath={product.preview_path}
+            mimeType={product.mime_type}
+            fileSize={product.file_size}
+            fileName={product.file_name}
+          />
 
-            <button
-              id="main-buy-button"
-              disabled={isSoldOut}
-              className={`w-full px-6 py-3 rounded-xl text-sm font-bold text-white transition-all ${
-                isSoldOut
-                  ? 'bg-gray-300 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] hover:opacity-90 active:scale-[0.98]'
-              }`}
-            >
-              {isSoldOut ? 'Sold Out' : 'Beli Sekarang'}
-            </button>
-          </div>
+          <ProductFAQ faqs={faqs} />
+          <ShareButtons productUrl={productUrl} title={product.title} />
+          <ProductActions
+            product={{
+              id: product.id,
+              title: product.title,
+              type: product.type,
+              sale_price: product.sale_price,
+              original_price: product.original_price,
+              stock_type: product.stock_type,
+              stock_qty: product.stock_qty,
+              description: product.description,
+              file_size: product.file_size,
+            }}
+            settings={{}}
+          />
         </div>
-      </LynkShell>
-      <StickyBuyBar product={product} />
-    </>
+      </article>
+    </LynkShell>
   )
 }

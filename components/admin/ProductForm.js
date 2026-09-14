@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import useUnsavedChanges from '@/lib/use-unsaved-changes'
 import { useRouter } from 'next/navigation'
 import { generateSlug, formatRupiah, calcDiscount, CARD_LAYOUTS } from '@/lib/utils'
+import { uploadMedia } from '@/lib/upload-media'
 import FAQEditor from '@/components/admin/FAQEditor'
 
 const BADGE_OPTIONS = [
@@ -11,6 +13,7 @@ const BADGE_OPTIONS = [
   { value: 'diskon', label: 'Diskon' },
   { value: 'gratis', label: 'Gratis' },
   { value: 'premium', label: 'Premium' },
+  { value: 'custom', label: 'Kustom' },
 ]
 
 export default function ProductForm({ initialData, categories = [] }) {
@@ -41,7 +44,7 @@ export default function ProductForm({ initialData, categories = [] }) {
     card_layout: initialData?.card_layout || 'landscape',
     is_active: true,
     meta_title: '',
-    meta_description: '',
+    meta_description: initialData?.meta_desc || '',
     ...initialData,
     badges: initialData?.badge ? [initialData.badge] : [],
     sale_price: initialData?.sale_price ?? 0,
@@ -53,8 +56,12 @@ export default function ProductForm({ initialData, categories = [] }) {
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
   const [toast, setToast] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const uploadingRef = useRef(false)
   const [coverPreview, setCoverPreview] = useState(null)
   const [savedDraft, setSavedDraft] = useState(false)
+  const [draftError, setDraftError] = useState(false)
+  const {dirty, markSaved, leave} = useUnsavedChanges(form)
 
   useEffect(() => {
     if (!slugManuallyEdited && !isEditing && form.title) {
@@ -63,23 +70,31 @@ export default function ProductForm({ initialData, categories = [] }) {
   }, [form.title]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const autoSave = { ...form, _timestamp: Date.now() }
-    const timer = setInterval(() => {
-      localStorage.setItem(draftKey, JSON.stringify(autoSave))
-      setSavedDraft(true)
-    }, 30000)
-    return () => clearInterval(timer)
-  }, [form, draftKey])
+    setSavedDraft(false); setDraftError(false);
+    if (!dirty) return;
+    const timer = setTimeout(() => {
+      try { localStorage.setItem(draftKey, JSON.stringify({...form, _timestamp:Date.now()})); setSavedDraft(true); }
+      catch { setDraftError(true); }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [form, draftKey, dirty])
 
   useEffect(() => {
-    if (!isEditing) {
+    {
       try {
         const draft = localStorage.getItem(draftKey)
         if (draft) {
           const parsed = JSON.parse(draft)
           if (parsed.title && window.confirm('Ada draft tersimpan. Pulihkan?')) {
+            setSlugManuallyEdited(true)
             const { _timestamp, ...rest } = parsed
-            setForm(prev => ({ ...prev, ...rest }))
+            setForm(prev => ({
+              ...prev,
+              ...rest,
+              cover_path: rest.cover_path || prev.cover_path,
+              file_path: rest.file_path || prev.file_path,
+              file_size: rest.file_size || prev.file_size,
+            }))
           }
         }
       } catch {}
@@ -93,9 +108,8 @@ export default function ProductForm({ initialData, categories = [] }) {
   const toggleBadge = (badge) => {
     setForm(prev => ({
       ...prev,
-      badges: prev.badges.includes(badge)
-        ? prev.badges.filter(b => b !== badge)
-        : [...prev.badges, badge],
+      badges: prev.badges.includes(badge) ? [] : [badge],
+      is_best_seller: false,
     }))
   }
 
@@ -106,6 +120,7 @@ export default function ProductForm({ initialData, categories = [] }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (saving || uploadingRef.current) return
     setSaving(true)
     const isDemo =
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -167,20 +182,27 @@ export default function ProductForm({ initialData, categories = [] }) {
   const discount = calcDiscount(form.original_price, form.sale_price)
 
   const handlePreview = () => {
-    const slug = form.slug || generateSlug(form.title)
-    if (slug) window.open(`/produk/${slug}`, '_blank')
+    if (initialData?.is_active && initialData.slug) window.open(`/produk/${initialData.slug}`, '_blank', 'noopener,noreferrer')
   }
 
-  const handleCoverChange = (e) => {
+  const handleUpload = async (e, kind) => {
     const file = e.target.files?.[0]
-    if (file) {
-      setCoverPreview(URL.createObjectURL(file))
-      updateField('cover_path', URL.createObjectURL(file))
-    }
+    if (!file || uploadingRef.current) return
+    uploadingRef.current = true; setUploading(true)
+    try {
+      const media = await uploadMedia(file, kind)
+      if (kind === 'cover') { setCoverPreview(media.url); updateField('cover_path', media.url) }
+      else { updateField('file_path', media.path); updateField('file_size', (media.size / 1024 / 1024).toFixed(1) + ' MB') }
+      setToast({ type: 'success', message: 'File berhasil diunggah. Simpan produk untuk menerapkan perubahan.' })
+    } catch (error) { setToast({ type: 'error', message: error.message }) }
+    finally { uploadingRef.current = false; setUploading(false); e.target.value = '' }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit}><fieldset disabled={saving || uploading} className="space-y-6 min-w-0">
+      {uploading && <p role="status">Mengunggah file…</p>}
+      {draftError && <p role="status" className="text-sm text-amber-800">Draf belum bisa disimpan di browser ini. Simpan ke toko sebelum keluar.</p>}
+      {dirty && !savedDraft && !draftError && <p role="status" className="text-sm text-slate-600">Perubahan belum disimpan ke toko.</p>}
       {toast && (
         <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${
           toast.type === 'success'
@@ -190,12 +212,12 @@ export default function ProductForm({ initialData, categories = [] }) {
           {toast.message}
         </div>
       )}
-      {savedDraft && (
+      {dirty && savedDraft && (
         <div className="px-4 py-2 bg-blue-50 text-blue-600 text-xs rounded-lg border border-blue-200 flex items-center gap-2">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          Draft tersimpan otomatis
+          Draf tersimpan di browser ini. Belum disimpan ke toko.
         </div>
       )}
 
@@ -290,7 +312,7 @@ export default function ProductForm({ initialData, categories = [] }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Badge</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Badge (pilih satu)</label>
           <div className="flex flex-wrap gap-2">
             {BADGE_OPTIONS.map(opt => (
               <button
@@ -463,9 +485,9 @@ export default function ProductForm({ initialData, categories = [] }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Cover</label>
             <label className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-[#0ea5a0] transition-colors cursor-pointer block">
               {coverPreview ? (
-                <img src={coverPreview} alt="Preview" className="max-h-32 mx-auto rounded" />
+                <div className="mx-auto h-36 max-w-sm rounded-lg bg-cover bg-center shadow-sm" style={{ backgroundImage: `url("${coverPreview}")` }} />
               ) : form.cover_path ? (
-                <img src={form.cover_path} alt="Cover" className="max-h-32 mx-auto rounded" />
+                <div className="mx-auto h-36 max-w-sm rounded-lg bg-cover bg-center shadow-sm" style={{ backgroundImage: `url("${form.cover_path}")` }} />
               ) : (
                 <div>
                   <svg className="w-8 h-8 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -475,7 +497,7 @@ export default function ProductForm({ initialData, categories = [] }) {
                   <p className="text-xs text-gray-300 mt-1">JPG, PNG, WebP</p>
                 </div>
               )}
-              <input type="file" accept="image/*" onChange={handleCoverChange} className="hidden" />
+              <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={e => handleUpload(e, 'cover')} className="hidden" />
             </label>
           </div>
           <div>
@@ -498,13 +520,7 @@ export default function ProductForm({ initialData, categories = [] }) {
                   <p className="text-xs text-gray-300 mt-1">PDF, ZIP, DOC, XLS (max 50MB)</p>
                 </div>
               )}
-              <input type="file" onChange={e => {
-                const f = e.target.files?.[0]
-                if (f) {
-                  updateField('file_path', f.name)
-                  updateField('file_size', `${(f.size / 1024 / 1024).toFixed(1)} MB`)
-                }
-              }} className="hidden" />
+              <input type="file" disabled={uploading} accept=".pdf,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={e => handleUpload(e, 'file')} className="hidden" />
             </label>
           </div>
         </div>
@@ -549,7 +565,7 @@ export default function ProductForm({ initialData, categories = [] }) {
       <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-200">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => leave(() => router.back())}
           className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
         >
           Batal
@@ -557,21 +573,21 @@ export default function ProductForm({ initialData, categories = [] }) {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={handlePreview}
+            disabled={!initialData?.is_active} title="Membuka versi produk yang sudah diterbitkan" onClick={handlePreview}
             className="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
           >
-            Preview
+            Lihat Terbitan
           </button>
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || uploading}
             className="px-6 py-2.5 bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {saving ? 'Menyimpan...' : isEditing ? 'Perbarui Produk' : 'Simpan Produk'}
           </button>
         </div>
       </div>
-    </form>
+    </fieldset></form>
   )
 }
 

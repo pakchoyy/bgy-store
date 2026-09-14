@@ -1,7 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import useUnsavedChanges from '@/lib/use-unsaved-changes'
 import { useRouter } from 'next/navigation'
+import { uploadMedia } from '@/lib/upload-media'
 
 const BLOCK_META = {
   hero: { icon: 'H', label: 'Hero', color: 'bg-teal-100 text-teal-700' },
@@ -25,8 +27,10 @@ export default function HomepageBuilder({ initialSections, products = [], catego
   const [selectedId, setSelectedId] = useState(initialSections[0]?.id || null)
   const [dragId, setDragId] = useState(null)
   const [overId, setOverId] = useState(null)
+  const pending = useRef(false)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(null)
+  const {dirty, markSaved} = useUnsavedChanges(sections)
 
   const selected = useMemo(
     () => sections.find((s) => s.id === selectedId) || null,
@@ -43,10 +47,11 @@ export default function HomepageBuilder({ initialSections, products = [], catego
 
   function showToast(type, msg) {
     setToast({ type, msg })
-    setTimeout(() => setToast(null), 2500)
+
   }
 
   function reorder(fromId, toId) {
+    if (pending.current) return
     if (!fromId || !toId || fromId === toId) return
     setSections((prev) => {
       const next = [...prev].sort((a, b) => a.sort_order - b.sort_order)
@@ -60,12 +65,14 @@ export default function HomepageBuilder({ initialSections, products = [], catego
   }
 
   function toggleVisible(id) {
+    if (pending.current) return
     setSections((prev) =>
       prev.map((s) => (s.id === id ? { ...s, is_visible: !s.is_visible } : s))
     )
   }
 
   function updateConfig(key, value) {
+    if (pending.current) return
     if (!selectedId) return
     setSections((prev) =>
       prev.map((s) =>
@@ -77,6 +84,7 @@ export default function HomepageBuilder({ initialSections, products = [], catego
   }
 
   function updateLabel(value) {
+    if (pending.current) return
     if (!selectedId) return
     setSections((prev) =>
       prev.map((s) => (s.id === selectedId ? { ...s, label: value } : s))
@@ -84,6 +92,9 @@ export default function HomepageBuilder({ initialSections, products = [], catego
   }
 
   async function handleSave() {
+    if (pending.current) return
+    pending.current = true
+    setToast(null)
     setSaving(true)
     try {
       const res = await fetch('/api/admin/homepage', {
@@ -103,19 +114,23 @@ export default function HomepageBuilder({ initialSections, products = [], catego
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         showToast('error', data.error || 'Gagal menyimpan')
-      } else {
-        showToast('success', data.demo ? 'Mode demo — tidak tersimpan ke DB' : 'Homepage tersimpan!')
+      } else if (Array.isArray(data.sections)) {
+        setSections(data.sections)
+        markSaved(data.sections)
+        showToast('success', 'Semua perubahan halaman depan tersimpan!')
         router.refresh()
-      }
+      } else { showToast('error', 'Server belum mengonfirmasi penyimpanan. Silakan coba lagi.') }
     } catch (e) {
       showToast('error', e.message || 'Gagal menyimpan')
     } finally {
+      pending.current = false
       setSaving(false)
     }
   }
 
   return (
-    <div className="space-y-4">
+    <fieldset disabled={saving} aria-busy={saving} className="space-y-4 min-w-0">
+      {dirty && <p role="status" className="text-sm text-slate-600">Ada perubahan halaman depan yang belum disimpan.</p>}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-extrabold text-gray-900">Homepage Builder</h1>
@@ -141,7 +156,7 @@ export default function HomepageBuilder({ initialSections, products = [], catego
       </div>
 
       {toast && (
-        <div
+        <div role={toast.type === 'error' ? 'alert' : 'status'}
           className={`rounded-xl border px-4 py-2 text-sm ${
             toast.type === 'success'
               ? 'bg-green-50 border-green-200 text-green-800'
@@ -215,6 +230,8 @@ export default function HomepageBuilder({ initialSections, products = [], catego
                           {section.key}
                         </p>
                       </div>
+                      <button type="button" aria-label={`Naikkan ${section.label}`} disabled={saving || sections[0]?.id === section.id} onClick={event=>{event.stopPropagation();const index=sections.findIndex(s=>s.id===section.id);reorder(section.id,sections[index-1]?.id);}} className="min-h-11 min-w-11 rounded-lg border disabled:opacity-30">↑</button>
+                      <button type="button" aria-label={`Turunkan ${section.label}`} disabled={saving || sections[sections.length-1]?.id === section.id} onClick={event=>{event.stopPropagation();const index=sections.findIndex(s=>s.id===section.id);reorder(section.id,sections[index+1]?.id);}} className="min-h-11 min-w-11 rounded-lg border disabled:opacity-30">↓</button>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -245,7 +262,7 @@ export default function HomepageBuilder({ initialSections, products = [], catego
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Label</label>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Nama bagian (untuk admin)</label>
                 <input
                   value={selected.label || ''}
                   onChange={(e) => updateLabel(e.target.value)}
@@ -256,7 +273,34 @@ export default function HomepageBuilder({ initialSections, products = [], catego
               {selected.key === 'hero' && (
                 <>
                   <Field
-                    label="Judul"
+                    label="Nama tampilan"
+                    value={selected.config?.display_name || selected.config?.title || ''}
+                    onChange={(v) => updateConfig('display_name', v)}
+                  />
+                  <Field
+                    label="Handle / username"
+                    value={selected.config?.handle || ''}
+                    onChange={(v) => updateConfig('handle', v)}
+                    placeholder="@bgy"
+                  />
+                  <Field
+                    label="About singkat"
+                    value={selected.config?.about || selected.config?.subtitle || ''}
+                    onChange={(v) => updateConfig('about', v)}
+                    multiline
+                  />
+                  <UploadField
+                    label="Avatar / logo profil"
+                    value={selected.config?.avatar_url || ''}
+                    onChange={(v) => updateConfig('avatar_url', v)}
+                  />
+                  <UploadField
+                    label="Banner background"
+                    value={selected.config?.banner_url || ''}
+                    onChange={(v) => updateConfig('banner_url', v)}
+                  />
+                  <Field
+                    label="Judul SEO / fallback"
                     value={selected.config?.title || ''}
                     onChange={(v) => updateConfig('title', v)}
                   />
@@ -283,6 +327,11 @@ export default function HomepageBuilder({ initialSections, products = [], catego
 
               {selected.key === 'promo_banner' && (
                 <>
+                  <UploadField
+                    label="Gambar banner promo"
+                    value={selected.config?.image_url || ''}
+                    onChange={(v) => updateConfig('image_url', v)}
+                  />
                   <Field
                     label="Teks Banner"
                     value={selected.config?.text || ''}
@@ -369,11 +418,11 @@ export default function HomepageBuilder({ initialSections, products = [], catego
           </div>
         </div>
       </div>
-    </div>
+    </fieldset>
   )
 }
 
-function Field({ label, value, onChange, multiline }) {
+function Field({ label, value, onChange, multiline, placeholder = '' }) {
   const cls =
     'w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]'
   return (
@@ -389,10 +438,62 @@ function Field({ label, value, onChange, multiline }) {
       ) : (
         <input
           value={value}
+          placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
           className={cls}
         />
       )}
+    </div>
+  )
+}
+
+function UploadField({ label, value, onChange }) {
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
+
+  async function chooseFile(event) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    setUploading(true)
+    setError('')
+    try {
+      const media = await uploadMedia(file, 'cover')
+      onChange(media.url)
+    } catch (err) {
+      setError(err.message || 'Upload gagal. Coba lagi.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div>
+      <label className="text-xs font-semibold text-gray-500 mb-1 block">{label}</label>
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+        {value ? (
+          <div className="mb-3 overflow-hidden rounded-lg border border-gray-200 bg-white">
+            <div className="h-28 w-full bg-cover bg-center" style={{ backgroundImage: `url("${value}")` }} />
+          </div>
+        ) : (
+          <div className="mb-3 flex h-24 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-white text-xs text-gray-400">
+            Belum ada gambar
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2">
+          <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-[#0d7a8a] px-4 py-2 text-sm font-semibold text-white">
+            {uploading ? 'Mengunggah...' : 'Upload gambar'}
+            <input type="file" accept="image/png,image/jpeg,image/webp" onChange={chooseFile} disabled={uploading} className="sr-only" />
+          </label>
+          {value && (
+            <button type="button" onClick={() => onChange('')} className="min-h-11 rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700">
+              Hapus
+            </button>
+          )}
+        </div>
+        {error && <p role="alert" className="mt-2 text-xs text-red-700">{error}</p>}
+        {value && <p className="mt-2 break-all text-[11px] text-gray-500">{value}</p>}
+      </div>
     </div>
   )
 }
@@ -402,18 +503,24 @@ function PreviewBlock({ section, siteName, featured, free, categories, active, o
   const c = section.config || {}
 
   if (section.key === 'hero') {
+    const displayName = c.display_name || c.title || 'Bantu Guru Yuk'
+    const about = c.about || c.subtitle
+    const handle = c.handle
     return (
       <button type="button" onClick={onClick} className={`w-full text-left ${ring}`}>
-        <div className="bg-gradient-to-br from-[#0ea5a0] to-[#0d7a8a] px-4 py-6 text-white">
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xs font-extrabold mb-3">
-            {siteName?.slice(0, 3)?.toUpperCase() || 'BGY'}
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#0ea5a0] to-[#0d7a8a] px-4 py-6 text-center text-white">
+          {c.banner_url && <div className="absolute inset-0 bg-cover bg-center opacity-35" style={{ backgroundImage: `url("${c.banner_url}")` }} />}
+          <div className="relative">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white/50 bg-white/20 text-xs font-extrabold">
+            {c.avatar_url ? <span className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url("${c.avatar_url}")` }} aria-hidden="true" /> : displayName?.slice(0, 3)?.toUpperCase() || 'BGY'}
           </div>
           <p className="text-sm font-extrabold leading-snug">
-            {c.title || 'Bantu Guru Yuk'}
+            {displayName}
           </p>
-          {c.subtitle && (
+          {handle && <p className="mt-1 text-[10px] font-semibold text-white/75">{handle}</p>}
+          {about && (
             <p className="text-[10px] text-white/80 mt-1.5 leading-relaxed line-clamp-3">
-              {c.subtitle}
+              {about}
             </p>
           )}
           {c.cta_text && (
@@ -421,6 +528,7 @@ function PreviewBlock({ section, siteName, featured, free, categories, active, o
               {c.cta_text}
             </span>
           )}
+          </div>
         </div>
       </button>
     )
@@ -429,11 +537,14 @@ function PreviewBlock({ section, siteName, featured, free, categories, active, o
   if (section.key === 'promo_banner') {
     return (
       <button type="button" onClick={onClick} className={`w-full text-left px-3 py-2 ${ring}`}>
-        <div className="rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-2.5 text-white">
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-2.5 text-white">
+          {c.image_url && <div className="absolute inset-0 bg-cover bg-center opacity-35" style={{ backgroundImage: `url("${c.image_url}")` }} />}
+          <div className="relative">
           <p className="text-[11px] font-bold leading-snug">{c.text || 'Promo spesial!'}</p>
           {c.cta_text && (
             <span className="text-[10px] underline mt-1 inline-block">{c.cta_text}</span>
           )}
+          </div>
         </div>
       </button>
     )
