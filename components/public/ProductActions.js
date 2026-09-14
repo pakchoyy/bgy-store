@@ -4,30 +4,14 @@ import Modal from './Modal';
 import DownloadModal from './DownloadModal';
 import StickyBuyBar from './StickyBuyBar';
 
-const paymentMethods = [
-  { id: 'qris', label: 'QRIS', mark: 'QRIS', group: 'Instant Payment' },
-  { id: 'ovo', label: 'OVO', mark: 'OVO', group: 'Instant Payment' },
-  { id: 'dana', label: 'DANA', mark: 'DANA', group: 'Instant Payment' },
-  { id: 'gopay', label: 'GoPay', mark: 'gopay', group: 'Instant Payment' },
-  { id: 'bca', label: 'BCA Virtual Account', mark: 'BCA', group: 'Virtual Account' },
-  { id: 'mandiri', label: 'Mandiri Virtual Account', mark: 'mandiri', group: 'Virtual Account' },
-  { id: 'bni', label: 'BNI Virtual Account', mark: 'BNI', group: 'Virtual Account' },
-  { id: 'cimb', label: 'CIMB Niaga', mark: 'CIMB', group: 'Virtual Account' },
-  { id: 'alfamart', label: 'Alfamart', mark: 'Alfamart', group: 'Others' },
-  { id: 'atm', label: 'ATM Bersama', mark: 'ATM', group: 'Others' },
-];
-
 export default function ProductActions({ product, settings }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [method, setMethod] = useState('qris');
-  const [showMethods, setShowMethods] = useState(false);
   const submitting = useRef(false);
   const soldOut = product.stock_type === 'limited' && product.stock_qty <= 0;
   const isFree = product.type === 'free';
   const price = Number(product.sale_price || 0);
-  const selectedMethod = paymentMethods.find((item) => item.id === method) || paymentMethods[0];
   const fmt = (value) => `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
   const openOrder = () => {
     if (!soldOut) setOpen(true);
@@ -95,29 +79,23 @@ export default function ProductActions({ product, settings }) {
               <button type="button" className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-emerald-500 px-4 py-3 text-base font-extrabold text-emerald-600">
                 <span aria-hidden="true">%</span> Add Voucher
               </button>
-              <input type="hidden" name="payment_method" value={method} />
+              <input type="hidden" name="payment_method" value="qris" />
               <div className="mt-4 rounded-xl border border-emerald-500 p-3">
-                <button type="button" onClick={() => setShowMethods((value) => !value)} className="flex w-full items-center gap-3 text-left">
-                  <span className="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-black text-slate-800">{selectedMethod.mark}</span>
-                  <span className="flex-1 text-base font-extrabold text-emerald-600">{selectedMethod.label}</span>
-                  <span aria-hidden="true" className="text-2xl text-emerald-500">›</span>
-                </button>
-                {showMethods && (
-                  <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">
-                    {['Instant Payment', 'Virtual Account', 'Others'].map((group) => (
-                      <div key={group}>
-                        <p className="mb-2 text-sm font-extrabold text-slate-400">{group}</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {paymentMethods.filter((item) => item.group === group).map((item) => (
-                            <button key={item.id} type="button" onClick={() => { setMethod(item.id); setShowMethods(false); }} className={`min-h-12 rounded-lg border px-3 text-center text-sm font-black ${method === item.id ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700'}`}>
-                              {item.mark}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                <div className="flex w-full items-center gap-3 text-left">
+                  <span className="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-xl font-black tracking-tight text-slate-900">QRIS</span>
+                  <span className="flex-1">
+                    <span className="block text-base font-extrabold text-emerald-600">QRIS Payment</span>
+                    <span className="block text-xs font-semibold text-slate-500">Scan via e-wallet atau mobile banking setelah lanjut bayar.</span>
+                  </span>
+                </div>
+                <div className="mt-3 rounded-xl bg-emerald-50 p-3">
+                  <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-black text-emerald-800">
+                    <span className="rounded-lg bg-white px-2 py-2">OVO</span>
+                    <span className="rounded-lg bg-white px-2 py-2">GoPay</span>
+                    <span className="rounded-lg bg-white px-2 py-2">DANA</span>
+                    <span className="rounded-lg bg-white px-2 py-2">BCA</span>
                   </div>
-                )}
+                </div>
                 <div className="mt-3 flex items-center gap-3 rounded-xl bg-emerald-50 p-3">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-2xl" aria-hidden="true">🔒</div>
                   <div>

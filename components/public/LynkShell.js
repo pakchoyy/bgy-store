@@ -55,7 +55,7 @@ export default function LynkShell({
         />
       )}
 
-      <div className="sticky top-0 z-40 mx-auto flex h-14 max-w-md items-center justify-between bg-neutral-800 px-4 text-white shadow-lg shadow-black/10">
+      <div className="sticky top-0 z-40 mx-auto flex h-14 max-w-md items-center justify-between bg-[#123b35] px-4 text-white shadow-lg shadow-emerald-950/20">
         <details className="relative">
           <summary aria-label="Buka menu" className="flex h-10 w-10 list-none items-center justify-center rounded-full hover:bg-white/10 [&::-webkit-details-marker]:hidden">
             <span className="sr-only">Menu</span>
@@ -74,15 +74,22 @@ export default function LynkShell({
         </details>
         <p className="text-lg font-extrabold">{topBarTitle}</p>
         <div className="flex items-center gap-1">
-          <a href="/cari" aria-label="Cari produk" className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10">
-            <svg aria-hidden="true" className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="m21 21-4.35-4.35m1.1-5.4a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" />
-            </svg>
-          </a>
-          <a href="/produk" aria-label="Keranjang belanja" className="relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10">
+          <details className="relative">
+            <summary aria-label="Cari produk" className="flex h-10 w-10 list-none items-center justify-center rounded-full hover:bg-white/10 [&::-webkit-details-marker]:hidden">
+              <svg aria-hidden="true" className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="m21 21-4.35-4.35m1.1-5.4a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" />
+              </svg>
+            </summary>
+            <form action="/cari" className="absolute right-0 top-12 flex w-72 gap-2 rounded-2xl bg-white p-3 text-slate-900 shadow-2xl ring-1 ring-black/5">
+              <input name="q" type="search" placeholder="Cari produk..." className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-base outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
+              <button type="submit" className="rounded-xl bg-[#123b35] px-4 py-2 text-sm font-extrabold text-white">Cari</button>
+            </form>
+          </details>
+          <a href="/produk" aria-label="Keranjang belanja" className="relative flex h-10 min-w-12 items-center justify-center gap-1 rounded-full px-2 hover:bg-white/10">
             <svg aria-hidden="true" className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M3 3h2l.5 3m0 0L7 15h10l3-9H5.5Zm3 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
             </svg>
+            <span className="hidden text-xs font-bold min-[390px]:inline">Cart</span>
             <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-400 px-1 text-xs font-extrabold text-white">0</span>
           </a>
         </div>
@@ -120,7 +127,7 @@ export default function LynkShell({
         <PageTabs items={navItems} />
 
         {activeTabLabel && (
-          <p className="rounded-lg bg-neutral-800 px-4 py-3 text-center text-sm font-extrabold text-white shadow-sm mt-4 mb-3">
+          <p className="rounded-lg bg-[#123b35] px-4 py-3 text-center text-sm font-extrabold text-white shadow-sm mt-4 mb-3">
             {activeTabLabel}
           </p>
         )}
