@@ -9,10 +9,11 @@ export async function POST(request) {
     if (!product_id) return NextResponse.json({ error: 'product_id diperlukan' }, { status: 400 })
     if (!buyer_name?.trim()) return NextResponse.json({ error: 'Nama pembeli diperlukan' }, { status: 400 })
     if (!buyer_whatsapp?.trim()) return NextResponse.json({ error: 'Nomor WhatsApp diperlukan' }, { status: 400 })
+    if (!buyer_email?.trim()) return NextResponse.json({ error: 'Email pembeli diperlukan' }, { status: 400 })
 
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
       && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_supabase_url'
-    const hasMayar = !!process.env.MAYAR_API_KEY
+    const hasMayar = !!process.env.MAYAR_API_KEY && !process.env.MAYAR_API_KEY.startsWith('your_')
 
     let product = null
 
@@ -60,10 +61,15 @@ export async function POST(request) {
           name,
           description: `Pembelian ${name}`,
           redirectUrl: redirectUrl + orderId,
-          customer: { name: buyer_name.trim(), email: buyer_email || '', phone: buyer_whatsapp.trim() },
+          customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: buyer_whatsapp.trim() },
         })
-        paymentUrl = mayarResponse.data?.url || mayarResponse.url
-        paymentId = mayarResponse.data?.id || mayarResponse.id || orderId
+        const mayarData = mayarResponse.data || mayarResponse
+        paymentUrl = mayarData.link || mayarData.url || mayarData.paymentUrl || mayarData.payment_url
+        paymentId = mayarData.transactionId || mayarData.transaction_id || mayarData.id || orderId
+
+        if (!paymentUrl) {
+          throw new Error('Tautan pembayaran Mayar tidak tersedia')
+        }
       } catch (e) {
         console.error('checkout mayar error:', e)
         paymentUrl = `https://app.mayar.id/payment/demo?order=${orderId}`
@@ -84,7 +90,7 @@ export async function POST(request) {
           product_id: product.id,
           buyer_name: buyer_name.trim(),
           buyer_whatsapp: buyer_whatsapp.trim(),
-          buyer_email: buyer_email || null,
+          buyer_email: buyer_email.trim(),
           amount,
           status: 'pending',
           payment_method: hasMayar ? 'mayar' : 'manual',
