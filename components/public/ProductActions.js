@@ -4,6 +4,21 @@ import Modal from './Modal';
 import DownloadModal from './DownloadModal';
 import StickyBuyBar from './StickyBuyBar';
 
+const qrisLogoRows = [
+  [
+    { label: 'OVO', className: 'text-[#4c2484] tracking-wide' },
+    { label: 'GoPay', className: 'text-[#00a5df]' },
+    { label: 'DANA', className: 'text-[#108ee9] tracking-wider' },
+    { label: 'LinkAja!', className: 'text-[#e31e2f]' },
+  ],
+  [
+    { label: 'BCA', className: 'text-[#1268b3]' },
+    { label: 'mandiri', className: 'text-[#173f8a]' },
+    { label: 'BNI', className: 'text-[#ef6c00]' },
+    { label: 'QRIS', className: 'text-slate-900 tracking-tight' },
+  ],
+];
+
 export default function ProductActions({ product, settings }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -89,12 +104,16 @@ export default function ProductActions({ product, settings }) {
                   </span>
                 </div>
                 <div className="mt-3 rounded-xl bg-emerald-50 p-3">
-                  <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-black text-emerald-800">
-                    <span className="rounded-lg bg-white px-2 py-2">OVO</span>
-                    <span className="rounded-lg bg-white px-2 py-2">GoPay</span>
-                    <span className="rounded-lg bg-white px-2 py-2">DANA</span>
-                    <span className="rounded-lg bg-white px-2 py-2">BCA</span>
-                  </div>
+                  <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-wide text-emerald-700">Bisa bayar pakai</p>
+                  {qrisLogoRows.map((row, index) => (
+                    <div key={index} className="grid grid-cols-4 gap-2 first:mb-2">
+                      {row.map((logo) => (
+                        <span key={logo.label} className={`flex min-h-10 items-center justify-center rounded-lg bg-white px-2 text-center text-[11px] font-black shadow-sm ring-1 ring-emerald-100 ${logo.className}`}>
+                          {logo.label}
+                        </span>
+                      ))}
+                    </div>
+                  ))}
                 </div>
                 <div className="mt-3 flex items-center gap-3 rounded-xl bg-emerald-50 p-3">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-2xl" aria-hidden="true">🔒</div>
