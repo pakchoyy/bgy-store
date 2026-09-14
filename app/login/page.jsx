@@ -1,45 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [debug, setDebug] = useState('');
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
 
-  useEffect(() => {
-    let mounted = true
-    async function checkSession() {
-      try {
-        const { createClient } = await import('@/lib/supabase-browser')
-        const supabase = createClient()
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session && mounted) {
-          window.location.href = '/admin'
-          return
-        }
-      } catch (e) {
-        console.log('Session check skip:', e?.message)
-      }
-      if (mounted) setChecking(false)
-    }
-    checkSession()
-    return () => { mounted = false }
-  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    setDebug('')
     setLoading(true)
 
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email: email.trim(), password }),
       })
 
@@ -54,29 +33,21 @@ export default function LoginPage() {
 
       if (!res.ok) {
         console.error('Login API error:', res.status, data)
-        setDebug(`HTTP ${res.status}: ${data.error}`)
-        setError('Email atau password salah. Silakan coba lagi.')
+        setError(data.error || 'Login belum dapat diproses.')
         setLoading(false)
         return
       }
 
       console.log('Login OK via API')
-      window.location.href = '/admin'
+      const target = new URLSearchParams(window.location.search).get('redirect');
+      window.location.href = target && /^\/admin(?:\/|$)/.test(target) ? target : '/admin'
     } catch (err) {
       console.error('Login fetch error:', err)
-      setDebug(err?.message || String(err))
       setError('Terjadi kesalahan jaringan. Silakan coba lagi.')
       setLoading(false)
     }
   }
 
-  if (checking) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] flex items-center justify-center p-4">
@@ -94,6 +65,7 @@ export default function LoginPage() {
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
               <input
+                aria-label="Email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -107,6 +79,7 @@ export default function LoginPage() {
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
               <input
+                aria-label="Password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -126,11 +99,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {debug && (
-              <div className="bg-gray-50 border border-gray-200 text-gray-500 text-xs rounded-xl px-4 py-2.5 break-all font-mono">
-                {debug}
-              </div>
-            )}
 
             <button
               type="submit"
