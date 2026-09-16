@@ -36,18 +36,18 @@ export default function StickyBuyBar({ product }) {
           {product.original_price && product.original_price > product.sale_price ? (
             <div className="flex items-baseline gap-2">
               <span className="text-xs line-through text-gray-400">{fmt(product.original_price)}</span>
-              <span className="text-base font-bold text-red-500">{fmt(product.sale_price)}</span>
+              <span className="text-base font-semibold text-red-500">{fmt(product.sale_price)}</span>
             </div>
           ) : product.sale_price === 0 ? (
-            <span className="text-base font-bold text-[#0ea5a0]">Gratis</span>
+            <span className="text-base font-semibold text-[#0ea5a0]">Gratis</span>
           ) : (
-            <span className="text-base font-bold text-gray-900">{fmt(product.sale_price)}</span>
+            <span className="text-base font-semibold text-gray-900">{fmt(product.sale_price)}</span>
           )}
         </div>
         <button
           onClick={() => btnRef.current?.click()}
           disabled={isSoldOut}
-          className={`px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 ${
+          className={`px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${
             isSoldOut
               ? 'bg-gray-300 cursor-not-allowed'
               : 'bg-gradient-to-r from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] hover:shadow-md active:scale-[0.98]'

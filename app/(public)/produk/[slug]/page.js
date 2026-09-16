@@ -60,7 +60,7 @@ export default async function ProdukDetailPage({ params }) {
     return (
       <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement}>
         <div className="bg-white/95 rounded-2xl p-8 text-center shadow-sm">
-          <h1 className="text-lg font-extrabold text-gray-900 mb-2">Produk Tidak Ditemukan</h1>
+          <h1 className="text-lg font-semibold text-gray-900 mb-2">Produk Tidak Ditemukan</h1>
           <p className="text-sm text-gray-500 mb-4">Produk tidak tersedia atau telah dihapus.</p>
           <Link href="/produk" className="inline-flex text-sm font-bold text-[#0ea5a0]">
             Lihat Produk Lain
@@ -80,7 +80,7 @@ export default async function ProdukDetailPage({ params }) {
           {product.cover_path ? (
             <img src={product.cover_path} alt={product.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300 font-extrabold">
+            <div className="w-full h-full flex items-center justify-center text-gray-300 font-bold">
               {product.type === 'free' ? 'GRATIS' : 'PAID'}
             </div>
           )}
@@ -100,7 +100,7 @@ export default async function ProdukDetailPage({ params }) {
               {product.category && <CategoryBadge category={product.category} />}
               <StockIndicator stockType={product.stock_type} stockQty={product.stock_qty} />
             </div>
-            <h1 className="text-2xl font-extrabold text-gray-950 leading-tight">{product.title}</h1>
+            <h1 className="text-2xl font-semibold text-gray-950 leading-tight">{product.title}</h1>
             <div className="mt-3">
               <PriceBlock salePrice={product.sale_price} originalPrice={product.original_price} />
             </div>
@@ -108,7 +108,7 @@ export default async function ProdukDetailPage({ params }) {
 
           {product.description && (
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h2 className="mb-3 text-xl font-extrabold text-gray-950">Detail Produk</h2>
+              <h2 className="mb-3 text-xl font-semibold text-gray-950">Detail Produk</h2>
               <div
                 className="rich-content text-base text-gray-700 leading-relaxed prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: product.description }}
@@ -117,7 +117,7 @@ export default async function ProdukDetailPage({ params }) {
           )}
 
           <section className="rounded-2xl bg-slate-950 px-5 py-6 text-center text-white">
-            <h2 className="text-2xl font-extrabold">Tingkatkan Sekarang</h2>
+            <h2 className="text-xl font-semibold">Tingkatkan Sekarang</h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/80">
               Nikmati akses file digital Bantu Guru Yuk dengan proses pembayaran cepat dan tautan unduhan otomatis.
             </p>

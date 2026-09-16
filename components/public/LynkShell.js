@@ -49,14 +49,19 @@ export default function LynkShell({
       : {
           backgroundImage: `linear-gradient(180deg, ${bgColor || '#0ea5a0'} 0%, ${bgColor || '#0ea5a0'}cc 35%, #f0fdfa 70%, #f8fafc 100%)`,
         }
+  const baseNavItems = [
+    ...(navItems || []).filter((item) => item.is_visible !== false),
+    { id: 'fallback-about', label: 'Tentang', target_url: '/halaman/tentang-kami', is_visible: true },
+    { id: 'fallback-faq', label: 'FAQ', target_url: '/halaman/faq', is_visible: true },
+  ]
   const rawMenuItems = [
     { key: 'home', label: 'Home', href: '/' },
-    ...uniqueNavigationItems((navItems || []).filter((item) => item.is_visible !== false)).map((item) => {
+    ...uniqueNavigationItems(baseNavItems).map((item) => {
       const href = navigationHref(item)
       return {
         key: item.id || item.label,
-        label: item.label === 'Tentang Kami' ? 'FAQ' : item.label,
-        href: item.label === 'Tentang Kami' ? '/halaman/faq' : href,
+        label: item.label,
+        href,
       }
     }),
   ]
@@ -82,20 +87,22 @@ export default function LynkShell({
         <details className="relative">
           <summary aria-label="Buka menu" className="flex h-10 w-10 list-none items-center justify-center rounded-full hover:bg-white/10 [&::-webkit-details-marker]:hidden">
             <span className="sr-only">Menu</span>
-            <span aria-hidden="true" className="relative block h-4 w-5 border-y-2 border-white before:absolute before:left-0 before:top-1/2 before:h-0.5 before:w-5 before:-translate-y-1/2 before:bg-white" />
+            <span aria-hidden="true" className="relative block h-3.5 w-5 before:absolute before:left-0 before:top-0 before:h-0.5 before:w-5 before:rounded-full before:bg-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-5 after:rounded-full after:bg-white">
+              <span className="absolute left-0 top-1.5 h-0.5 w-5 rounded-full bg-white" />
+            </span>
           </summary>
           <div className="absolute left-0 top-12 w-56 overflow-hidden rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-black/5">
-            <p className="border-b border-slate-100 px-4 py-3 text-[11px] font-extrabold uppercase tracking-wide text-slate-400">Pages</p>
+            <p className="border-b border-slate-100 px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Pages</p>
             <nav className="max-h-72 overflow-y-auto py-1">
               {menuItems.map((item) => (
-                <a key={item.key} href={item.href} className="block px-4 py-3 text-sm font-extrabold hover:bg-slate-50">
+                <a key={item.key} href={item.href} className="block px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50">
                   {item.label}
                 </a>
               ))}
             </nav>
           </div>
         </details>
-        <p className="text-lg font-extrabold">{topBarTitle}</p>
+        <p className="text-lg font-semibold">{topBarTitle}</p>
         <div className="flex items-center gap-1">
           <details className="relative">
             <summary aria-label="Cari produk" className="flex h-10 w-10 list-none items-center justify-center rounded-full hover:bg-white/10 [&::-webkit-details-marker]:hidden">
@@ -105,29 +112,29 @@ export default function LynkShell({
             </summary>
             <form action="/cari" className="absolute right-0 top-12 flex w-72 gap-2 rounded-2xl bg-white p-3 text-slate-900 shadow-2xl ring-1 ring-black/5">
               <input name="q" type="search" placeholder="Cari produk..." className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-base outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
-              <button type="submit" className="rounded-xl bg-[#123b35] px-4 py-2 text-sm font-extrabold text-white">Cari</button>
+              <button type="submit" className="rounded-xl bg-[#123b35] px-4 py-2 text-sm font-semibold text-white">Cari</button>
             </form>
           </details>
           <button type="button" onClick={() => setCartOpen(open => !open)} aria-expanded={cartOpen} aria-label={`Keranjang berisi ${cartItems.length} produk`} className="relative flex h-10 min-w-12 items-center justify-center gap-1 rounded-full px-2 hover:bg-white/10">
             <svg aria-hidden="true" className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M3 3h2l.5 3m0 0L7 15h10l3-9H5.5Zm3 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
             </svg>
-            <span className="hidden text-xs font-bold min-[390px]:inline">Cart</span>
-            {cartItems.length > 0 && <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-400 px-1 text-xs font-extrabold text-white">{cartItems.length}</span>}
+            <span className="hidden text-xs font-semibold min-[390px]:inline">Cart</span>
+            {cartItems.length > 0 && <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-400 px-1 text-xs font-semibold text-white">{cartItems.length}</span>}
           </button>
         </div>
       </div>
       {cartOpen && (
         <div className="absolute right-4 top-14 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-black/5">
           <div className="border-b border-slate-100 px-4 py-3">
-            <p className="text-sm font-extrabold">Keranjang</p>
+            <p className="text-sm font-semibold">Keranjang</p>
             <p className="text-xs text-slate-500">Checkout tetap dari halaman produk.</p>
           </div>
           {cartItems.length ? (
             <div className="max-h-72 overflow-y-auto py-2">
               {cartItems.map((item) => (
                 <a key={item.id} href={item.slug ? `/produk/${item.slug}` : '/produk'} className="block px-4 py-3 hover:bg-slate-50">
-                  <span className="block text-sm font-bold text-slate-900">{item.title}</span>
+                  <span className="block text-sm font-semibold text-slate-900">{item.title}</span>
                   <span className="mt-1 block text-xs text-slate-500">{item.sale_price ? `Rp${Number(item.sale_price).toLocaleString('id-ID')}` : 'Gratis'}</span>
                 </a>
               ))}
@@ -144,12 +151,12 @@ export default function LynkShell({
             {profileAvatarUrl ? (
               <img src={profileAvatarUrl} alt={profileName} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-xl font-extrabold">
+              <div className="w-full h-full flex items-center justify-center text-xl font-semibold">
                 {(profileName || 'BGY').slice(0, 3).toUpperCase()}
               </div>
             )}
           </div>
-          <h1 className="text-lg font-extrabold drop-shadow-sm">{profileName}</h1>
+          <h1 className="text-lg font-semibold drop-shadow-sm">{profileName}</h1>
           {profileHandle && (
             <p className="text-sm text-white/85 font-semibold mt-0.5">{profileHandle}</p>
           )}
@@ -170,7 +177,7 @@ export default function LynkShell({
         <PageTabs items={navItems} />
 
         {activeTabLabel && (
-          <p className="rounded-lg bg-[#123b35] px-4 py-3 text-center text-sm font-extrabold text-white shadow-sm mt-4 mb-3">
+          <p className="rounded-lg bg-[#123b35] px-4 py-3 text-center text-sm font-semibold text-white shadow-sm mt-4 mb-3">
             {activeTabLabel}
           </p>
         )}

@@ -1,4 +1,5 @@
 import LynkShell from '@/components/public/LynkShell'
+import FAQAccordion from '@/components/public/FAQAccordion'
 import Link from 'next/link'
 import { demoNavItems, demoSettings, demoFooterConfig } from '@/lib/demo-data'
 import { getAppearance, settingsToMap } from '@/lib/utils'
@@ -30,6 +31,25 @@ const demoPages = {
     is_active: true,
   },
 }
+
+const faqItems = [
+  {
+    question: 'Bagaimana cara download produk gratis?',
+    answer: 'Buka halaman Gratis, pilih materi yang dibutuhkan, lalu tekan tombol download pada halaman produk.',
+  },
+  {
+    question: 'Bagaimana cara membeli produk berbayar?',
+    answer: 'Buka halaman Produk, pilih produk, lalu tekan Beli Sekarang. Anda akan diarahkan ke pembayaran, kemudian tautan unduhan aktif setelah pembayaran berhasil.',
+  },
+  {
+    question: 'Apakah ada fitur keranjang?',
+    answer: 'Ada. Keranjang dipakai untuk menyimpan produk yang menarik. Checkout tetap dilakukan dari halaman produk agar pembayaran dan tautan unduhan lebih jelas.',
+  },
+  {
+    question: 'Bagaimana jika file bermasalah?',
+    answer: 'Hubungi admin melalui kontak resmi dan sertakan nama produk serta kendala yang dialami.',
+  },
+]
 
 async function getData(slug) {
   if (!hasSupabase()) {
@@ -89,18 +109,22 @@ export default async function HalamanPage({ params }) {
       <div className="bg-white/95 rounded-2xl shadow-sm p-5">
         {!page ? (
           <div className="text-center py-8">
-            <h1 className="text-lg font-extrabold text-gray-900 mb-2">Halaman tidak ditemukan</h1>
-            <Link href="/" className="text-sm font-bold text-[#0ea5a0]">
+            <h1 className="text-lg font-semibold text-gray-900 mb-2">Halaman tidak ditemukan</h1>
+            <Link href="/" className="text-sm font-semibold text-[#0ea5a0]">
               Kembali ke Home
             </Link>
           </div>
         ) : (
           <>
-            <h1 className="text-xl font-extrabold text-gray-900 mb-4">{page.title}</h1>
-            <div
-              className="prose prose-sm max-w-none text-gray-600"
-              dangerouslySetInnerHTML={{ __html: page.content }}
-            />
+            <h1 className="text-xl font-semibold text-gray-900 mb-4">{page.title}</h1>
+            {slug === 'faq' ? (
+              <FAQAccordion items={faqItems} />
+            ) : (
+              <div
+                className="prose prose-sm max-w-none text-gray-600 prose-headings:font-semibold prose-headings:text-gray-900 prose-p:leading-6"
+                dangerouslySetInnerHTML={{ __html: page.content }}
+              />
+            )}
           </>
         )}
       </div>

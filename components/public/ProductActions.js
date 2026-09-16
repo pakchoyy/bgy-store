@@ -54,9 +54,9 @@ export default function ProductActions({ product, settings }) {
   }
   return <>
     <div className={!isFree && !soldOut ? 'grid gap-3 sm:grid-cols-[1fr_auto]' : ''}>
-      <button type="button" id="main-buy-button" disabled={soldOut} onClick={openOrder} className="relative z-10 w-full min-h-14 px-8 py-3 rounded-2xl font-extrabold text-white bg-gradient-to-r from-brand to-brand-dark shadow-lg shadow-teal-900/10 transition-transform duration-150 active:scale-[0.96] disabled:bg-none disabled:bg-gray-400 disabled:shadow-none">{soldOut ? 'Stok Habis' : isFree ? 'Download Gratis' : 'Beli Sekarang'}</button>
+      <button type="button" id="main-buy-button" disabled={soldOut} onClick={openOrder} className="relative z-10 w-full min-h-14 px-8 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-brand to-brand-dark shadow-lg shadow-teal-900/10 transition-transform duration-150 active:scale-[0.96] disabled:bg-none disabled:bg-gray-400 disabled:shadow-none">{soldOut ? 'Stok Habis' : isFree ? 'Download Gratis' : 'Beli Sekarang'}</button>
       {!isFree && !soldOut && (
-        <button type="button" onClick={addToCart} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-brand-dark/20 bg-white px-5 py-3 text-sm font-extrabold text-brand-dark shadow-sm transition-[background-color,transform] duration-150 hover:bg-teal-50 active:scale-[0.96]" aria-label={`Tambah ${product.title} ke keranjang`}>
+        <button type="button" onClick={addToCart} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-brand-dark/20 bg-white px-5 py-3 text-sm font-semibold text-brand-dark shadow-sm transition-[background-color,transform] duration-150 hover:bg-teal-50 active:scale-[0.96]" aria-label={`Tambah ${product.title} ke keranjang`}>
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20 8H7M12 10v4M10 12h4M10 21h.01M17 21h.01" />
           </svg>
@@ -71,20 +71,20 @@ export default function ProductActions({ product, settings }) {
         <form onSubmit={checkout} aria-busy={busy}>
           <fieldset disabled={busy} className="space-y-4">
             <section className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">You will make a payment to</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">You will make a payment to</p>
               <div className="mt-3 flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-xs font-extrabold text-emerald-700 ring-1 ring-emerald-100">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">
                   BGY
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-extrabold text-slate-900">{settings?.site_name || 'Bantu Guru Yuk'}</p>
+                  <p className="truncate text-sm font-semibold text-slate-900">{settings?.site_name || 'Bantu Guru Yuk'}</p>
                   <p className="text-sm text-emerald-700">bgy-store.vercel.app</p>
                 </div>
               </div>
             </section>
 
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-slate-400">Buyer Info</p>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Buyer Info</p>
               <div className="space-y-3">
                 <label className="block text-sm font-semibold text-slate-700">
                   <span className="text-red-500">*</span> Email
@@ -102,14 +102,14 @@ export default function ProductActions({ product, settings }) {
             </section>
 
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-slate-400">Payment Detail</p>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Payment Detail</p>
               <div className="space-y-2 text-base">
                 <div className="flex justify-between gap-4"><span>Subtotal</span><span>{fmt(price)}</span></div>
                 <div className="flex justify-between gap-4 text-emerald-600"><span>Discount</span><span>- Rp 0</span></div>
                 <div className="flex justify-between gap-4"><span>Convenience fee</span><span>Rp 0</span></div>
-                <div className="flex justify-between gap-4 border-t border-slate-200 pt-3 font-extrabold"><span>TOTAL</span><span>{fmt(price)}</span></div>
+                <div className="flex justify-between gap-4 border-t border-slate-200 pt-3 font-semibold"><span>TOTAL</span><span>{fmt(price)}</span></div>
               </div>
-              <button type="button" className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-emerald-500 px-4 py-3 text-base font-extrabold text-emerald-600">
+              <button type="button" className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-emerald-500 px-4 py-3 text-base font-semibold text-emerald-600">
                 <span aria-hidden="true">%</span> Add Voucher
               </button>
               <input type="hidden" name="payment_method" value="qris" />
@@ -117,7 +117,7 @@ export default function ProductActions({ product, settings }) {
                 <div className="flex w-full items-center gap-3 text-left">
                   <span className="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-xl font-black tracking-tight text-slate-900">QRIS</span>
                   <span className="flex-1">
-                    <span className="block text-base font-extrabold text-emerald-600">QRIS Payment</span>
+                    <span className="block text-base font-semibold text-emerald-600">QRIS Payment</span>
                     <span className="block text-xs font-semibold text-slate-500">Scan via e-wallet atau mobile banking setelah lanjut bayar.</span>
                   </span>
                 </div>
@@ -136,7 +136,7 @@ export default function ProductActions({ product, settings }) {
                 <div className="mt-3 flex items-center gap-3 rounded-xl bg-emerald-50 p-3">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-2xl" aria-hidden="true">🔒</div>
                   <div>
-                    <p className="font-extrabold text-slate-700">Secure Payment</p>
+                    <p className="font-semibold text-slate-700">Secure Payment</p>
                     <p className="text-sm text-slate-600">All payments will be processed securely by the payment gateway.</p>
                   </div>
                 </div>
@@ -152,7 +152,7 @@ export default function ProductActions({ product, settings }) {
               <span>I agree that the creator may contact me about this purchase and related updates.</span>
             </label>
             {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
-            <button disabled={busy} className="w-full min-h-14 rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-600 px-4 py-3 text-white font-extrabold transition-transform duration-150 active:scale-[0.96] disabled:opacity-60">{busy ? 'Preparing payment...' : `Buy Now - IDR ${price.toLocaleString('id-ID')}`}</button>
+            <button disabled={busy} className="w-full min-h-14 rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-600 px-4 py-3 text-white font-semibold transition-transform duration-150 active:scale-[0.96] disabled:opacity-60">{busy ? 'Preparing payment...' : `Buy Now - IDR ${price.toLocaleString('id-ID')}`}</button>
           </fieldset>
           <p role="status" className="mt-3 min-h-5 text-sm text-slate-600">{busy ? 'Sedang menyiapkan pembayaran. Mohon tunggu...' : ''}</p>
         </form>

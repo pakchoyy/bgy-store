@@ -7,10 +7,15 @@ import { resolveNavHref } from '@/lib/utils'
 export default function PageTabs({ items = [] }) {
   const pathname = usePathname()
   const seen = new Set()
-  const tabs = (items || []).filter((item) => {
+  const baseItems = [
+    ...(items || []),
+    { id: 'fallback-about', label: 'Tentang', target_url: '/halaman/tentang-kami', is_visible: true },
+    { id: 'fallback-faq', label: 'FAQ', target_url: '/halaman/faq', is_visible: true },
+  ]
+  const tabs = baseItems.filter((item) => {
     if (item.is_visible === false) return false
     const rawHref = resolveNavHref(item)
-    const href = item.label === 'Tentang Kami' ? '/halaman/faq' : rawHref
+    const href = rawHref
     if (seen.has(href)) return false
     seen.add(href)
     return true
@@ -23,8 +28,8 @@ export default function PageTabs({ items = [] }) {
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {tabs.map((item) => {
           const rawHref = resolveNavHref(item)
-          const href = item.label === 'Tentang Kami' ? '/halaman/faq' : rawHref
-          const label = item.label === 'Tentang Kami' ? 'FAQ' : item.label
+          const href = rawHref
+          const label = item.label
           const active =
             href === '/'
               ? pathname === '/'
@@ -34,7 +39,7 @@ export default function PageTabs({ items = [] }) {
             <Link
               key={item.id}
               href={href}
-              className={`shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all ${
+              className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                 active
                   ? 'bg-white text-[#0d7a8a] shadow-md'
                   : 'bg-white/15 text-white hover:bg-white/25'

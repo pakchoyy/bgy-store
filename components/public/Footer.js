@@ -9,9 +9,9 @@ export default function Footer({ config, siteName }) {
         <div className="bg-white/80 backdrop-blur rounded-2xl border border-white/60 shadow-sm px-5 py-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <div className="w-7 h-7 bg-[#0ea5a0]/15 rounded-lg flex items-center justify-center">
-              <span className="text-[#0ea5a0] font-extrabold text-xs">BGY</span>
+              <span className="text-[#0ea5a0] font-bold text-xs">BGY</span>
             </div>
-            <span className="text-sm font-extrabold text-gray-900">
+            <span className="text-sm font-semibold text-gray-900">
               {siteName || 'Bantu Guru Yuk'}
             </span>
           </div>
