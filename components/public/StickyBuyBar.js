@@ -47,13 +47,13 @@ export default function StickyBuyBar({ product }) {
         <button
           onClick={() => btnRef.current?.click()}
           disabled={isSoldOut}
-          className={`px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${
+          className={`store-buy-button px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${
             isSoldOut
               ? 'bg-gray-300 cursor-not-allowed'
               : 'bg-gradient-to-r from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] hover:shadow-md active:scale-[0.98]'
           }`}
         >
-          {isSoldOut ? 'Sold Out' : 'Beli Sekarang'}
+          {isSoldOut ? 'Stok Habis' : product.purchase_button_label || 'Beli Sekarang'}
         </button>
       </div>
       <style jsx>{`

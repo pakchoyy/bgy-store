@@ -9,13 +9,12 @@ export default function PageTabs({ items = [] }) {
   const seen = new Set()
   const baseItems = [
     ...(items || []),
-    { id: 'fallback-about', label: 'Tentang', target_url: '/halaman/tentang-kami', is_visible: true },
     { id: 'fallback-faq', label: 'FAQ', target_url: '/halaman/faq', is_visible: true },
   ]
   const tabs = baseItems.filter((item) => {
     if (item.is_visible === false) return false
-    const rawHref = resolveNavHref(item)
-    const href = rawHref
+    const href = resolveNavHref(item).replace(/\/+$/, '') || '/'
+    if (href === '/halaman/tentang-kami') return false
     if (seen.has(href)) return false
     seen.add(href)
     return true
@@ -25,10 +24,9 @@ export default function PageTabs({ items = [] }) {
 
   return (
     <div className="sticky top-0 z-20 -mx-1 px-1 py-2 bg-inherit/80 backdrop-blur-sm">
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+      <div className="flex flex-wrap justify-center gap-2 pb-1">
         {tabs.map((item) => {
-          const rawHref = resolveNavHref(item)
-          const href = rawHref
+          const href = resolveNavHref(item).replace(/\/+$/, '') || '/'
           const label = item.label
           const active =
             href === '/'

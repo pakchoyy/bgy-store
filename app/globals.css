@@ -27,3 +27,24 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.store-theme {
+  font-family: var(--store-font, inherit);
+}
+
+.store-theme .store-buy-button {
+  border-radius: var(--store-radius, 16px);
+}
+
+.store-theme[data-button-style="outline"] .store-buy-button:not(:disabled) {
+  background: transparent;
+  color: var(--brand-dark);
+  border: 2px solid var(--brand);
+  box-shadow: none;
+}
+
+.store-theme[data-button-style="soft"] .store-buy-button:not(:disabled) {
+  background: color-mix(in srgb, var(--brand) 14%, white);
+  color: var(--brand-dark);
+  box-shadow: none;
+}

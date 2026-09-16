@@ -28,6 +28,7 @@ export default function ProductForm({ initialData, categories = [] }) {
     faqs: [],
     category_id: '',
     type: 'free',
+    purchase_button_label: 'Beli Sekarang',
     badges: [],
     badge_custom: '',
     is_featured: false,
@@ -42,6 +43,7 @@ export default function ProductForm({ initialData, categories = [] }) {
     file_size: initialData?.file_size || '',
     mime_type: initialData?.mime_type || '',
     card_layout: initialData?.card_layout || 'landscape',
+    purchase_button_label: initialData?.purchase_button_label || 'Beli Sekarang',
     is_active: true,
     meta_title: '',
     meta_description: initialData?.meta_desc || '',
@@ -57,6 +59,9 @@ export default function ProductForm({ initialData, categories = [] }) {
   const [toast, setToast] = useState(null)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [deliveryMode, setDeliveryMode] = useState(initialData?.file_url ? 'link' : 'upload')
+  const [linkPlatform, setLinkPlatform] = useState(() => /drive\.google\.com|docs\.google\.com/i.test(initialData?.file_url || '') ? 'gdrive' : 'other')
+  const [uploadKind, setUploadKind] = useState(() => /\.pdf$/i.test(initialData?.file_name || '') ? 'pdf' : 'upload')
   const uploadingRef = useRef(false)
   const [coverPreview, setCoverPreview] = useState(null)
   const [savedDraft, setSavedDraft] = useState(false)
@@ -121,6 +126,18 @@ export default function ProductForm({ initialData, categories = [] }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (saving || uploadingRef.current) return
+    if (deliveryMode === 'link' && form.file_url) {
+      try {
+        if (new URL(form.file_url).protocol !== 'https:') throw new Error()
+      } catch {
+        showToast('error', 'Masukkan tautan lengkap yang diawali https://')
+        return
+      }
+    }
+    if (deliveryMode === 'upload' && uploadKind === 'pdf' && form.file_path && !/\.pdf$/i.test(form.file_name || '')) {
+      showToast('error', 'Unggah file PDF untuk mode PDF / Ebook, atau pilih Upload file.')
+      return
+    }
     setSaving(true)
     const isDemo =
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -131,6 +148,7 @@ export default function ProductForm({ initialData, categories = [] }) {
       description: form.description,
       category_id: form.category_id || null,
       type: form.type,
+      purchase_button_label: form.purchase_button_label,
       sale_price: Number(form.sale_price) || 0,
       original_price: form.original_price ? Number(form.original_price) : null,
       stock_type: form.stock_type,
@@ -140,8 +158,8 @@ export default function ProductForm({ initialData, categories = [] }) {
       is_featured: form.is_featured,
       cover_path: form.cover_path || null,
       preview_path: form.preview_path || null,
-      file_path: form.file_path || null,
-      file_url: form.file_url || null,
+      file_path: deliveryMode === 'upload' ? form.file_path || null : null,
+      file_url: deliveryMode === 'link' ? form.file_url || null : null,
       file_name: form.file_name || null,
       file_size: form.file_size || null,
       mime_type: form.mime_type || null,
@@ -180,7 +198,7 @@ export default function ProductForm({ initialData, categories = [] }) {
   }
 
   const discount = calcDiscount(form.original_price, form.sale_price)
-  const coverImage = coverPreview || form.cover_path
+  const coverImage = coverPreview || (typeof form.cover_path === 'string' ? form.cover_path : '')
 
   const handlePreview = () => {
     if (initialData?.is_active && initialData.slug) window.open(`/produk/${initialData.slug}`, '_blank', 'noopener,noreferrer')
@@ -193,9 +211,9 @@ export default function ProductForm({ initialData, categories = [] }) {
     try {
       const media = await uploadMedia(file, kind)
       if (kind === 'cover') { setCoverPreview(media.url); updateField('cover_path', media.url) }
-      else { updateField('file_path', media.path); updateField('file_size', (media.size / 1024 / 1024).toFixed(1) + ' MB') }
+      else { updateField('file_path', media.path); updateField('file_url', ''); updateField('file_size', (media.size / 1024 / 1024).toFixed(1) + ' MB') }
       setToast({ type: 'success', message: 'File berhasil diunggah. Simpan produk untuk menerapkan perubahan.' })
-    } catch (error) { setToast({ type: 'error', message: error.message }) }
+    } catch (error) { setToast({ type: 'error', message: error?.message || 'Unggahan gagal. Coba lagi.' }) }
     finally { uploadingRef.current = false; setUploading(false); e.target.value = '' }
   }
 
@@ -222,6 +240,8 @@ export default function ProductForm({ initialData, categories = [] }) {
         </div>
       )}
 
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0 space-y-6">
       {/* Identitas */}
       <CardSection title="Identitas Produk">
         <div>
@@ -246,40 +266,6 @@ export default function ProductForm({ initialData, categories = [] }) {
             required
           />
           <p className="text-xs text-gray-400 mt-1">URL: /produk/{form.slug || '...'}</p>
-        </div>
-      </CardSection>
-
-      <CardSection title="Foto Produk">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[12rem_1fr] md:items-center">
-          <label className="group block cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-[#0ea5a0]">
-            {coverImage ? (
-              <div className="relative aspect-square bg-cover bg-center" style={{ backgroundImage: `url("${coverImage}")` }}>
-                <div className="absolute inset-x-0 bottom-0 bg-black/55 px-3 py-2 text-center text-xs font-semibold text-white opacity-100 transition-opacity group-hover:opacity-100">
-                  Ganti cover
-                </div>
-              </div>
-            ) : (
-              <div className="flex aspect-square flex-col items-center justify-center px-4 text-center">
-                <svg className="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2 1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p className="mt-2 text-sm font-semibold text-[#0d7a8a]">Tambah cover</p>
-                <p className="mt-1 text-xs text-gray-400">JPG, PNG, WebP</p>
-              </div>
-            )}
-            <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={e => handleUpload(e, 'cover')} className="hidden" />
-          </label>
-          <div>
-            <p className="text-sm font-semibold text-gray-900">Cover produk</p>
-            <p className="mt-1 max-w-md text-sm leading-6 text-gray-500">
-              Foto ini dipakai di kartu produk dan halaman detail. Kalau produk lama belum punya cover, klik area gambar untuk menambahkan.
-            </p>
-            {coverImage && (
-              <button type="button" onClick={() => { setCoverPreview(null); updateField('cover_path', '') }} className="mt-3 text-sm font-semibold text-red-600 hover:text-red-700">
-                Hapus cover
-              </button>
-            )}
-          </div>
         </div>
       </CardSection>
 
@@ -515,7 +501,26 @@ export default function ProductForm({ initialData, categories = [] }) {
 
       {/* File produk */}
       <CardSection title="File Produk">
-        <div>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1 sm:grid-cols-4">
+            {[
+              ['upload', 'Upload file'], ['pdf', 'PDF / Ebook'], ['gdrive', 'Google Drive'], ['other', 'Tautan lain'],
+            ].map(([value, label]) => (
+              <button key={value} type="button" aria-pressed={value === 'upload' || value === 'pdf' ? deliveryMode === 'upload' && uploadKind === value : deliveryMode === 'link' && linkPlatform === value} onClick={() => {
+                if (value === 'upload' || value === 'pdf') { setDeliveryMode('upload'); setUploadKind(value); updateField('file_url', '') }
+                else { setDeliveryMode('link'); setLinkPlatform(value); updateField('file_path', '') }
+              }} className={`min-h-10 rounded-md px-2 text-xs font-semibold ${(value === 'upload' || value === 'pdf' ? deliveryMode === 'upload' && uploadKind === value : deliveryMode === 'link' && linkPlatform === value) ? 'bg-white text-teal-800 shadow-sm' : 'text-gray-600'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+          {deliveryMode === 'link' ? (
+            <div>
+              <label htmlFor="product-delivery-link" className="mb-1 block text-sm font-medium text-gray-700">Tautan file / materi</label>
+              <input id="product-delivery-link" type="url" inputMode="url" value={form.file_url || ''} onChange={e => updateField('file_url', e.target.value)} placeholder={linkPlatform === 'gdrive' ? 'https://drive.google.com/...' : 'https://...'} className="w-full rounded-lg border border-gray-200 bg-[var(--input-bg)] px-3 py-2.5 text-sm focus:border-[#0ea5a0] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20" />
+              <p className="mt-1 text-xs text-gray-500">Pastikan akses tautan dibuka untuk pembeli.</p>
+            </div>
+          ) : <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">File Produk</label>
             <label className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-[#0ea5a0] transition-colors cursor-pointer block">
               {form.file_path ? (
@@ -535,20 +540,63 @@ export default function ProductForm({ initialData, categories = [] }) {
                   <p className="text-xs text-gray-300 mt-1">PDF, ZIP, DOC, XLS (max 50MB)</p>
                 </div>
               )}
-              <input type="file" disabled={uploading} accept=".pdf,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={e => handleUpload(e, 'file')} className="hidden" />
+              <input type="file" disabled={uploading} accept={uploadKind === 'pdf' ? '.pdf' : '.pdf,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx'} onChange={e => { if (e.target.files?.[0]) { updateField('file_name', e.target.files[0].name); setUploadKind(/\.pdf$/i.test(e.target.files[0].name) ? 'pdf' : 'upload') } handleUpload(e, 'file') }} className="hidden" />
             </label>
+          </div>}
         </div>
+      </CardSection>
+
+        </div>
+        <aside className="min-w-0 space-y-6 xl:sticky xl:top-4">
+
+      <CardSection title="Foto Produk">
+        <label className="group block cursor-pointer overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-50 transition-colors hover:border-[#0ea5a0] focus-within:ring-2 focus-within:ring-[#0ea5a0]">
+          {coverImage ? (
+            <div className="relative aspect-[4/3] bg-cover bg-center" style={{ backgroundImage: `url("${coverImage}")` }}>
+              <span className="absolute inset-x-0 bottom-0 bg-black/55 px-3 py-2 text-center text-sm font-semibold text-white">Ganti cover</span>
+            </div>
+          ) : (
+            <div className="flex aspect-[4/3] flex-col items-center justify-center px-4 text-center">
+              <svg aria-hidden="true" className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2 1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="mt-2 text-sm font-semibold text-[#0d7a8a]">Tambah foto produk</span>
+              <span className="mt-1 text-xs text-gray-500">JPG, PNG, WebP · maks. 5 MB</span>
+            </div>
+          )}
+          <input aria-label="Unggah atau ganti foto produk" type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={e => handleUpload(e, 'cover')} className="sr-only" />
+        </label>
+        {coverImage && (
+          <button type="button" onClick={() => { setCoverPreview(null); updateField('cover_path', '') }} className="min-h-10 text-sm font-semibold text-red-600 hover:text-red-700">
+            Hapus cover
+          </button>
+        )}
       </CardSection>
 
       {/* Publish */}
       <CardSection title="Publikasi">
         <label className="flex items-center gap-3 cursor-pointer">
-          <div className={`relative w-10 h-5 rounded-full transition-colors ${form.is_active ? 'bg-[#0ea5a0]' : 'bg-gray-300'}`}>
-            <div className={`absolute w-4 h-4 bg-white rounded-full top-0.5 transition-transform shadow-sm ${form.is_active ? 'translate-x-5' : 'translate-x-0.5'}`} />
-            <input type="checkbox" checked={form.is_active} onChange={e => updateField('is_active', e.target.checked)} className="sr-only" />
-          </div>
+          <input type="checkbox" checked={form.is_active} onChange={e => updateField('is_active', e.target.checked)} className="h-5 w-5 rounded text-[#0ea5a0] focus:ring-[#0ea5a0]" />
           <span className="text-sm font-medium text-gray-700">{form.is_active ? 'Aktif' : 'Draft'}</span>
         </label>
+      </CardSection>
+
+      <CardSection title="Ringkasan">
+        <div className="space-y-2 text-sm">
+          <p className="break-words font-semibold text-gray-900">{form.title || 'Judul produk'}</p>
+          <p className="text-gray-600">{form.type === 'paid' ? formatRupiah(form.sale_price) : 'Gratis'}</p>
+          <p className="text-xs text-gray-500">{categories.find(category => category.id === form.category_id)?.name || 'Belum ada kategori'} · {form.card_layout || 'landscape'}</p>
+        </div>
+        {form.type === 'paid' && (
+          <div>
+            <label htmlFor="purchase-button-label" className="block text-sm font-medium text-gray-700 mb-1">Teks tombol beli</label>
+            <select id="purchase-button-label" value={form.purchase_button_label} onChange={e => updateField('purchase_button_label', e.target.value)} className="w-full rounded-lg border border-gray-200 bg-[var(--input-bg)] px-3 py-2.5 text-sm focus:border-[#0ea5a0] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20">
+              <option value="Beli Sekarang">Beli Sekarang</option>
+              <option value="Pesan Sekarang">Pesan Sekarang</option>
+              <option value="Dapatkan Sekarang">Dapatkan Sekarang</option>
+            </select>
+          </div>
+        )}
       </CardSection>
 
       {/* SEO */}
@@ -574,6 +622,8 @@ export default function ProductForm({ initialData, categories = [] }) {
           />
         </div>
       </CardSection>
+        </aside>
+      </div>
 
       {/* Actions */}
       <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-200">

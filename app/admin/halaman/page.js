@@ -33,9 +33,10 @@ export default async function AdminHalaman() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">Kelola Halaman</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Total {pages.length} halaman</p>
+          <h1 className="text-lg font-bold text-gray-900">Halaman & Navigasi</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Kelola halaman toko dan menu navigasinya.</p>
         </div>
+        <a href="/admin/navigation#navigasi" className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Kelola menu</a>
       </div>
       <PageTableClient pages={pages} />
     </div>

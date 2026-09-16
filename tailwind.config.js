@@ -8,6 +8,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        brand: 'rgb(var(--brand-rgb) / <alpha-value>)',
+        'brand-dark': 'rgb(var(--brand-dark-rgb) / <alpha-value>)',
         primary: {
           DEFAULT: '#0ea5a0',
           light: 'rgba(14,165,160,0.08)',

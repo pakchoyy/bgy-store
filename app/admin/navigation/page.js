@@ -75,9 +75,9 @@ export default async function AdminNavigation({ searchParams }) {
   if (items.length === 0) items = demoNavItems
 
   return (
-    <div>
+    <div id="navigasi">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-extrabold text-gray-900">Navigation Manager</h1>
+        <div><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Halaman & Navigasi</p><h1 className="text-lg font-extrabold text-gray-900">Menu navigasi</h1><a href="/admin/halaman" className="mt-1 inline-block text-sm text-teal-700 hover:underline">Kembali ke halaman</a></div>
         <details className="group relative">
           <summary className="list-none bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer">
             + Tambah Menu

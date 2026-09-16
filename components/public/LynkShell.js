@@ -26,6 +26,7 @@ export default function LynkShell({
     bannerEnabled,
     bgColor,
     bgStyle,
+    bgImageUrl,
     socialLinks,
     siteName,
   } = appearance || {}
@@ -43,12 +44,17 @@ export default function LynkShell({
     }
   }, [])
 
-  const bg =
-    bgStyle === 'flat'
+  const bg = bgImageUrl
+    ? {
+        backgroundColor: bgColor || '#0ea5a0',
+        backgroundImage: `${bgStyle === 'flat' ? 'linear-gradient(rgba(255,255,255,.16), rgba(255,255,255,.16))' : `linear-gradient(180deg, ${bgColor || '#0ea5a0'}bb 0%, ${bgColor || '#0ea5a0'}66 35%, #f0fdfa99 75%)`}, url("${bgImageUrl}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+        backgroundAttachment: 'fixed',
+      }
+    : bgStyle === 'flat'
       ? { backgroundColor: bgColor || '#0ea5a0' }
-      : {
-          backgroundImage: `linear-gradient(180deg, ${bgColor || '#0ea5a0'} 0%, ${bgColor || '#0ea5a0'}cc 35%, #f0fdfa 70%, #f8fafc 100%)`,
-        }
+      : { backgroundImage: `linear-gradient(180deg, ${bgColor || '#0ea5a0'} 0%, ${bgColor || '#0ea5a0'}cc 35%, #f0fdfa 70%, #f8fafc 100%)` }
   const baseNavItems = [
     ...(navItems || []).filter((item) => item.is_visible !== false),
     { id: 'fallback-about', label: 'Tentang', target_url: '/halaman/tentang-kami', is_visible: true },

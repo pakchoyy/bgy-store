@@ -34,16 +34,14 @@ function Sidebar({ userName }) {
       items: [
         { href: '/admin/produk', label: 'Produk', icon: 'package' },
         { href: '/admin/kategori', label: 'Kategori', icon: 'tags' },
-        { href: '/admin/halaman', label: 'Halaman', icon: 'file-text' },
+        { href: '/admin/halaman', label: 'Halaman & Navigasi', icon: 'file-text' },
       ],
     },
     {
       label: 'Tampilan',
       items: [
         { href: '/admin/homepage', label: 'Appearance', icon: 'home' },
-        { href: '/admin/navigation', label: 'Navigation', icon: 'menu' },
         { href: '/admin/footer', label: 'Footer', icon: 'rectangle' },
-        { href: '/admin/theme', label: 'Theme', icon: 'palette' },
         { href: '/admin/announcement', label: 'Announcement', icon: 'megaphone' },
       ],
     },

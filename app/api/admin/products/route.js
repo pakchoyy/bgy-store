@@ -1,6 +1,16 @@
 import { createClient } from '@/lib/supabase-server'
 import { generateSlug } from '@/lib/utils'
 
+function normalizeFileUrl(value) {
+  if (!value) return null
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' ? url.toString() : null
+  } catch {
+    return null
+  }
+}
+
 function sanitizeProduct(body) {
   return {
     title: (body.title || '').trim(),
@@ -8,6 +18,9 @@ function sanitizeProduct(body) {
     description: (body.description || '').trim(),
     category_id: body.category_id || null,
     type: body.type === 'paid' ? 'paid' : 'free',
+    purchase_button_label: ['Beli Sekarang', 'Pesan Sekarang', 'Dapatkan Sekarang'].includes(body.purchase_button_label)
+      ? body.purchase_button_label
+      : 'Beli Sekarang',
     sale_price: typeof body.sale_price === 'number' ? body.sale_price : 0,
     original_price: typeof body.original_price === 'number' ? body.original_price : null,
     stock_type: body.stock_type === 'limited' ? 'limited' : 'unlimited',
@@ -18,7 +31,7 @@ function sanitizeProduct(body) {
     cover_path: body.cover_path || null,
     preview_path: body.preview_path || null,
     file_path: body.file_path || null,
-    file_url: body.file_url || null,
+    file_url: normalizeFileUrl(body.file_url),
     file_name: body.file_name || null,
     file_size: body.file_size || null,
     mime_type: body.mime_type || null,

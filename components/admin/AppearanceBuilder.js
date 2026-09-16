@@ -3,6 +3,8 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { parseSocialLinks } from '@/lib/utils'
+import { themeFonts } from '@/lib/store-theme'
+import { uploadMedia } from '@/lib/upload-media'
 
 const PLATFORMS = [
   'whatsapp',
@@ -38,10 +40,17 @@ export default function AppearanceBuilder({
     banner_enabled: initialAppearance.bannerEnabled !== false,
     bg_color: initialAppearance.bgColor || '#0ea5a0',
     bg_style: initialAppearance.bgStyle || 'gradient',
+    bg_image_url: initialAppearance.bgImageUrl || '',
+    theme_font: initialAppearance.themeFont || 'system',
+    theme_primary_color: initialAppearance.themePrimaryColor || '#0ea5a0',
+    theme_secondary_color: initialAppearance.themeSecondaryColor || '#0d7a8a',
+    theme_border_radius: initialAppearance.themeBorderRadius || 'rounded',
+    theme_button_style: initialAppearance.themeButtonStyle || 'solid',
     social_links: parseSocialLinks(initialAppearance.socialLinks || []),
   }))
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(null)
+  const [uploading, setUploading] = useState('')
 
   const previewProducts = useMemo(
     () => products.filter((p) => p.is_active).slice(0, 6),
@@ -78,6 +87,22 @@ export default function AppearanceBuilder({
     }))
   }
 
+  async function handleImageUpload(event, settingKey) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setUploading(settingKey)
+    try {
+      const media = await uploadMedia(file, 'cover')
+      update(settingKey, media.url)
+      showToast('success', 'Foto berhasil diunggah. Simpan perubahan untuk menerapkan.')
+    } catch (error) {
+      showToast('error', error?.message || 'Foto gagal diunggah.')
+    } finally {
+      setUploading('')
+      event.target.value = ''
+    }
+  }
+
   async function handleSave() {
     setSaving(true)
     try {
@@ -94,6 +119,12 @@ export default function AppearanceBuilder({
             banner_enabled: form.banner_enabled ? 'true' : 'false',
             bg_color: form.bg_color,
             bg_style: form.bg_style,
+            bg_image_url: form.bg_image_url,
+            theme_font: form.theme_font,
+            theme_primary_color: form.theme_primary_color,
+            theme_secondary_color: form.theme_secondary_color,
+            theme_border_radius: form.theme_border_radius,
+            theme_button_style: form.theme_button_style,
             social_links: JSON.stringify(form.social_links),
             site_name: form.profile_name,
             site_tagline: form.profile_about,
@@ -132,7 +163,7 @@ export default function AppearanceBuilder({
           <button
             type="button"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !!uploading}
             className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-bold px-5 py-2 rounded-xl hover:opacity-90 disabled:opacity-50"
           >
             {saving ? 'Menyimpan...' : 'Simpan'}
@@ -182,14 +213,7 @@ export default function AppearanceBuilder({
                 placeholder="Penjelasan singkat toko..."
               />
             </Field>
-            <Field label="URL Avatar">
-              <input
-                value={form.profile_avatar_url}
-                onChange={(e) => update('profile_avatar_url', e.target.value)}
-                className={inputCls}
-                placeholder="https://..."
-              />
-            </Field>
+            <ImageUpload label="Foto profil" value={form.profile_avatar_url} uploading={uploading === 'profile_avatar_url'} onChange={(e) => handleImageUpload(e, 'profile_avatar_url')} onRemove={() => update('profile_avatar_url', '')} />
           </section>
 
           <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
@@ -205,21 +229,7 @@ export default function AppearanceBuilder({
                 Tampilkan
               </label>
             </div>
-            <Field label="URL Banner (1200×628 disarankan)">
-              <input
-                value={form.banner_url}
-                onChange={(e) => update('banner_url', e.target.value)}
-                className={inputCls}
-                placeholder="https://..."
-              />
-            </Field>
-            {form.banner_url && (
-              <img
-                src={form.banner_url}
-                alt="Banner preview"
-                className="w-full max-h-40 object-cover rounded-xl border border-gray-100"
-              />
-            )}
+            <ImageUpload label="Banner (1200 x 628 disarankan)" value={form.banner_url} uploading={uploading === 'banner_url'} onChange={(e) => handleImageUpload(e, 'banner_url')} onRemove={() => update('banner_url', '')} />
           </section>
 
           <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
@@ -251,6 +261,36 @@ export default function AppearanceBuilder({
                 </select>
               </Field>
             </div>
+            <ImageUpload label="Foto latar" value={form.bg_image_url} uploading={uploading === 'bg_image_url'} onChange={(e) => handleImageUpload(e, 'bg_image_url')} onRemove={() => update('bg_image_url', '')} />
+          </section>
+
+          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+            <h2 className="text-sm font-bold text-gray-900">Font & tombol</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Font halaman">
+                <select value={form.theme_font} onChange={(e) => update('theme_font', e.target.value)} className={inputCls}>
+                  {Object.entries(themeFonts).map(([name, font]) => <option key={name} value={name} style={{ fontFamily: font }}>{name === 'system' ? 'Sistem' : name}</option>)}
+                </select>
+              </Field>
+              <Field label="Bentuk sudut">
+                <select value={form.theme_border_radius} onChange={(e) => update('theme_border_radius', e.target.value)} className={inputCls}>
+                  <option value="rounded">Bulat</option><option value="slightly">Sedikit bulat</option><option value="square">Kotak</option>
+                </select>
+              </Field>
+              <Field label="Warna tombol utama">
+                <ColorField value={form.theme_primary_color} onChange={(value) => update('theme_primary_color', value)} />
+              </Field>
+              <Field label="Warna tombol kedua">
+                <ColorField value={form.theme_secondary_color} onChange={(value) => update('theme_secondary_color', value)} />
+              </Field>
+            </div>
+            <Field label="Gaya tombol beli">
+              <div className="grid grid-cols-3 gap-2">
+                {[['solid', 'Penuh'], ['outline', 'Outline'], ['soft', 'Lembut']].map(([value, label]) => (
+                  <button key={value} type="button" aria-pressed={form.theme_button_style === value} onClick={() => update('theme_button_style', value)} className={`min-h-11 rounded-lg border px-3 text-sm font-semibold ${form.theme_button_style === value ? 'border-teal-600 bg-teal-50 text-teal-800' : 'border-gray-200 text-gray-600'}`}>{label}</button>
+                ))}
+              </div>
+            </Field>
           </section>
 
           <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
@@ -300,7 +340,7 @@ export default function AppearanceBuilder({
           <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <h2 className="text-sm font-bold text-gray-900 mb-2">Tab Halaman</h2>
             <p className="text-xs text-gray-500 mb-3">
-              Dikelola di menu Navigation. Tab ini tampil di atas konten produk.
+              Dikelola bersama halaman toko dan navigasi di bagian Konten.
             </p>
             <div className="flex flex-wrap gap-2">
               {navItems
@@ -318,10 +358,10 @@ export default function AppearanceBuilder({
               )}
             </div>
             <a
-              href="/admin/navigation"
+              href="/admin/halaman"
               className="inline-block mt-3 text-sm font-semibold text-[#0ea5a0] hover:underline"
             >
-              Kelola Navigation →
+              Kelola halaman & menu →
             </a>
           </section>
         </div>
@@ -335,13 +375,7 @@ export default function AppearanceBuilder({
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-gray-900 rounded-b-2xl z-20" />
               <div
                 className="h-[540px] overflow-y-auto"
-                style={
-                  form.bg_style === 'flat'
-                    ? { backgroundColor: form.bg_color }
-                    : {
-                        backgroundImage: `linear-gradient(180deg, ${form.bg_color} 0%, ${form.bg_color}cc 40%, #f0fdfa 75%)`,
-                      }
-                }
+                style={{ fontFamily: themeFonts[form.theme_font] || themeFonts.system, ...(form.bg_image_url ? { backgroundColor: form.bg_color, backgroundImage: `${form.bg_style === 'flat' ? 'linear-gradient(rgba(255,255,255,.16), rgba(255,255,255,.16))' : `linear-gradient(180deg, ${form.bg_color}bb 0%, ${form.bg_color}66 40%, #f0fdfa99 75%)`}, url("${form.bg_image_url}")`, backgroundSize: 'cover', backgroundPosition: 'center' } : form.bg_style === 'flat' ? { backgroundColor: form.bg_color } : { backgroundImage: `linear-gradient(180deg, ${form.bg_color} 0%, ${form.bg_color}cc 40%, #f0fdfa 75%)` }) }}
               >
                 <div className="pt-8 pb-4 px-4 text-center text-white">
                   <div className="w-14 h-14 mx-auto rounded-full bg-white/20 border-2 border-white/40 overflow-hidden mb-2">
@@ -426,6 +460,21 @@ export default function AppearanceBuilder({
 
     </div>
   )
+}
+
+function ColorField({ value, onChange }) {
+  return <div className="flex gap-2"><input aria-label="Pilih warna" type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-10 w-12 rounded border border-gray-200" /><input aria-label="Kode warna" value={value} onChange={(e) => onChange(e.target.value)} className={`${inputCls} font-mono`} /></div>
+}
+
+function ImageUpload({ label, value, uploading, onChange, onRemove }) {
+  return <Field label={label}>
+    <div className="flex flex-wrap items-center gap-3">
+      {value ? <img src={value} alt={`Pratinjau ${label}`} className="h-16 w-24 rounded-lg border border-gray-200 object-cover" /> : <div className="flex h-16 w-24 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-xs text-gray-400">Belum ada foto</div>}
+      <label className="inline-flex min-h-10 cursor-pointer items-center rounded-lg border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">{uploading ? 'Mengunggah...' : value ? 'Ganti foto' : 'Upload foto'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={onChange} className="sr-only" /></label>
+      {value && <button type="button" onClick={onRemove} className="min-h-10 px-2 text-sm font-medium text-red-600">Hapus</button>}
+      <span className="text-xs text-gray-500">JPG, PNG, WebP · maks. 5 MB</span>
+    </div>
+  </Field>
 }
 
 function Field({ label, children }) {
