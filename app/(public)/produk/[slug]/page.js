@@ -5,7 +5,6 @@ import PriceBlock from '@/components/public/PriceBlock'
 import StockIndicator from '@/components/public/StockIndicator'
 import ProductFAQ from '@/components/public/ProductFAQ'
 import ShareButtons from '@/components/public/ShareButtons'
-import FilePreview from '@/components/public/FilePreview'
 import ProductActions from '@/components/public/ProductActions'
 import { demoProducts } from '@/lib/demo-data'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
@@ -122,14 +121,6 @@ export default async function ProdukDetailPage({ params }) {
               Nikmati akses file digital Bantu Guru Yuk dengan proses pembayaran cepat dan tautan unduhan otomatis.
             </p>
           </section>
-
-          <FilePreview
-            filePath={product.file_url}
-            previewPath={product.preview_path}
-            mimeType={product.mime_type}
-            fileSize={product.file_size}
-            fileName={product.file_name}
-          />
 
           <ProductFAQ faqs={faqs} />
           <ShareButtons productUrl={productUrl} title={product.title} />

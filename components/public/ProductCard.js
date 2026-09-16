@@ -129,7 +129,7 @@ export default function ProductCard({ product, className = '' }) {
           )}
 
           <div className="mt-3 flex items-center justify-between gap-3">
-            {product.file_size ? <span className="text-xs text-gray-500">{product.file_size}</span> : <span />}
+            <span className="text-xs text-gray-500">{isFree ? 'Gratis' : 'Digital'}</span>
             <span className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white group-hover:bg-[#0d7a8a]">
               {isSoldOut ? 'Detail' : isFree ? 'Download' : 'Beli'}
             </span>

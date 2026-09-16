@@ -180,6 +180,7 @@ export default function ProductForm({ initialData, categories = [] }) {
   }
 
   const discount = calcDiscount(form.original_price, form.sale_price)
+  const coverImage = coverPreview || form.cover_path
 
   const handlePreview = () => {
     if (initialData?.is_active && initialData.slug) window.open(`/produk/${initialData.slug}`, '_blank', 'noopener,noreferrer')
@@ -245,6 +246,40 @@ export default function ProductForm({ initialData, categories = [] }) {
             required
           />
           <p className="text-xs text-gray-400 mt-1">URL: /produk/{form.slug || '...'}</p>
+        </div>
+      </CardSection>
+
+      <CardSection title="Foto Produk">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[12rem_1fr] md:items-center">
+          <label className="group block cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 transition-colors hover:border-[#0ea5a0]">
+            {coverImage ? (
+              <div className="relative aspect-square bg-cover bg-center" style={{ backgroundImage: `url("${coverImage}")` }}>
+                <div className="absolute inset-x-0 bottom-0 bg-black/55 px-3 py-2 text-center text-xs font-semibold text-white opacity-100 transition-opacity group-hover:opacity-100">
+                  Ganti cover
+                </div>
+              </div>
+            ) : (
+              <div className="flex aspect-square flex-col items-center justify-center px-4 text-center">
+                <svg className="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2 1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="mt-2 text-sm font-semibold text-[#0d7a8a]">Tambah cover</p>
+                <p className="mt-1 text-xs text-gray-400">JPG, PNG, WebP</p>
+              </div>
+            )}
+            <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={e => handleUpload(e, 'cover')} className="hidden" />
+          </label>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">Cover produk</p>
+            <p className="mt-1 max-w-md text-sm leading-6 text-gray-500">
+              Foto ini dipakai di kartu produk dan halaman detail. Kalau produk lama belum punya cover, klik area gambar untuk menambahkan.
+            </p>
+            {coverImage && (
+              <button type="button" onClick={() => { setCoverPreview(null); updateField('cover_path', '') }} className="mt-3 text-sm font-semibold text-red-600 hover:text-red-700">
+                Hapus cover
+              </button>
+            )}
+          </div>
         </div>
       </CardSection>
 
@@ -478,29 +513,9 @@ export default function ProductForm({ initialData, categories = [] }) {
         </div>
       </CardSection>
 
-      {/* Media */}
-      <CardSection title="Media">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cover</label>
-            <label className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-[#0ea5a0] transition-colors cursor-pointer block">
-              {coverPreview ? (
-                <div className="mx-auto h-36 max-w-sm rounded-lg bg-cover bg-center shadow-sm" style={{ backgroundImage: `url("${coverPreview}")` }} />
-              ) : form.cover_path ? (
-                <div className="mx-auto h-36 max-w-sm rounded-lg bg-cover bg-center shadow-sm" style={{ backgroundImage: `url("${form.cover_path}")` }} />
-              ) : (
-                <div>
-                  <svg className="w-8 h-8 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <p className="text-sm text-gray-400 mt-2">Klik untuk upload cover</p>
-                  <p className="text-xs text-gray-300 mt-1">JPG, PNG, WebP</p>
-                </div>
-              )}
-              <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={e => handleUpload(e, 'cover')} className="hidden" />
-            </label>
-          </div>
-          <div>
+      {/* File produk */}
+      <CardSection title="File Produk">
+        <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">File Produk</label>
             <label className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-[#0ea5a0] transition-colors cursor-pointer block">
               {form.file_path ? (
@@ -522,7 +537,6 @@ export default function ProductForm({ initialData, categories = [] }) {
               )}
               <input type="file" disabled={uploading} accept=".pdf,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={e => handleUpload(e, 'file')} className="hidden" />
             </label>
-          </div>
         </div>
       </CardSection>
 
