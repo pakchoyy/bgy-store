@@ -137,6 +137,7 @@ export default async function ProdukDetailPage({ params }) {
             product={{
               id: product.id,
               title: product.title,
+              slug: product.slug,
               type: product.type,
               sale_price: product.sale_price,
               original_price: product.original_price,

@@ -7,7 +7,9 @@ export default function ProductFAQ({ faqs }) {
 
   if (!faqs || faqs.length === 0) return null;
 
-  const sorted = [...faqs].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+  const sorted = [...faqs]
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    .filter((faq, index, arr) => arr.findIndex(item => item.question?.trim().toLowerCase() === faq.question?.trim().toLowerCase()) === index);
 
   return (
     <div className="space-y-2">

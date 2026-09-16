@@ -6,7 +6,15 @@ import { resolveNavHref } from '@/lib/utils'
 
 export default function PageTabs({ items = [] }) {
   const pathname = usePathname()
-  const tabs = (items || []).filter((i) => i.is_visible !== false)
+  const seen = new Set()
+  const tabs = (items || []).filter((item) => {
+    if (item.is_visible === false) return false
+    const rawHref = resolveNavHref(item)
+    const href = item.label === 'Tentang Kami' ? '/halaman/faq' : rawHref
+    if (seen.has(href)) return false
+    seen.add(href)
+    return true
+  })
 
   if (!tabs.length) return null
 

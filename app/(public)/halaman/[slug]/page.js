@@ -7,14 +7,26 @@ import { getAnnouncement, hasSupabase } from '@/lib/store-shell'
 const demoPages = {
   'tentang-kami': {
     slug: 'tentang-kami',
-    title: 'Tentang Kami',
-    content: `<p>Bantu Guru Yuk adalah platform toko digital untuk guru SD Indonesia. Fokus ke materi siap pakai: modul ajar, ATP, media pembelajaran, dan administrasi sekolah.</p>`,
+    title: 'Tentang Bantu Guru Yuk',
+    content: `<h2>Teman Praktis Guru SD</h2>
+<p>Bantu Guru Yuk menyediakan materi ajar digital untuk membantu guru menyiapkan pembelajaran dengan lebih cepat, rapi, dan mudah digunakan di kelas.</p>
+<h2>Apa yang Tersedia?</h2>
+<p>Guru dapat menemukan modul ajar, ATP, media pembelajaran, administrasi kelas, dan file pendukung lain dalam format digital. Sebagian materi tersedia gratis, sebagian lain berbayar untuk mendukung pengembangan konten yang lebih lengkap.</p>
+<h2>Untuk Siapa?</h2>
+<p>Platform ini dibuat untuk guru SD, wali kelas, operator sekolah, dan pendidik yang membutuhkan bahan siap pakai namun tetap mudah disesuaikan dengan kebutuhan kelas masing-masing.</p>`,
     is_active: true,
   },
   faq: {
     slug: 'faq',
     title: 'FAQ',
-    content: `<p>Kunjungi halaman Gratis untuk unduh materi free, atau Produk untuk materi berbayar.</p>`,
+    content: `<h2>Bagaimana cara download produk gratis?</h2>
+<p>Buka halaman Gratis, pilih materi yang dibutuhkan, lalu tekan tombol download pada halaman produk.</p>
+<h2>Bagaimana cara membeli produk berbayar?</h2>
+<p>Buka halaman Produk, pilih produk, lalu tekan tombol Beli Sekarang. Anda akan diarahkan ke pembayaran, kemudian tautan unduhan aktif setelah pembayaran berhasil.</p>
+<h2>Apakah ada fitur keranjang?</h2>
+<p>Ada. Keranjang dipakai untuk menyimpan produk yang menarik. Checkout tetap dilakukan dari halaman produk agar pembayaran dan tautan unduhan lebih jelas.</p>
+<h2>Bagaimana jika file bermasalah?</h2>
+<p>Hubungi admin melalui kontak resmi dan sertakan nama produk serta kendala yang dialami.</p>`,
     is_active: true,
   },
 }
@@ -47,8 +59,14 @@ async function getData(slug) {
   ])
 
   const settings = settingsToMap(settingsRows || [])
+  const fallbackPage = demoPages[slug]
+  const content = typeof page?.content === 'string' ? page.content.trim() : ''
+  const resolvedPage = fallbackPage
+    ? { ...fallbackPage, ...(page || {}), title: page?.title?.trim() || fallbackPage.title, content: content || fallbackPage.content }
+    : page || null
+
   return {
-    page: page || null,
+    page: resolvedPage,
     navItems: navItems || [],
     appearance: getAppearance(settings),
     footerConfig: footerConfig || [],

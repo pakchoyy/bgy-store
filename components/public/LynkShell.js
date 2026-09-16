@@ -1,8 +1,12 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import AnnouncementBar from '@/components/public/AnnouncementBar'
 import Footer from '@/components/public/Footer'
 import PageTabs from '@/components/public/PageTabs'
 import SocialIcons from '@/components/public/SocialIcons'
-import { navigationHref } from '@/lib/navigation'
+import { navigationHref, uniqueNavigationItems } from '@/lib/navigation'
+import { CART_UPDATED_EVENT, getCartItems } from '@/lib/cart'
 
 export default function LynkShell({
   appearance,
@@ -25,6 +29,19 @@ export default function LynkShell({
     socialLinks,
     siteName,
   } = appearance || {}
+  const [cartOpen, setCartOpen] = useState(false)
+  const [cartItems, setCartItems] = useState([])
+
+  useEffect(() => {
+    const syncCart = () => setCartItems(getCartItems())
+    syncCart()
+    window.addEventListener(CART_UPDATED_EVENT, syncCart)
+    window.addEventListener('storage', syncCart)
+    return () => {
+      window.removeEventListener(CART_UPDATED_EVENT, syncCart)
+      window.removeEventListener('storage', syncCart)
+    }
+  }, [])
 
   const bg =
     bgStyle === 'flat'
@@ -32,9 +49,9 @@ export default function LynkShell({
       : {
           backgroundImage: `linear-gradient(180deg, ${bgColor || '#0ea5a0'} 0%, ${bgColor || '#0ea5a0'}cc 35%, #f0fdfa 70%, #f8fafc 100%)`,
         }
-  const menuItems = [
+  const rawMenuItems = [
     { key: 'home', label: 'Home', href: '/' },
-    ...(navItems || []).filter((item) => item.is_visible !== false).map((item) => {
+    ...uniqueNavigationItems((navItems || []).filter((item) => item.is_visible !== false)).map((item) => {
       const href = navigationHref(item)
       return {
         key: item.id || item.label,
@@ -43,6 +60,12 @@ export default function LynkShell({
       }
     }),
   ]
+  const seenMenuHrefs = new Set()
+  const menuItems = rawMenuItems.filter((item) => {
+    if (seenMenuHrefs.has(item.href)) return false
+    seenMenuHrefs.add(item.href)
+    return true
+  })
 
   return (
     <div className="min-h-screen" style={bg}>
@@ -85,15 +108,35 @@ export default function LynkShell({
               <button type="submit" className="rounded-xl bg-[#123b35] px-4 py-2 text-sm font-extrabold text-white">Cari</button>
             </form>
           </details>
-          <a href="/produk" aria-label="Keranjang belanja" className="relative flex h-10 min-w-12 items-center justify-center gap-1 rounded-full px-2 hover:bg-white/10">
+          <button type="button" onClick={() => setCartOpen(open => !open)} aria-expanded={cartOpen} aria-label={`Keranjang berisi ${cartItems.length} produk`} className="relative flex h-10 min-w-12 items-center justify-center gap-1 rounded-full px-2 hover:bg-white/10">
             <svg aria-hidden="true" className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M3 3h2l.5 3m0 0L7 15h10l3-9H5.5Zm3 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
             </svg>
             <span className="hidden text-xs font-bold min-[390px]:inline">Cart</span>
-            <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-400 px-1 text-xs font-extrabold text-white">0</span>
-          </a>
+            {cartItems.length > 0 && <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-400 px-1 text-xs font-extrabold text-white">{cartItems.length}</span>}
+          </button>
         </div>
       </div>
+      {cartOpen && (
+        <div className="absolute right-4 top-14 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-black/5">
+          <div className="border-b border-slate-100 px-4 py-3">
+            <p className="text-sm font-extrabold">Keranjang</p>
+            <p className="text-xs text-slate-500">Checkout tetap dari halaman produk.</p>
+          </div>
+          {cartItems.length ? (
+            <div className="max-h-72 overflow-y-auto py-2">
+              {cartItems.map((item) => (
+                <a key={item.id} href={item.slug ? `/produk/${item.slug}` : '/produk'} className="block px-4 py-3 hover:bg-slate-50">
+                  <span className="block text-sm font-bold text-slate-900">{item.title}</span>
+                  <span className="mt-1 block text-xs text-slate-500">{item.sale_price ? `Rp${Number(item.sale_price).toLocaleString('id-ID')}` : 'Gratis'}</span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="px-4 py-6 text-sm text-slate-500">Belum ada produk di keranjang.</p>
+          )}
+        </div>
+      )}
 
       <div className="max-w-md mx-auto px-4 pt-8 pb-6">
         <header className="text-center text-white mb-4">

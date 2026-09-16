@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
-import { isAdmin } from '@/lib/admin-role';
+import { isAdmin, isConfiguredAdminEmail } from '@/lib/admin-role';
+import { createServiceClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 
 function createAuthClient(request, response) {
@@ -34,9 +35,23 @@ export async function POST(request) {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) return NextResponse.json({ error: 'Email atau password salah.' }, { status: 401 });
     const result = await supabase.auth.getUser();
-    if (result.error || !isAdmin(result.data?.user)) {
+    let user = result.data?.user;
+    if (!result.error && user && !isAdmin(user) && isConfiguredAdminEmail(user.email)) {
+      try {
+        const service = await createServiceClient();
+        const appMetadata = { ...(user.app_metadata || {}), role: 'admin' };
+        const promoted = await service.auth.admin.updateUserById(user.id, { app_metadata: appMetadata });
+        if (!promoted.error) {
+          user = { ...user, app_metadata: appMetadata };
+          await supabase.auth.refreshSession();
+          const refreshed = await supabase.auth.getUser();
+          if (refreshed.data?.user && isAdmin(refreshed.data.user)) user = refreshed.data.user;
+        }
+      } catch {}
+    }
+    if (result.error || !isAdmin(user)) {
       const denied = NextResponse.json(
-        { error: 'Akun ini belum memiliki akses admin.' },
+        { error: 'Akun ini belum memiliki akses admin. Pastikan email admin sudah terdaftar di BGY_ADMIN_EMAILS atau beri app_metadata.role=admin di Supabase.' },
         { status: 403, headers: { 'Cache-Control': 'no-store' } }
       );
       const deniedSupabase = createAuthClient(request, denied);
