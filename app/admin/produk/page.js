@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import { demoProducts, demoCategories } from '@/lib/demo-data'
 import ProductBuilder from '@/components/admin/ProductBuilder'
 
 export const dynamic = 'force-dynamic'
@@ -17,11 +16,9 @@ async function getData() {
       .from('categories')
       .select('*')
       .order('sort_order')
-    if (products?.length) {
-      return { products, categories: categories || demoCategories }
-    }
+    return { products: products || [], categories: categories || [] }
   } catch {}
-  return { products: demoProducts, categories: demoCategories }
+  return { products: [], categories: [] }
 }
 
 export default async function AdminProduk() {

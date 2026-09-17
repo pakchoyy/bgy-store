@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import { demoCategories } from '@/lib/demo-data'
 import ProductForm from '@/components/admin/ProductForm'
 
 async function getCategories() {
@@ -9,7 +8,7 @@ async function getCategories() {
     const { data: categories } = await supabase.from('categories').select('*').order('sort_order')
     if (categories) return categories
   } catch {}
-  return demoCategories
+  return []
 }
 
 export default async function AdminProdukBaru() {

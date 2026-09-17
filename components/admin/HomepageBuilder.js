@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import useUnsavedChanges from '@/lib/use-unsaved-changes'
 import { useRouter } from 'next/navigation'
 import { uploadMedia } from '@/lib/upload-media'
+import AdminToast from '@/components/admin/AdminToast'
 
 const BLOCK_META = {
   hero: { icon: 'H', label: 'Hero', color: 'bg-teal-100 text-teal-700' },
@@ -155,17 +156,7 @@ export default function HomepageBuilder({ initialSections, products = [], catego
         </div>
       </div>
 
-      {toast && (
-        <div role={toast.type === 'error' ? 'alert' : 'status'}
-          className={`rounded-xl border px-4 py-2 text-sm ${
-            toast.type === 'success'
-              ? 'bg-green-50 border-green-200 text-green-800'
-              : 'bg-red-50 border-red-200 text-red-800'
-          }`}
-        >
-          {toast.msg}
-        </div>
-      )}
+      <AdminToast toast={toast?.type} message={toast?.msg} />
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6 items-start">
         {/* LEFT: blocks + editor */}

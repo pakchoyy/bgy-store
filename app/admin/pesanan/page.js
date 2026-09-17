@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { formatRupiah } from '@/lib/utils'
+import AdminToast from '@/components/admin/AdminToast'
 
 async function generateLink(formData) {
   'use server'
@@ -22,42 +23,6 @@ const statusLabels = {
   expired: 'Kadaluarsa',
 }
 
-function DemoBadge() {
-  return (
-    <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-sm text-yellow-800 flex items-center gap-2 mb-6">
-      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-      </svg>
-      <span>Mode Demo — Data tidak disimpan</span>
-    </div>
-  )
-}
-
-function ToastBar({ toast }) {
-  if (!toast) return null
-  const isSuccess = toast === 'success'
-  const isDemo = toast === 'demo'
-  const bg = isDemo ? 'bg-yellow-50 border-yellow-200 text-yellow-800' : isSuccess ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
-  const msg = isDemo ? 'Mode Demo — Data tidak disimpan' : isSuccess ? 'Link berhasil digenerate!' : 'Terjadi kesalahan'
-  return (
-    <div className={`${bg} border rounded-lg px-4 py-2 text-sm flex items-center gap-2 mb-6`}>
-      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        {isSuccess ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />}
-      </svg>
-      <span>{msg}</span>
-    </div>
-  )
-}
-
-const demoOrders = [
-  { id: 'ORD-001', buyer_name: 'Siti Nurhaliza', whatsapp: '628111111111', email: 'siti@example.com', product_title: 'Modul Ajar Matematika Kelas 1 SD', price: 0, status: 'paid', date: '2026-01-15' },
-  { id: 'ORD-002', buyer_name: 'Ahmad Fauzi', whatsapp: '628222222222', email: 'ahmad@example.com', product_title: 'Media Pembelajaran Interaktif IPA Kelas 3 SD', price: 35000, status: 'paid', date: '2026-01-16' },
-  { id: 'ORD-003', buyer_name: 'Dewi Lestari', whatsapp: '628333333333', email: 'dewi@example.com', product_title: 'Bundle Media Pembelajaran SD Kelas 1-6', price: 125000, status: 'pending', date: '2026-01-17' },
-  { id: 'ORD-004', buyer_name: 'Budi Santoso', whatsapp: '628444444444', email: 'budi@example.com', product_title: 'Administrasi Guru Kelas 4 SD Full Tahun', price: 45000, status: 'failed', date: '2026-01-18' },
-  { id: 'ORD-005', buyer_name: 'Rina Wulandari', whatsapp: '628555555555', email: 'rina@example.com', product_title: 'Template Sertifikat Kelulusan SD', price: 25000, status: 'expired', date: '2026-01-19' },
-  { id: 'ORD-006', buyer_name: 'Hendra Gunawan', whatsapp: '628666666666', email: 'hendra@example.com', product_title: 'ATP Bahasa Indonesia Kelas 2 SD', price: 0, status: 'paid', date: '2026-01-20' },
-]
-
 export default async function AdminPesanan({ searchParams }) {
   const supabase = await createClient()
   const toast = searchParams?.toast
@@ -73,8 +38,8 @@ export default async function AdminPesanan({ searchParams }) {
       orders = data.map(o => ({
         id: o.id,
         buyer_name: o.buyer_name || o.customer_name || 'Unknown',
-        whatsapp: o.whatsapp || o.phone || '-',
-        email: o.email || '-',
+        whatsapp: o.buyer_whatsapp || o.whatsapp || o.phone || '-',
+        email: o.buyer_email || o.email || '-',
         product_title: o.product_title || o.product?.title || 'Unknown',
         price: o.price || o.amount || 0,
         status: o.status || 'pending',
@@ -82,7 +47,6 @@ export default async function AdminPesanan({ searchParams }) {
       }))
     }
   }
-  if (orders.length === 0) orders = demoOrders
 
   let filtered = orders
   if (statusFilter !== 'all') {
@@ -114,8 +78,7 @@ export default async function AdminPesanan({ searchParams }) {
           </button>
         </form>
       </div>
-      {isDemo && <DemoBadge />}
-      <ToastBar toast={toast} />
+      <AdminToast toast={toast} message={toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
           {statuses.map(s => {
@@ -204,7 +167,12 @@ export default async function AdminPesanan({ searchParams }) {
         <div className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-white/70">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-bold text-gray-900">Order Details</h2>
-            <button className="rounded-xl border border-[#0ea5a0] px-3 py-1.5 text-xs font-bold text-[#0ea5a0]">PRINT</button>
+            <button className="inline-flex items-center gap-1.5 rounded-xl border border-[#0ea5a0] px-3 py-1.5 text-xs font-bold text-[#0ea5a0] transition-colors hover:bg-emerald-50">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6v-7Z" />
+              </svg>
+              Print
+            </button>
           </div>
           {selectedOrder ? (
             <div className="space-y-3 text-sm">

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { generateSlug, formatRupiah, calcDiscount, CARD_LAYOUTS } from '@/lib/utils'
 import { uploadMedia } from '@/lib/upload-media'
 import FAQEditor from '@/components/admin/FAQEditor'
+import AdminToast from '@/components/admin/AdminToast'
 
 const BADGE_OPTIONS = [
   { value: 'baru', label: 'Baru' },
@@ -222,15 +223,7 @@ export default function ProductForm({ initialData, categories = [] }) {
       {uploading && <p role="status">Mengunggah file…</p>}
       {draftError && <p role="status" className="text-sm text-amber-800">Draf belum bisa disimpan di browser ini. Simpan ke toko sebelum keluar.</p>}
       {dirty && !savedDraft && !draftError && <p role="status" className="text-sm text-slate-600">Perubahan belum disimpan ke toko.</p>}
-      {toast && (
-        <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${
-          toast.type === 'success'
-            ? 'bg-green-50 text-green-700 border-green-200'
-            : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-        }`}>
-          {toast.message}
-        </div>
-      )}
+      <AdminToast toast={toast?.type} message={toast?.message} />
       {dirty && savedDraft && (
         <div className="px-4 py-2 bg-blue-50 text-blue-600 text-xs rounded-lg border border-blue-200 flex items-center gap-2">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

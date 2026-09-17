@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { parseSocialLinks } from '@/lib/utils'
 import { themeFonts } from '@/lib/store-theme'
 import { uploadMedia } from '@/lib/upload-media'
+import AdminToast from '@/components/admin/AdminToast'
 
 const PLATFORMS = [
   'whatsapp',
@@ -171,17 +172,7 @@ export default function AppearanceBuilder({
         </div>
       </div>
 
-      {toast && (
-        <div
-          className={`rounded-xl border px-4 py-2 text-sm ${
-            toast.type === 'success'
-              ? 'bg-green-50 border-green-200 text-green-800'
-              : 'bg-red-50 border-red-200 text-red-800'
-          }`}
-        >
-          {toast.msg}
-        </div>
-      )}
+      <AdminToast toast={toast?.type} message={toast?.msg} />
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
         <div className="space-y-4">

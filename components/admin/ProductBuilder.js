@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { formatRupiah } from '@/lib/utils'
+import AdminToast from '@/components/admin/AdminToast'
 
 function priceLabel(p) {
   if (p.type === 'free' || !p.sale_price) return 'GRATIS'
@@ -175,17 +176,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
         </Link>
       </div>
 
-      {toast && (
-        <div
-          className={`rounded-xl border px-4 py-2 text-sm ${
-            toast.type === 'success'
-              ? 'bg-green-50 border-green-200 text-green-800'
-              : 'bg-red-50 border-red-200 text-red-800'
-          }`}
-        >
-          {toast.msg}
-        </div>
-      )}
+      <AdminToast toast={toast?.type} message={toast?.msg} />
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
         {/* LEFT */}

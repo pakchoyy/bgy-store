@@ -2,15 +2,18 @@ import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatRupiah } from '@/lib/utils'
-import { demoProducts } from '@/lib/demo-data'
 
 async function getDashboardData() {
+  const empty = { products: [], orders: [] }
   try {
     const supabase = await createClient()
-    const { data: products } = await supabase.from('products').select('*')
-    if (products) return products
+    const [{ data: products }, { data: orders }] = await Promise.all([
+      supabase.from('products').select('*, category:categories(*)').is('deleted_at', null),
+      supabase.from('orders').select('*').order('created_at', { ascending: false }),
+    ])
+    return { products: products || [], orders: orders || [] }
   } catch {}
-  return demoProducts
+  return empty
 }
 
 export default async function AdminDashboard() {
@@ -21,17 +24,35 @@ export default async function AdminDashboard() {
     if (!session) redirect('/login')
   }
 
-  const products = await getDashboardData()
+  const { products, orders } = await getDashboardData()
+  const today = new Date().toISOString().slice(0, 10)
+  const monthKey = new Date().toISOString().slice(0, 7)
 
   const activeProducts = products.filter(p => p.is_active)
   const totalDownloads = products.reduce((sum, p) => sum + (p.download_count || 0), 0)
-  const monthlyRevenue = products
-    .filter(p => p.type === 'paid')
-    .reduce((sum, p) => sum + (p.sale_price || 0), 0)
-  const dailyOrders = 12
+  const paidOrders = orders.filter(o => o.status === 'paid')
+  const monthlyRevenue = paidOrders
+    .filter(o => String(o.created_at || '').startsWith(monthKey))
+    .reduce((sum, o) => sum + (o.amount || o.price || 0), 0)
+  const dailyOrders = orders.filter(o => String(o.created_at || '').startsWith(today)).length
 
   const recentProducts = [...products].sort((a, b) => (b.created_at || 0) - (a.created_at || 0)).slice(0, 5)
   const topDownloads = [...products].sort((a, b) => (b.download_count || 0) - (a.download_count || 0)).slice(0, 5)
+  const chartDays = Array.from({ length: 14 }, (_, i) => {
+    const date = new Date()
+    date.setDate(date.getDate() - (13 - i))
+    const key = date.toISOString().slice(0, 10)
+    const orderCount = orders.filter(o => String(o.created_at || '').startsWith(key)).length
+    return {
+      key,
+      label: date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+      views: 0,
+      clicks: orderCount,
+    }
+  })
+  const totalViews = chartDays.reduce((sum, day) => sum + day.views, 0)
+  const totalClicks = totalDownloads
+  const maxChartValue = Math.max(1, ...chartDays.map(day => Math.max(day.views, day.clicks)))
 
   const summaryCards = [
     {
@@ -93,21 +114,48 @@ export default async function AdminDashboard() {
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#25bd83] via-[#43cfa0] to-[#65ddb8] p-5 text-white shadow-sm">
           <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/12" />
           <div className="absolute -bottom-10 left-20 h-24 w-24 rounded-full bg-white/10" />
-          <div className="relative flex items-start justify-between gap-4">
+          <div className="relative flex items-start gap-4">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-900/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] ring-1 ring-white/20">
+              <svg className="h-10 w-10 text-emerald-100 drop-shadow" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                <path d="M24 4 40 14v20L24 44 8 34V14L24 4Z" fill="currentColor" opacity=".38" />
+                <path d="M24 9 35 16 24 39 13 16 24 9Z" fill="#0f8f68" />
+                <path d="M13 16h22L24 39 13 16Z" fill="#b7f5db" opacity=".82" />
+                <path d="M24 9v30M13 16l11-7 11 7" stroke="white" strokeOpacity=".55" strokeWidth="2" strokeLinejoin="round" />
+              </svg>
+            </div>
             <div>
               <p className="text-sm font-semibold text-white/90">Earnings</p>
               <p className="mt-3 text-2xl font-extrabold">{formatRupiah(monthlyRevenue)}</p>
               <p className="mt-1 text-sm text-white/80">Payout Setting Page</p>
             </div>
-            <Link href="/admin/pesanan" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/18 text-xl font-bold text-white shadow-sm" aria-label="Lihat pesanan">↗</Link>
+            <Link href="/admin/pesanan" className="ml-auto flex h-10 w-10 items-center justify-center rounded-xl bg-white/18 text-xl font-bold text-white shadow-sm" aria-label="Lihat pesanan">↗</Link>
           </div>
-          <div className="relative mt-5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#10946b]">Verify your account to activate</div>
+          <div className="relative mt-5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#10946b]">{paidOrders.length} transaksi lunas tercatat</div>
         </div>
       </section>
 
       <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-        <div className="flex items-center justify-between"><div><h2 className="font-bold text-slate-700">Total Views & Clicks</h2><div className="mt-2 flex gap-5 text-xs text-slate-500"><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-amber-400" />Views <b className="ml-1 text-base text-slate-700">303</b></span><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-emerald-400" />Clicks <b className="ml-1 text-base text-slate-700">198</b></span></div></div><span className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400">Pilih tanggal</span></div>
-        <div className="mt-5 flex h-36 items-end gap-2 overflow-hidden px-2">{[34,18,10,25,46,28,62,20,36,24,72,40,30,52,25,44,34,58,32,47].map((h, i) => <div key={i} className="flex min-w-2 flex-1 items-end gap-0.5"><span className="w-1/2 rounded-t bg-amber-300" style={{height:`${h}%`}} /><span className="w-1/2 rounded-t bg-emerald-400" style={{height:`${Math.max(10,h-22)}%`}} /></div>)}</div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-bold text-slate-700">Total Views & Clicks</h2>
+            <div className="mt-2 flex gap-5 text-xs text-slate-500">
+              <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-amber-400" />Views <b className="ml-1 text-base text-slate-700">{totalViews}</b></span>
+              <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-emerald-400" />Clicks <b className="ml-1 text-base text-slate-700">{totalClicks}</b></span>
+            </div>
+          </div>
+          <span className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400">14 hari</span>
+        </div>
+        <div className="mt-5 flex h-40 items-end gap-2 overflow-hidden px-2">
+          {chartDays.map((day) => (
+            <div key={day.key} className="flex min-w-8 flex-1 flex-col items-center justify-end gap-1">
+              <div className="flex h-32 w-full items-end justify-center gap-0.5">
+                <span className="w-1.5 rounded-t bg-amber-300" style={{ height: `${Math.max(3, (day.views / maxChartValue) * 100)}%` }} />
+                <span className="w-1.5 rounded-t bg-emerald-400" style={{ height: `${Math.max(3, (day.clicks / maxChartValue) * 100)}%` }} />
+              </div>
+              <span className="text-[10px] text-slate-400">{day.label}</span>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Summary Cards */}
@@ -131,8 +179,8 @@ export default async function AdminDashboard() {
         <div className="bg-white/90 rounded-2xl shadow-card p-5 ring-1 ring-white/70">
           <h3 className="text-sm font-bold text-gray-900 mb-4">Pesanan Terbaru</h3>
           <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+            {orders.slice(0, 5).map((order, i) => (
+              <div key={order.id || i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#0ea5a0]/10 flex items-center justify-center">
                     <svg className="w-4 h-4 text-[#0ea5a0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,13 +188,16 @@ export default async function AdminDashboard() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Pembeli #{1000 + i}</p>
-                    <p className="text-xs text-gray-400">{products[i - 1]?.title || `Produk #${i}`}</p>
+                    <p className="text-sm font-medium text-gray-900">{order.buyer_name || order.customer_name || 'Pembeli'}</p>
+                    <p className="text-xs text-gray-400">{order.product_title || 'Produk digital'}</p>
                   </div>
                 </div>
-                <span className="text-xs text-gray-500">{i} jam lalu</span>
+                <span className="text-xs text-gray-500">{order.status || 'pending'}</span>
               </div>
             ))}
+            {orders.length === 0 && (
+              <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-400">Belum ada pesanan.</p>
+            )}
           </div>
         </div>
 

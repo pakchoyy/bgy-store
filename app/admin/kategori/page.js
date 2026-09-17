@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import { demoCategories, demoProducts } from '@/lib/demo-data'
 import KategoriManager from '@/components/admin/KategoriManager'
 
 async function getData() {
@@ -19,13 +18,7 @@ async function getData() {
       return withCounts
     }
   } catch {}
-
-  const counts = {}
-  demoProducts.forEach(p => {
-    counts[p.category_id] = (counts[p.category_id] || 0) + 1
-  })
-  const withCounts = demoCategories.map(c => ({ ...c, product_count: counts[c.id] || 0 }))
-  return withCounts
+  return []
 }
 
 export default async function AdminKategori() {

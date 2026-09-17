@@ -64,6 +64,7 @@ function Sidebar({ counts }) {
     {
       label: 'Lainnya',
       items: [
+        { href: '/admin/voucher', label: 'Voucher', icon: 'ticket' },
         { href: '/admin/settings', label: 'Settings', icon: 'settings' },
         { href: '/admin/seo', label: 'SEO', icon: 'search' },
         { href: '/admin/custom-404', label: 'Custom 404', icon: 'alert-circle' },
