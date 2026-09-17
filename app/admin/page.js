@@ -64,49 +64,42 @@ export default async function AdminDashboard() {
     },
   ]
 
-  const quickActions = [
-    { label: '+ Tambah Produk', href: '/admin/produk/baru', color: 'bg-white text-[#18a873] shadow-sm' },
-    { label: '+ Tambah Halaman', href: '/admin/halaman/baru', color: 'bg-white/20 text-white ring-1 ring-white/25 hover:bg-white/30' },
-    { label: 'Lihat Pesanan', href: '/admin/pesanan', color: 'bg-white/20 text-white ring-1 ring-white/25 hover:bg-white/30' },
-    { label: 'Buka Website', href: '/', color: 'bg-white/20 text-white ring-1 ring-white/25 hover:bg-white/30' },
-  ]
-
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#20ba80] via-[#43cfa0] to-[#6ee0bc] p-5 text-white shadow-xl shadow-emerald-900/10">
-        <div className="relative">
-          <div className="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full bg-white/14" />
-          <div className="pointer-events-none absolute bottom-0 right-20 h-16 w-16 rounded-full bg-white/10" />
-          <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/95 text-lg font-extrabold text-[#18a873] shadow-sm">
-                BGY
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-white/80">Account</p>
-                <h1 className="text-2xl font-extrabold tracking-tight">Bantu Guru Yuk Store</h1>
-                <p className="mt-1 max-w-xl text-sm text-white/85">Kelola produk digital, tampilan toko, pesanan, dan konten halaman dari satu tempat.</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {quickActions.map(action => (
-                <Link
-                  key={action.label}
-                  href={action.href}
-                  className={`rounded-2xl px-4 py-2.5 text-sm font-bold transition-all active:scale-[0.96] ${action.color}`}
-                >
-                  {action.label}
-                </Link>
-              ))}
-            </div>
+      <div className="flex items-center justify-between px-1">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-700">Home</h1>
+        <Link href="/admin/produk/baru" className="rounded-xl bg-[#25bd83] px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-[0.96]">+ Produk</Link>
+      </div>
+      <section className="grid gap-4 lg:grid-cols-[1.35fr_0.9fr]">
+        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+          <div className="flex items-center justify-between text-sm text-slate-500"><span>Account</span><span className="text-[#18a873]">›</span></div>
+          <div className="mt-3 flex items-center gap-3 rounded-2xl bg-emerald-50/70 p-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#b8efcf] text-sm font-extrabold text-[#168f68]">BGY</div>
+            <div className="min-w-0"><p className="font-bold text-slate-700">Bantu Guru Yuk</p><p className="truncate text-xs text-[#18a873]">Toko digital guru</p></div>
+            <Link href="/" target="_blank" aria-label="Buka website" className="ml-auto rounded-full bg-white px-3 py-2 text-xs font-bold text-[#18a873] shadow-sm">↗</Link>
+          </div>
+          <p className="mt-4 text-xs font-semibold text-slate-500">Mulai kelola toko</p>
+          <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+            <Link href="/admin/produk/baru" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">＋ Produk digital</Link>
+            <Link href="/admin/halaman/baru" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">＋ Halaman</Link>
+            <Link href="/admin/homepage" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">⚙ Tampilan</Link>
           </div>
         </div>
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#21b97f] to-[#62dcb5] p-5 text-white shadow-sm">
+          <p className="text-sm font-semibold text-white/90">Pemasukan</p><p className="mt-3 text-2xl font-extrabold">{formatRupiah(monthlyRevenue)}</p><p className="mt-1 text-sm text-white/80">Bulan ini</p>
+          <Link href="/admin/pesanan" className="mt-5 inline-flex rounded-xl bg-white/20 px-3 py-2 text-xs font-bold text-white">Lihat pesanan →</Link>
+        </div>
+      </section>
+
+      <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+        <div className="flex items-center justify-between"><div><h2 className="font-bold text-slate-700">Total Views & Clicks</h2><div className="mt-2 flex gap-5 text-xs text-slate-500"><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-amber-400" />Views <b className="ml-1 text-base text-slate-700">303</b></span><span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-emerald-400" />Clicks <b className="ml-1 text-base text-slate-700">198</b></span></div></div><span className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400">Pilih tanggal</span></div>
+        <div className="mt-5 flex h-36 items-end gap-2 overflow-hidden px-2">{[34,18,10,25,46,28,62,20,36,24,72,40,30,52,25,44,34,58,32,47].map((h, i) => <div key={i} className="flex min-w-2 flex-1 items-end gap-0.5"><span className="w-1/2 rounded-t bg-amber-300" style={{height:`${h}%`}} /><span className="w-1/2 rounded-t bg-emerald-400" style={{height:`${Math.max(10,h-22)}%`}} /></div>)}</div>
       </section>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map(card => (
-          <div key={card.title} className="bg-white/90 rounded-2xl shadow-card p-5 relative overflow-hidden ring-1 ring-white/70">
+          <div key={card.title} className="relative overflow-hidden rounded-2xl bg-white/90 p-5 shadow-card ring-1 ring-white/70">
             <div className={`absolute top-0 right-0 w-24 h-24 -translate-y-6 translate-x-6 rounded-full ${card.bg}`} />
             <div className="relative">
               <div className={`inline-flex p-2.5 rounded-2xl bg-gradient-to-r ${card.color} text-white shadow-sm mb-3`}>

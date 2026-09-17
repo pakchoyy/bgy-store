@@ -39,18 +39,6 @@ export default function AdminDesktopSidebar({ menuGroups, counts = {} }) {
         <span className="text-lg font-extrabold tracking-tight">Admin</span>
       </Link>
 
-      <div className="relative mx-4 mb-3 rounded-3xl bg-white/18 p-3 ring-1 ring-white/20">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-sm font-bold uppercase text-[#18a873]">
-            A
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold">Admin BGY Store</p>
-            <p className="truncate text-xs text-white/75">Kelola toko digital</p>
-          </div>
-        </div>
-      </div>
-
       <nav className="relative flex-1 space-y-1 overflow-y-auto p-3">
         <SidebarLink href="/admin" icon="layout-dashboard">Dashboard</SidebarLink>
         {menuGroups.map((group) => (
@@ -67,11 +55,6 @@ export default function AdminDesktopSidebar({ menuGroups, counts = {} }) {
         ))}
       </nav>
 
-      <div className="relative p-4">
-        <Link href="/" className="flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 text-sm font-bold text-[#18a873] shadow-sm">
-          Lihat Website
-        </Link>
-      </div>
     </aside>
   );
 }

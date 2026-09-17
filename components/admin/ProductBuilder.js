@@ -29,6 +29,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
+  const [showBlockPicker, setShowBlockPicker] = useState(false)
 
   const filtered = useMemo(() => {
     let list = [...products]
@@ -212,12 +213,28 @@ export default function ProductBuilder({ products: initialProducts, categories =
           </div>
 
           {/* Add block bar */}
-          <Link
-            href="/admin/produk/baru"
-            className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#0ea5a0] to-[#14b8a6] text-white font-bold text-sm shadow-md hover:opacity-95 active:scale-[0.99] transition-all"
+          <button
+            type="button"
+            onClick={() => setShowBlockPicker(true)}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#0ea5a0] to-[#14b8a6] py-3.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-95 active:scale-[0.96]"
           >
             <span className="text-lg leading-none">+</span> Add new product
-          </Link>
+          </button>
+
+          {showBlockPicker && (
+            <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/40 p-4 pt-[12vh] backdrop-blur-sm" onClick={() => setShowBlockPicker(false)}>
+              <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-start justify-between gap-4"><div><h2 className="text-xl font-extrabold text-slate-700">Add new block</h2><p className="mt-1 text-sm text-slate-400">Tambahkan konten ke halaman toko seperti di Lynk.</p></div><button type="button" onClick={() => setShowBlockPicker(false)} className="text-2xl text-slate-400" aria-label="Tutup">×</button></div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {[['image','Image','Tambah foto atau cover produk','/admin/produk/baru'],['text','Text','Tambah judul dan deskripsi','/admin/produk/baru?block=text'],['link','Link','Tambah tombol menuju URL','/admin/produk/baru?block=link'],['package','Digital Product','Buat produk digital berbayar','/admin/produk/baru']].map(([icon, title, description, href]) => (
+                    <Link key={title} href={href} onClick={() => setShowBlockPicker(false)} className="group flex items-center gap-4 rounded-2xl border border-slate-200 p-4 transition-colors hover:border-[#25bd83] hover:bg-emerald-50/60">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-xl text-[#18a873]">{icon === 'image' ? '▧' : icon === 'text' ? 'T' : icon === 'link' ? '↗' : '▣'}</span><span><b className="block text-slate-700">{title}</b><small className="text-slate-400">{description}</small></span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Block list */}
           <div className="overflow-visible rounded-2xl border border-gray-100 bg-white shadow-sm">
@@ -260,7 +277,8 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         active ? 'border-[#0ea5a0]/30 bg-[rgba(14,165,160,0.07)]' : 'border-gray-100 bg-white hover:bg-gray-50/80'
                       } ${isOver ? 'ring-2 ring-inset ring-[#0ea5a0]/40' : ''} ${
                         dragId === p.id ? 'opacity-40' : ''
-                      }`}
+                      } ${p.is_featured ? 'ring-2 ring-amber-300/80 shadow-[0_0_22px_rgba(251,191,36,0.22)]' : ''}
+                      `}
                     >
                       <span className="text-gray-300 cursor-grab active:cursor-grabbing select-none text-lg px-0.5">
                         ⠿

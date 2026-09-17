@@ -34,7 +34,7 @@ export default async function AdminLayout({ children }) {
     <div className="flex min-h-screen flex-col bg-[#edf8f5] bg-[radial-gradient(circle_at_top_left,rgba(46,204,146,0.20),transparent_34rem),linear-gradient(180deg,#f4fbf8_0%,#edf8f5_48%,#f8fafc_100%)] lg:flex-row">
       <Sidebar userName={userName} counts={counts} />
       <div className="flex-1 lg:pl-64">
-        <Header userName={userName} />
+        <Header />
         <main className="p-4 pb-24 md:p-6 lg:pb-6">
           {children}
         </main>
@@ -81,32 +81,19 @@ function Sidebar({ userName, counts }) {
   );
 }
 
-function Header({ userName }) {
+function Header() {
   return (
-    <header className="sticky top-0 z-30 hidden h-14 items-center justify-between border-b border-white/70 bg-white/80 px-4 shadow-sm backdrop-blur lg:flex lg:px-6">
+    <header className="sticky top-0 z-30 hidden h-14 items-center justify-end border-b border-white/70 bg-white/80 px-4 shadow-sm backdrop-blur lg:flex lg:px-6">
       <div className="flex items-center gap-3">
-        <Link href="/" className="flex items-center gap-2 text-sm text-gray-400 hover:text-[#0ea5a0] transition-colors">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          <span className="hidden sm:inline">Lihat Website</span>
-        </Link>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-semibold text-gray-700">
-          Dashboard Admin
-        </span>
         <form action="/auth/signout" method="post">
           <button
             type="submit"
             aria-label="Keluar dari admin"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors sm:h-auto sm:w-auto sm:gap-1.5 sm:rounded-none sm:hover:bg-transparent"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50 active:scale-[0.96]"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span className="hidden sm:inline">Keluar</span>
           </button>
         </form>
       </div>
