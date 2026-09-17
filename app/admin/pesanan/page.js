@@ -142,7 +142,8 @@ export default async function AdminPesanan({ searchParams }) {
           />
         </form>
       </div>
-      <div className="bg-white rounded-xl shadow-card overflow-hidden">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="overflow-hidden rounded-2xl bg-white shadow-card ring-1 ring-white/70">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -199,8 +200,47 @@ export default async function AdminPesanan({ searchParams }) {
           <div className="p-8 text-center text-sm text-gray-400">Tidak ada pesanan ditemukan</div>
         )}
       </div>
+      <aside className="hidden space-y-4 xl:block">
+        <div className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-white/70">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-gray-900">Order Details</h2>
+            <button className="rounded-xl border border-[#0ea5a0] px-3 py-1.5 text-xs font-bold text-[#0ea5a0]">PRINT</button>
+          </div>
+          {selectedOrder ? (
+            <div className="space-y-3 text-sm">
+              <div className="rounded-xl bg-emerald-50 p-3">
+                <p className="text-xs font-semibold text-emerald-700">Order item</p>
+                <p className="mt-1 font-bold text-gray-900">{selectedOrder.product_title}</p>
+                <p className="text-xs text-gray-500">{selectedOrder.price === 0 ? 'Gratis' : formatRupiah(selectedOrder.price)}</p>
+              </div>
+              <div className="flex justify-between border-b border-gray-100 pb-2"><span className="text-gray-500">Customer</span><span className="font-semibold text-gray-900">{selectedOrder.buyer_name}</span></div>
+              <div className="flex justify-between border-b border-gray-100 pb-2"><span className="text-gray-500">Status</span><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColors[selectedOrder.status] || 'bg-gray-100 text-gray-600'}`}>{statusLabels[selectedOrder.status] || selectedOrder.status}</span></div>
+              <div className="flex justify-between border-b border-gray-100 pb-2"><span className="text-gray-500">Total</span><span className="font-bold text-gray-900">{selectedOrder.price === 0 ? 'Gratis' : formatRupiah(selectedOrder.price)}</span></div>
+              <div className="rounded-xl bg-gray-50 p-3 text-xs text-gray-500">
+                <p className="font-semibold text-gray-700">Kontak</p>
+                <p>{selectedOrder.email}</p>
+                <p>{selectedOrder.whatsapp}</p>
+              </div>
+              <form action={generateLink}>
+                <input type="hidden" name="id" value={selectedOrder.id} />
+                <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] px-4 py-2.5 text-sm font-bold text-white">
+                  Generate Ulang Link
+                </button>
+              </form>
+            </div>
+          ) : (
+            <p className="rounded-xl bg-gray-50 p-4 text-sm text-gray-500">Pilih pesanan di kiri untuk melihat detail.</p>
+          )}
+        </div>
+        <div className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-white/70">
+          <h2 className="text-sm font-bold text-gray-900">Follow Up Text</h2>
+          <button className="mt-3 w-full rounded-xl border border-[#0ea5a0] px-4 py-2.5 text-xs font-bold text-[#0ea5a0]">Send Follow Up Text via WhatsApp</button>
+          <p className="mt-3 text-xs text-gray-400">No history yet</p>
+        </div>
+      </aside>
+      </div>
       {selectedOrder && (
-        <div className="mt-6 bg-white rounded-xl shadow-card p-6">
+        <div className="mt-6 rounded-2xl bg-white p-6 shadow-card xl:hidden">
           <div className="flex items-start justify-between mb-4">
             <h3 className="text-sm font-bold text-gray-900">Detail Pesanan — {selectedOrder.id}</h3>
             <a href={`/admin/pesanan?status=${statusFilter}&search=${search}`} className="text-gray-400 hover:text-gray-600">

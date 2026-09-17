@@ -28,6 +28,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
   const [overId, setOverId] = useState(null)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(null)
+  const [openMenuId, setOpenMenuId] = useState(null)
 
   const filtered = useMemo(() => {
     let list = [...products]
@@ -65,6 +66,35 @@ export default function ProductBuilder({ products: initialProducts, categories =
     setProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, is_active: !p.is_active } : p))
     )
+  }
+
+  function toggleHighlight(id) {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, is_featured: !p.is_featured } : p))
+    )
+  }
+
+  function duplicateProduct(product) {
+    const id = `${product.id}-copy-${Date.now()}`
+    setProducts((prev) => [
+      ...prev,
+      {
+        ...product,
+        id,
+        title: `${product.title} (Copy)`,
+        slug: `${product.slug || 'produk'}-copy-${Date.now()}`,
+        sort_order: prev.length + 1,
+        is_active: false,
+      },
+    ])
+    setSelectedId(id)
+    showToast('success', 'Produk diduplikasi sebagai draft.')
+  }
+
+  function deleteProduct(id) {
+    setProducts((prev) => prev.filter((p) => p.id !== id))
+    setSelectedId((current) => (current === id ? products.find((p) => p.id !== id)?.id || null : current))
+    showToast('success', 'Produk dihapus dari daftar lokal.')
   }
 
   async function handleSaveOrder() {
@@ -190,8 +220,8 @@ export default function ProductBuilder({ products: initialProducts, categories =
           </Link>
 
           {/* Block list */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+          <div className="overflow-visible rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-gray-50 px-4 py-3">
               <h2 className="text-sm font-bold text-gray-900">Block List</h2>
               <span className="text-xs text-gray-400">{filtered.length} produk</span>
             </div>
@@ -201,7 +231,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                 Belum ada produk. Klik <strong>Add new product</strong>.
               </div>
             ) : (
-              <div className="divide-y divide-gray-50">
+              <div className="space-y-2 p-3">
                 {filtered.map((p) => {
                   const active = selectedId === p.id
                   const isOver = overId === p.id && dragId !== p.id
@@ -226,8 +256,8 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         setOverId(null)
                       }}
                       onClick={() => setSelectedId(p.id)}
-                      className={`flex items-center gap-3 px-3 py-3 cursor-pointer transition-all ${
-                        active ? 'bg-[rgba(14,165,160,0.07)]' : 'hover:bg-gray-50/80'
+                      className={`relative flex cursor-pointer items-center gap-3 rounded-2xl border px-3 py-3 shadow-sm transition-all ${
+                        active ? 'border-[#0ea5a0]/30 bg-[rgba(14,165,160,0.07)]' : 'border-gray-100 bg-white hover:bg-gray-50/80'
                       } ${isOver ? 'ring-2 ring-inset ring-[#0ea5a0]/40' : ''} ${
                         dragId === p.id ? 'opacity-40' : ''
                       }`}
@@ -236,14 +266,20 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         ⠿
                       </span>
 
-                      <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white text-xs font-bold ${
-                          p.type === 'free'
-                            ? 'bg-gradient-to-br from-sky-400 to-sky-600'
-                            : 'bg-gradient-to-br from-amber-400 to-orange-500'
-                        }`}
-                      >
-                        {p.type === 'free' ? '↓' : 'Rp'}
+                      <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-gray-100 ring-1 ring-black/5">
+                        {p.cover_path ? (
+                          <img src={p.cover_path} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div
+                            className={`flex h-full w-full items-center justify-center text-xs font-bold text-white ${
+                              p.type === 'free'
+                                ? 'bg-gradient-to-br from-sky-400 to-sky-600'
+                                : 'bg-gradient-to-br from-amber-400 to-orange-500'
+                            }`}
+                          >
+                            {p.type === 'free' ? '↓' : 'Rp'}
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex-1 min-w-0">
@@ -263,6 +299,9 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           {cat && (
                             <span className="text-[10px] text-gray-400 truncate">{cat.name}</span>
                           )}
+                          {p.is_featured && (
+                            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">Highlight</span>
+                          )}
                         </div>
                       </div>
 
@@ -281,14 +320,49 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         {p.is_active ? 'ON' : 'OFF'}
                       </button>
 
-                      <Link
-                        href={`/admin/produk/${p.id}/edit`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-gray-300 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 shrink-0"
-                        title="Edit"
-                      >
-                        ⋯
-                      </Link>
+                      <div className="relative shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setOpenMenuId((current) => (current === p.id ? null : p.id))
+                          }}
+                          className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#25bd83] text-xl font-bold leading-none text-white shadow-sm transition-transform duration-150 active:scale-[0.96]"
+                          aria-label={`Buka menu ${p.title}`}
+                          aria-expanded={openMenuId === p.id}
+                        >
+                          ⋯
+                        </button>
+                        {openMenuId === p.id && (
+                          <div className="absolute right-0 top-11 z-20 w-64 overflow-hidden rounded-2xl bg-white text-sm text-gray-700 shadow-2xl ring-1 ring-black/5">
+                            <button type="button" onClick={(e) => { e.stopPropagation(); toggleActive(p.id); setOpenMenuId(null) }} className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50">
+                              <span>Show / Hide</span>
+                              <span className={`h-6 w-11 rounded-full p-0.5 ${p.is_active ? 'bg-[#25bd83]' : 'bg-gray-200'}`}>
+                                <span className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${p.is_active ? 'translate-x-5' : ''}`} />
+                              </span>
+                            </button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); toggleHighlight(p.id); setOpenMenuId(null) }} className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50">
+                              <span>Highlight</span>
+                              <span className={`h-6 w-11 rounded-full p-0.5 ${p.is_featured ? 'bg-[#25bd83]' : 'bg-gray-200'}`}>
+                                <span className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${p.is_featured ? 'translate-x-5' : ''}`} />
+                              </span>
+                            </button>
+                            <div className="border-t border-gray-100" />
+                            <button type="button" onClick={(e) => { e.stopPropagation(); duplicateProduct(p); setOpenMenuId(null) }} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50">
+                              <span className="text-lg">⧉</span> Duplicate
+                            </button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); showToast('success', 'Drag produk dari handle kiri untuk memindahkan urutan.'); setOpenMenuId(null) }} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50">
+                              <span className="text-lg">↔</span> Move Block
+                            </button>
+                            <Link href={`/admin/produk/${p.id}/edit`} onClick={(e) => e.stopPropagation()} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50">
+                              <span className="text-lg">✎</span> Edit Product
+                            </Link>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); deleteProduct(p.id); setOpenMenuId(null) }} className="flex w-full items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50">
+                              <span className="text-lg">⌫</span> Delete Product
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )
                 })}
