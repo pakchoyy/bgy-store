@@ -65,7 +65,7 @@ export default function ProductActions({ product, settings }) {
       )}
     </div>
     {!soldOut && <p role="status" className="mt-2 text-center text-xs text-slate-500">{cartMessage || (isFree ? 'File disiapkan langsung dari halaman ini.' : 'Bisa beli langsung atau simpan dulu ke keranjang.')}</p>}
-    <StickyBuyBar product={product} onBuy={openOrder} />
+    <StickyBuyBar product={product} onBuy={openOrder} onAddToCart={addToCart} />
     {open && (isFree ? <DownloadModal product={product} settings={settings} isOpen onClose={() => setOpen(false)} /> :
       <Modal closeDisabled={busy} title="Checkout" onClose={() => { if (!busy) setOpen(false); }}>
         <form onSubmit={checkout} aria-busy={busy}>

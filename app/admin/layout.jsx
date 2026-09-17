@@ -15,7 +15,7 @@ export default async function AdminLayout({ children }) {
   const userName = session?.user?.email?.split('@')[0] || 'Admin';
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-[#edf8f5] bg-[radial-gradient(circle_at_top_left,rgba(46,204,146,0.20),transparent_34rem),linear-gradient(180deg,#f4fbf8_0%,#edf8f5_48%,#f8fafc_100%)] lg:flex-row">
       <Sidebar userName={userName} />
       <div className="flex-1 lg:pl-64">
         <Header userName={userName} />
@@ -75,37 +75,54 @@ function Sidebar({ userName }) {
 
   return (
     <>
-    <details className="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-2">
-      <summary className="flex min-h-10 cursor-pointer select-none list-none items-center justify-between rounded-xl bg-gray-50 px-3 text-sm font-bold text-gray-800 [&::-webkit-details-marker]:hidden">
-        Menu admin
-        <span aria-hidden="true" className="text-gray-400">⌄</span>
+    <details className="sticky top-0 z-40 border-b border-emerald-100/70 bg-white/80 px-4 py-3 shadow-sm backdrop-blur lg:hidden">
+      <summary className="flex min-h-12 cursor-pointer select-none list-none items-center justify-between rounded-2xl bg-gradient-to-r from-[#27bf82] to-[#51d7b0] px-4 text-sm font-bold text-white shadow-md [&::-webkit-details-marker]:hidden">
+        <span className="flex items-center gap-3">
+          <span className="text-xl leading-none">☰</span>
+          <span>BGY Admin</span>
+        </span>
+        <span aria-hidden="true" className="text-white/80">⌄</span>
       </summary>
-      <nav aria-label="Menu admin ponsel" className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto pt-3">
+      <nav aria-label="Menu admin ponsel" className="mt-3 grid max-h-[70vh] grid-cols-1 gap-2 overflow-y-auto rounded-3xl bg-gradient-to-b from-[#2fc78b] to-[#58d7b4] p-3 shadow-xl sm:grid-cols-2">
         {mobileItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="rounded-xl bg-gray-50 px-3 py-2.5 text-sm font-semibold text-gray-700"
+            className="rounded-2xl bg-white/20 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/30"
           >
             {item.label}
           </Link>
         ))}
       </nav>
     </details>
-    <aside className="w-64 bg-white border-r border-gray-200 hidden lg:flex flex-col fixed inset-y-0 left-0 z-40">
-      <Link href="/admin" className="h-12 flex items-center gap-2.5 px-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
-        <div className="w-7 h-7 bg-gradient-to-br from-[#0ea5a0] to-[#0d7a8a] rounded-lg flex items-center justify-center shadow-sm">
-          <span className="text-white font-extrabold text-xs">BGY</span>
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col overflow-hidden bg-gradient-to-b from-[#27bf82] via-[#43cfa0] to-[#66ddb8] text-white shadow-2xl lg:flex">
+      <div className="pointer-events-none absolute -left-14 -top-16 h-40 w-40 rounded-full bg-white/12" />
+      <div className="pointer-events-none absolute -bottom-10 right-2 h-32 w-32 rounded-full bg-white/10" />
+      <Link href="/admin" className="relative flex h-16 items-center gap-3 px-5 transition-colors hover:bg-white/10">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/95 shadow-sm">
+          <span className="text-xs font-extrabold text-[#18a873]">BGY</span>
         </div>
-        <span className="text-sm font-extrabold text-gray-900">Dashboard</span>
+        <span className="text-lg font-extrabold tracking-tight">Admin</span>
       </Link>
 
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+      <div className="relative mx-4 mb-3 rounded-3xl bg-white/18 p-3 ring-1 ring-white/20">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-sm font-bold uppercase text-[#18a873]">
+            {userName?.charAt(0) || 'A'}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold">{userName}</p>
+            <p className="truncate text-xs text-white/75">bgy-store admin</p>
+          </div>
+        </div>
+      </div>
+
+      <nav className="relative flex-1 space-y-1 overflow-y-auto p-3">
         <SidebarLink href="/admin" icon="layout-dashboard">Dashboard</SidebarLink>
 
         {menuGroups.map((group) => (
           <div key={group.label}>
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.8px] pt-4 pb-1 px-3">
+            <div className="px-3 pb-1 pt-4 text-[11px] font-bold uppercase tracking-[0.8px] text-white/70">
               {group.label}
             </div>
             {group.items.map((item) => (
@@ -117,18 +134,10 @@ function Sidebar({ userName }) {
         ))}
       </nav>
 
-      <div className="border-t border-gray-200 p-3">
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 bg-[#0ea5a0]/10 rounded-full flex items-center justify-center">
-            <span className="text-[#0ea5a0] font-bold text-sm uppercase">
-              {userName?.charAt(0) || 'A'}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{userName}</p>
-            <p className="text-[10px] text-gray-400">Admin</p>
-          </div>
-        </div>
+      <div className="relative p-4">
+        <Link href="/" className="flex min-h-11 items-center justify-center rounded-2xl bg-white px-4 text-sm font-bold text-[#18a873] shadow-sm">
+          Lihat Website
+        </Link>
       </div>
     </aside>
     </>
@@ -137,7 +146,7 @@ function Sidebar({ userName }) {
 
 function Header({ userName }) {
   return (
-    <header className="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
+    <header className="sticky top-0 z-30 hidden h-14 items-center justify-between border-b border-white/70 bg-white/80 px-4 shadow-sm backdrop-blur lg:flex lg:px-6">
       <div className="flex items-center gap-3">
         <Link href="/" className="flex items-center gap-2 text-sm text-gray-400 hover:text-[#0ea5a0] transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,9 +181,9 @@ function SidebarLink({ href, icon, children }) {
   return (
     <a
       href={href}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:text-[#0ea5a0] hover:bg-[rgba(14,165,160,0.08)] transition-all duration-200"
+      className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-white/90 transition-all duration-200 hover:bg-white/20 hover:text-white"
     >
-      <span className="w-5 h-5 flex items-center justify-center text-gray-400 group-hover:text-[#0ea5a0]">
+      <span className="flex h-5 w-5 items-center justify-center text-white/85">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           {icon === 'layout-dashboard' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />}
           {icon === 'package' && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />}

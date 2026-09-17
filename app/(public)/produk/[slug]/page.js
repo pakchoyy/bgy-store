@@ -132,10 +132,12 @@ export default async function ProdukDetailPage({ params }) {
               type: product.type,
               sale_price: product.sale_price,
               original_price: product.original_price,
+              cover_path: product.cover_path,
               stock_type: product.stock_type,
               stock_qty: product.stock_qty,
               description: product.description,
               file_size: product.file_size,
+              purchase_button_label: product.purchase_button_label,
             }}
             settings={{}}
           />

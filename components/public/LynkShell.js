@@ -8,6 +8,11 @@ import SocialIcons from '@/components/public/SocialIcons'
 import { navigationHref, uniqueNavigationItems } from '@/lib/navigation'
 import { CART_UPDATED_EVENT, getCartItems } from '@/lib/cart'
 
+function formatCartPrice(value) {
+  const amount = Number(value || 0)
+  return amount > 0 ? `Rp${amount.toLocaleString('id-ID')}` : 'Gratis'
+}
+
 export default function LynkShell({
   appearance,
   navItems,
@@ -77,6 +82,8 @@ export default function LynkShell({
     seenMenuHrefs.add(item.href)
     return true
   })
+  const cartTotal = cartItems.reduce((sum, item) => sum + Number(item.sale_price || 0), 0)
+  const primaryCartItem = cartItems[0]
 
   return (
     <div className="min-h-screen" style={bg}>
@@ -131,23 +138,55 @@ export default function LynkShell({
         </div>
       </div>
       {cartOpen && (
-        <div className="absolute right-4 top-14 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-black/5">
-          <div className="border-b border-slate-100 px-4 py-3">
-            <p className="text-sm font-semibold">Keranjang</p>
-            <p className="text-xs text-slate-500">Checkout tetap dari halaman produk.</p>
-          </div>
-          {cartItems.length ? (
-            <div className="max-h-72 overflow-y-auto py-2">
-              {cartItems.map((item) => (
-                <a key={item.id} href={item.slug ? `/produk/${item.slug}` : '/produk'} className="block px-4 py-3 hover:bg-slate-50">
-                  <span className="block text-sm font-semibold text-slate-900">{item.title}</span>
-                  <span className="mt-1 block text-xs text-slate-500">{item.sale_price ? `Rp${Number(item.sale_price).toLocaleString('id-ID')}` : 'Gratis'}</span>
-                </a>
-              ))}
+        <div className="fixed inset-0 z-50 md:absolute md:inset-auto md:right-[calc(50%-14rem)] md:top-14 md:w-[min(22rem,calc(100vw-2rem))]">
+          <button type="button" aria-label="Tutup keranjang" onClick={() => setCartOpen(false)} className="absolute inset-0 bg-slate-950/55 md:hidden" />
+          <section className="absolute inset-x-0 bottom-0 max-h-[78vh] overflow-hidden rounded-t-[2rem] bg-white text-slate-900 shadow-2xl ring-1 ring-black/5 md:static md:max-h-none md:rounded-2xl">
+            <div className="mx-auto mt-3 h-1.5 w-20 rounded-full bg-slate-200 md:hidden" />
+            <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+              <svg aria-hidden="true" className="h-8 w-8 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.1} d="M3 3h2l.5 3m0 0L7 15h10l3-9H5.5Zm3 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+              </svg>
+              <div>
+                <p className="text-xl font-semibold">Cart ({cartItems.length})</p>
+                <p className="text-xs text-slate-500">Pilih produk, lalu lanjut beli.</p>
+              </div>
             </div>
-          ) : (
-            <p className="px-4 py-6 text-sm text-slate-500">Belum ada produk di keranjang.</p>
-          )}
+            {cartItems.length ? (
+              <>
+                <div className="max-h-72 overflow-y-auto px-5 py-4">
+                  {cartItems.map((item) => (
+                    <a key={item.id} href={item.slug ? `/produk/${item.slug}` : '/produk'} className="flex gap-3 rounded-xl border border-slate-200 p-3 transition-colors hover:bg-slate-50">
+                      <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-teal-50 text-[10px] font-bold text-[#0d7a8a]">
+                        {item.cover_path ? <img src={item.cover_path} alt="" className="h-full w-full object-cover" /> : 'BGY'}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold leading-snug text-slate-900">{item.title}</span>
+                        <span className="mt-1 block text-sm font-semibold text-[#0ea5a0]">{formatCartPrice(item.sale_price)}</span>
+                      </span>
+                      <span className="self-center text-sm font-semibold text-[#0ea5a0]">Beli</span>
+                    </a>
+                  ))}
+                </div>
+                <div className="space-y-3 border-t border-slate-100 px-5 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-semibold text-slate-500">Total ({cartItems.length} item)</span>
+                    <span className="font-bold text-slate-900">{formatCartPrice(cartTotal)}</span>
+                  </div>
+                  <a href={primaryCartItem?.slug ? `/produk/${primaryCartItem.slug}` : '/produk'} className="store-buy-button flex min-h-12 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#0ea5a0] to-[#16c784] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-transform duration-150 active:scale-[0.96]">
+                    Beli Sekarang
+                  </a>
+                  <a href="/produk" className="flex min-h-12 w-full items-center justify-center rounded-2xl border border-[#0ea5a0] px-4 py-3 text-sm font-semibold text-[#0d7a8a]">
+                    Lanjut Belanja
+                  </a>
+                </div>
+              </>
+            ) : (
+              <div className="px-5 py-8 text-center">
+                <p className="text-sm font-semibold text-slate-700">Keranjang masih kosong</p>
+                <a href="/produk" className="mt-4 inline-flex min-h-11 items-center justify-center rounded-2xl bg-[#0ea5a0] px-5 text-sm font-semibold text-white">Lihat Produk</a>
+              </div>
+            )}
+          </section>
         </div>
       )}
 

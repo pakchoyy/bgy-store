@@ -65,21 +65,51 @@ export default async function AdminDashboard() {
   ]
 
   const quickActions = [
-    { label: '+ Tambah Produk', href: '/admin/produk/baru', color: 'bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white' },
-    { label: '+ Tambah Halaman', href: '/admin/halaman/baru', color: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' },
-    { label: 'Lihat Pesanan', href: '/admin/pesanan', color: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' },
-    { label: 'Buka Website', href: '/', color: 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' },
+    { label: '+ Tambah Produk', href: '/admin/produk/baru', color: 'bg-white text-[#18a873] shadow-sm' },
+    { label: '+ Tambah Halaman', href: '/admin/halaman/baru', color: 'bg-white/20 text-white ring-1 ring-white/25 hover:bg-white/30' },
+    { label: 'Lihat Pesanan', href: '/admin/pesanan', color: 'bg-white/20 text-white ring-1 ring-white/25 hover:bg-white/30' },
+    { label: 'Buka Website', href: '/', color: 'bg-white/20 text-white ring-1 ring-white/25 hover:bg-white/30' },
   ]
 
   return (
     <div className="space-y-6">
+      <section className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#20ba80] via-[#43cfa0] to-[#6ee0bc] p-5 text-white shadow-xl shadow-emerald-900/10">
+        <div className="relative">
+          <div className="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full bg-white/14" />
+          <div className="pointer-events-none absolute bottom-0 right-20 h-16 w-16 rounded-full bg-white/10" />
+          <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/95 text-lg font-extrabold text-[#18a873] shadow-sm">
+                BGY
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white/80">Account</p>
+                <h1 className="text-2xl font-extrabold tracking-tight">Bantu Guru Yuk Store</h1>
+                <p className="mt-1 max-w-xl text-sm text-white/85">Kelola produk digital, tampilan toko, pesanan, dan konten halaman dari satu tempat.</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {quickActions.map(action => (
+                <Link
+                  key={action.label}
+                  href={action.href}
+                  className={`rounded-2xl px-4 py-2.5 text-sm font-bold transition-all active:scale-[0.96] ${action.color}`}
+                >
+                  {action.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map(card => (
-          <div key={card.title} className="bg-white rounded-xl shadow-card p-5 relative overflow-hidden">
+          <div key={card.title} className="bg-white/90 rounded-2xl shadow-card p-5 relative overflow-hidden ring-1 ring-white/70">
             <div className={`absolute top-0 right-0 w-24 h-24 -translate-y-6 translate-x-6 rounded-full ${card.bg}`} />
             <div className="relative">
-              <div className={`inline-flex p-2.5 rounded-lg bg-gradient-to-r ${card.color} text-white shadow-sm mb-3`}>
+              <div className={`inline-flex p-2.5 rounded-2xl bg-gradient-to-r ${card.color} text-white shadow-sm mb-3`}>
                 <Icon name={card.icon} />
               </div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{card.title}</p>
@@ -89,26 +119,10 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="bg-white rounded-xl shadow-card p-5">
-        <h3 className="text-sm font-bold text-gray-900 mb-3">Aksi Cepat</h3>
-        <div className="flex flex-wrap gap-2">
-          {quickActions.map(action => (
-            <Link
-              key={action.label}
-              href={action.href}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${action.color}`}
-            >
-              {action.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
       {/* Feeds */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pesanan Terbaru */}
-        <div className="bg-white rounded-xl shadow-card p-5">
+        <div className="bg-white/90 rounded-2xl shadow-card p-5 ring-1 ring-white/70">
           <h3 className="text-sm font-bold text-gray-900 mb-4">Pesanan Terbaru</h3>
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map(i => (
@@ -131,7 +145,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Produk dengan Download Terbanyak */}
-        <div className="bg-white rounded-xl shadow-card p-5">
+        <div className="bg-white/90 rounded-2xl shadow-card p-5 ring-1 ring-white/70">
           <h3 className="text-sm font-bold text-gray-900 mb-4">Produk Paling Banyak Diunduh</h3>
           <div className="space-y-3">
             {topDownloads.map((product, index) => (
