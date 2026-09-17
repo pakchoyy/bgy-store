@@ -65,29 +65,43 @@ export default async function AdminDashboard() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-4">
       <div className="flex items-center justify-between px-1">
-        <h1 className="text-2xl font-extrabold tracking-tight text-slate-700">Home</h1>
-        <Link href="/admin/produk/baru" className="rounded-xl bg-[#25bd83] px-4 py-2 text-sm font-bold text-white shadow-sm transition-transform active:scale-[0.96]">+ Produk</Link>
+        <h1 className="text-2xl font-extrabold text-slate-700">Home</h1>
+        <Link href="/admin/produk/baru" className="rounded-xl border border-[#25bd83] bg-white px-4 py-2 text-sm font-bold text-[#10946b] shadow-sm transition-transform active:scale-[0.96]">+ Produk</Link>
       </div>
-      <section className="grid gap-4 lg:grid-cols-[1.35fr_0.9fr]">
-        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-          <div className="flex items-center justify-between text-sm text-slate-500"><span>Account</span><span className="text-[#18a873]">›</span></div>
-          <div className="mt-3 flex items-center gap-3 rounded-2xl bg-emerald-50/70 p-3">
+      <section className="grid gap-3 lg:grid-cols-[1.35fr_0.9fr]">
+        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-emerald-100/80">
+          <div className="flex items-center justify-between text-sm text-slate-500">
+            <span>Account</span>
+            <Link href="/" target="_blank" aria-label="Buka website" className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#10946b]">Share</Link>
+          </div>
+          <div className="mt-3 flex items-center gap-3 rounded-2xl bg-[#effbf6] p-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#b8efcf] text-sm font-extrabold text-[#168f68]">BGY</div>
-            <div className="min-w-0"><p className="font-bold text-slate-700">Bantu Guru Yuk</p><p className="truncate text-xs text-[#18a873]">Toko digital guru</p></div>
-            <Link href="/" target="_blank" aria-label="Buka website" className="ml-auto rounded-full bg-white px-3 py-2 text-xs font-bold text-[#18a873] shadow-sm">↗</Link>
+            <div className="min-w-0">
+              <p className="font-bold text-slate-700">Bantu Guru Yuk</p>
+              <p className="truncate text-xs text-[#18a873]">bgy-store.vercel.app</p>
+            </div>
           </div>
           <p className="mt-4 text-xs font-semibold text-slate-500">Mulai kelola toko</p>
           <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-            <Link href="/admin/produk/baru" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">＋ Produk digital</Link>
-            <Link href="/admin/halaman/baru" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">＋ Halaman</Link>
-            <Link href="/admin/homepage" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">⚙ Tampilan</Link>
+            <Link href="/admin/produk/baru" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">Add Product</Link>
+            <Link href="/admin/halaman/baru" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">Add Page</Link>
+            <Link href="/admin/homepage" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">Appearance</Link>
           </div>
         </div>
-        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#21b97f] to-[#62dcb5] p-5 text-white shadow-sm">
-          <p className="text-sm font-semibold text-white/90">Pemasukan</p><p className="mt-3 text-2xl font-extrabold">{formatRupiah(monthlyRevenue)}</p><p className="mt-1 text-sm text-white/80">Bulan ini</p>
-          <Link href="/admin/pesanan" className="mt-5 inline-flex rounded-xl bg-white/20 px-3 py-2 text-xs font-bold text-white">Lihat pesanan →</Link>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#25bd83] via-[#43cfa0] to-[#65ddb8] p-5 text-white shadow-sm">
+          <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/12" />
+          <div className="absolute -bottom-10 left-20 h-24 w-24 rounded-full bg-white/10" />
+          <div className="relative flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-white/90">Earnings</p>
+              <p className="mt-3 text-2xl font-extrabold">{formatRupiah(monthlyRevenue)}</p>
+              <p className="mt-1 text-sm text-white/80">Payout Setting Page</p>
+            </div>
+            <Link href="/admin/pesanan" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/18 text-xl font-bold text-white shadow-sm" aria-label="Lihat pesanan">↗</Link>
+          </div>
+          <div className="relative mt-5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#10946b]">Verify your account to activate</div>
         </div>
       </section>
 
@@ -97,17 +111,16 @@ export default async function AdminDashboard() {
       </section>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {summaryCards.map(card => (
-          <div key={card.title} className="relative overflow-hidden rounded-2xl bg-white/90 p-5 shadow-card ring-1 ring-white/70">
-            <div className={`absolute top-0 right-0 w-24 h-24 -translate-y-6 translate-x-6 rounded-full ${card.bg}`} />
-            <div className="relative">
-              <div className={`inline-flex p-2.5 rounded-2xl bg-gradient-to-r ${card.color} text-white shadow-sm mb-3`}>
+          <div key={card.title} className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r ${card.color} text-white shadow-sm`}>
                 <Icon name={card.icon} />
               </div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{card.title}</p>
-              <p className="text-xl font-bold text-gray-900">{card.value}</p>
-            </div>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold text-gray-500">{card.title}</p>
+                <p className="text-base font-bold text-gray-900">{card.value}</p>
+              </div>
           </div>
         ))}
       </div>

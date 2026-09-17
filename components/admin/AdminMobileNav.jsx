@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const iconPaths = {
+  menu: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h16M4 17h16" />,
+  logout: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0-4-4m4 4H7m6 4v1a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1" />,
   'layout-dashboard': <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6" />,
   package: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />,
   home: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6" />,
@@ -57,9 +59,11 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
             <Icon name="menu" className="h-6 w-6" />
           </button>
           <p className="min-w-0 flex-1 truncate text-center text-sm font-extrabold">{title}</p>
-          <Link href="/" aria-label="Lihat website" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 transition-transform duration-150 active:scale-[0.96]">
-            <Icon name="search" className="h-5 w-5" />
-          </Link>
+          <form action="/auth/signout" method="post">
+            <button type="submit" aria-label="Keluar dari admin" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-red-500 shadow-sm transition-transform duration-150 active:scale-[0.96]">
+              <Icon name="logout" className="h-5 w-5" />
+            </button>
+          </form>
         </div>
       </header>
 
@@ -74,18 +78,7 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18 18 6M6 6l12 12" />
                 </svg>
               </button>
-              <p className="text-xl font-extrabold tracking-tight">BGY Admin</p>
-            </div>
-            <div className="relative mx-4 mb-3 rounded-3xl bg-white/18 p-3 ring-1 ring-white/20">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-sm font-bold uppercase text-[#18a873]">
-                  A
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold">Admin BGY Store</p>
-                  <p className="truncate text-xs text-white/75">Kelola toko digital</p>
-                </div>
-              </div>
+              <p className="text-xl font-extrabold tracking-tight">Admin</p>
             </div>
             <nav aria-label="Menu admin" className="relative flex-1 space-y-1 overflow-y-auto px-3 pb-5">
               {allGroups.map((group) => (

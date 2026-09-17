@@ -108,3 +108,48 @@ export async function PUT(request) {
     return Response.json({ error: e.message || 'Internal error' }, { status: 500 })
   }
 }
+
+export async function PATCH(request) {
+  try {
+    const body = await request.json()
+    const products = Array.isArray(body.products) ? body.products : []
+
+    if (!products.length) {
+      return Response.json({ error: 'products required for update' }, { status: 400 })
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!supabaseUrl || supabaseUrl === 'your_supabase_url') {
+      return Response.json({ success: true, demo: true })
+    }
+
+    const supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const updates = products
+      .filter((product) => product.id)
+      .map((product, index) =>
+        supabase
+          .from('products')
+          .update({
+            sort_order: typeof product.sort_order === 'number' ? product.sort_order : index + 1,
+            is_active: product.is_active !== false,
+            is_featured: !!product.is_featured,
+          })
+          .eq('id', product.id)
+      )
+
+    const results = await Promise.all(updates)
+    const error = results.find((result) => result.error)?.error
+    if (error) {
+      console.error('PATCH /api/admin/products update error:', error)
+      return Response.json({ error: error.message }, { status: 500 })
+    }
+
+    return Response.json({ success: true })
+  } catch (e) {
+    console.error('PATCH /api/admin/products unexpected error:', e)
+    return Response.json({ error: e.message || 'Internal error' }, { status: 500 })
+  }
+}

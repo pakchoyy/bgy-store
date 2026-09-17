@@ -27,12 +27,11 @@ export default async function AdminLayout({ children }) {
     redirect('/login');
   }
 
-  const userName = session?.user?.email?.split('@')[0] || 'Admin';
   const counts = await getAdminCounts(supabase, isDemo);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#edf8f5] bg-[radial-gradient(circle_at_top_left,rgba(46,204,146,0.20),transparent_34rem),linear-gradient(180deg,#f4fbf8_0%,#edf8f5_48%,#f8fafc_100%)] lg:flex-row">
-      <Sidebar userName={userName} counts={counts} />
+      <Sidebar counts={counts} />
       <div className="flex-1 lg:pl-64">
         <Header />
         <main className="p-4 pb-24 md:p-6 lg:pb-6">
@@ -43,7 +42,7 @@ export default async function AdminLayout({ children }) {
   );
 }
 
-function Sidebar({ userName, counts }) {
+function Sidebar({ counts }) {
   const menuGroups = [
     {
       label: 'Konten',
@@ -65,7 +64,6 @@ function Sidebar({ userName, counts }) {
     {
       label: 'Lainnya',
       items: [
-        { href: '/admin/media', label: 'Media Library', icon: 'image' },
         { href: '/admin/settings', label: 'Settings', icon: 'settings' },
         { href: '/admin/seo', label: 'SEO', icon: 'search' },
         { href: '/admin/custom-404', label: 'Custom 404', icon: 'alert-circle' },
@@ -75,8 +73,8 @@ function Sidebar({ userName, counts }) {
 
   return (
     <>
-    <AdminMobileNav menuGroups={menuGroups} userName={userName} counts={counts} />
-    <AdminDesktopSidebar menuGroups={menuGroups} userName={userName} counts={counts} />
+    <AdminMobileNav menuGroups={menuGroups} counts={counts} />
+    <AdminDesktopSidebar menuGroups={menuGroups} counts={counts} />
     </>
   );
 }

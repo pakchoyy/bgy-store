@@ -48,3 +48,31 @@ body {
   color: var(--brand-dark);
   box-shadow: none;
 }
+
+.bgy-highlight-block {
+  animation: bgy-highlight-wiggle 2.8s ease-in-out infinite;
+}
+
+@keyframes bgy-highlight-wiggle {
+  0%, 78%, 100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  82% {
+    transform: rotate(-0.55deg) translateY(-1px);
+  }
+  86% {
+    transform: rotate(0.55deg) translateY(0);
+  }
+  90% {
+    transform: rotate(-0.35deg) translateY(-1px);
+  }
+  94% {
+    transform: rotate(0.25deg) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bgy-highlight-block {
+    animation: none;
+  }
+}
