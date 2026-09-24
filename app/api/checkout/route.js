@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { demoProducts } from '@/lib/demo-data'
 
 export async function POST(request) {
   try {
@@ -13,99 +12,88 @@ export async function POST(request) {
 
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
       && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_supabase_url'
-    const hasMayar = !!process.env.MAYAR_API_KEY && !process.env.MAYAR_API_KEY.startsWith('your_')
 
-    let product = null
-
-    if (hasSupabase) {
-      const { createClient } = await import('@/lib/supabase-server')
-      const supabase = await createClient()
-
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', product_id)
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .single()
-
-      if (!error && data) {
-        product = data
-      }
+    if (!hasSupabase) {
+      return NextResponse.json({ error: 'Database belum dikonfigurasi' }, { status: 500 })
     }
 
-    if (!product) {
-      product = demoProducts.find((p) => p.id === product_id && p.is_active && p.type === 'paid') || null
-    }
+    const { createClient } = await import('@/lib/supabase-server')
+    const supabase = await createClient()
 
-    if (!product) return NextResponse.json({ error: 'Produk tidak ditemukan' }, { status: 404 })
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', product_id)
+      .eq('is_active', true)
+      .is('deleted_at', null)
+      .single()
+
+    if (productError || !product) return NextResponse.json({ error: 'Produk tidak ditemukan' }, { status: 404 })
     if (product.type !== 'paid') return NextResponse.json({ error: 'Produk bukan produk berbayar' }, { status: 400 })
     if (product.stock_type === 'limited' && product.stock_qty <= 0) {
       return NextResponse.json({ error: 'Sold Out' }, { status: 400 })
     }
 
-    const orderId = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
     const amount = product.sale_price
     const name = product.title
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
-    const redirectUrl = `${siteUrl}/terima-kasih?token=`
+    const { hasMayarApiKey, createPaymentLink, extractMayarInvoice } = await import('@/lib/mayar')
 
-    let paymentUrl
-    let paymentId
-
-    if (hasMayar) {
-      try {
-        const { createPaymentLink } = await import('@/lib/mayar')
-        const mayarResponse = await createPaymentLink({
-          amount,
-          name,
-          description: `Pembelian ${name}`,
-          redirectUrl: redirectUrl + orderId,
-          customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: buyer_whatsapp.trim() },
-        })
-        const mayarData = mayarResponse.data || mayarResponse
-        paymentUrl = mayarData.link || mayarData.url || mayarData.paymentUrl || mayarData.payment_url
-        paymentId = mayarData.transactionId || mayarData.transaction_id || mayarData.id || orderId
-
-        if (!paymentUrl) {
-          throw new Error('Tautan pembayaran Mayar tidak tersedia')
-        }
-      } catch (e) {
-        console.error('checkout mayar error:', e)
-        paymentUrl = `https://app.mayar.id/payment/demo?order=${orderId}`
-        paymentId = `demo-${Date.now()}`
-      }
-    } else {
-      paymentUrl = `https://app.mayar.id/payment/demo?order=${orderId}`
-      paymentId = `demo-${Date.now()}`
+    if (!hasMayarApiKey()) {
+      return NextResponse.json({ error: 'Mayar API key belum dikonfigurasi' }, { status: 500 })
     }
 
-    if (hasSupabase) {
-      try {
-        const { createClient } = await import('@/lib/supabase-server')
-        const supabase = await createClient()
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        product_id: product.id,
+        buyer_name: buyer_name.trim(),
+        buyer_whatsapp: buyer_whatsapp.trim(),
+        buyer_email: buyer_email.trim(),
+        amount,
+        status: 'pending',
+        payment_method: 'mayar',
+      })
+      .select('id')
+      .single()
 
-        await supabase.from('orders').insert({
-          id: orderId,
-          product_id: product.id,
-          buyer_name: buyer_name.trim(),
-          buyer_whatsapp: buyer_whatsapp.trim(),
-          buyer_email: buyer_email.trim(),
-          amount,
-          status: 'pending',
-          payment_method: hasMayar ? 'mayar' : 'manual',
-          payment_id: paymentId,
-        })
-
-        if (product.stock_type === 'limited') {
-          await supabase.from('products').update({ stock_qty: product.stock_qty - 1 }).eq('id', product.id)
-        }
-      } catch (e) {
-        console.error('checkout order insert error:', e)
-      }
+    if (orderError || !order) {
+      console.error('checkout order insert error:', orderError)
+      return NextResponse.json({ error: 'Gagal membuat pesanan' }, { status: 500 })
     }
 
-    return NextResponse.json({ payment_url: paymentUrl, order_id: orderId })
+    try {
+      const redirectUrl = `${siteUrl}/terima-kasih?order=${order.id}`
+      const mayarResponse = await createPaymentLink({
+        amount,
+        name,
+        description: `Pembelian ${name}`,
+        redirectUrl,
+        referenceId: order.id,
+        customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: buyer_whatsapp.trim() },
+      })
+      const { paymentUrl, invoiceId } = extractMayarInvoice(mayarResponse)
+
+      if (!paymentUrl) {
+        throw new Error('Tautan pembayaran Mayar tidak tersedia')
+      }
+
+      await supabase
+        .from('orders')
+        .update({
+          mayar_order_id: invoiceId || null,
+          mayar_payment_id: invoiceId || null,
+          payment_id: invoiceId || null,
+          payment_url: paymentUrl,
+        })
+        .eq('id', order.id)
+
+      return NextResponse.json({ payment_url: paymentUrl, order_id: order.id })
+    } catch (e) {
+      console.error('checkout mayar error:', e)
+      await supabase.from('orders').update({ status: 'failed' }).eq('id', order.id)
+      return NextResponse.json({ error: e.message || 'Gagal membuat pembayaran Mayar' }, { status: 502 })
+    }
   } catch (err) {
     console.error('checkout error:', err)
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
