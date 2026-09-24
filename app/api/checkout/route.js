@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { product_id, buyer_name, buyer_whatsapp, buyer_email } = body
+    const { product_id, buyer_name, buyer_whatsapp, buyer_email, voucher_code } = body
     const cleanWhatsapp = String(buyer_whatsapp || '').replace(/[^\d+]/g, '')
 
     if (!product_id) return NextResponse.json({ error: 'product_id diperlukan' }, { status: 400 })
@@ -36,7 +36,20 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Sold Out' }, { status: 400 })
     }
 
-    const amount = product.sale_price
+    let amount = product.sale_price
+    let voucherCode = null
+    let discountAmount = 0
+    if (voucher_code) {
+      voucherCode = String(voucher_code).trim().toUpperCase()
+      const { data: voucher } = await supabase.from('vouchers').select('*').eq('code', voucherCode).eq('is_active', true).maybeSingle()
+      if (!voucher) return NextResponse.json({ error: 'Voucher tidak ditemukan atau sudah tidak aktif' }, { status: 400 })
+      const now = new Date()
+      if ((voucher.starts_at && new Date(voucher.starts_at) > now) || (voucher.ends_at && new Date(voucher.ends_at) < now) || (voucher.max_uses && voucher.used_count >= voucher.max_uses)) return NextResponse.json({ error: 'Voucher sudah tidak berlaku' }, { status: 400 })
+      if (amount < Number(voucher.min_order_amount || 0)) return NextResponse.json({ error: 'Minimal belanja untuk voucher belum terpenuhi' }, { status: 400 })
+      const discount = voucher.discount_type === 'fixed' ? Number(voucher.discount_value) : Math.floor(amount * Number(voucher.discount_value) / 100)
+      discountAmount = Math.min(amount, discount)
+      amount = Math.max(0, amount - discountAmount)
+    }
     const name = product.title
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
     const { hasMayarApiKey, createPaymentLink, extractMayarInvoice } = await import('@/lib/mayar')
@@ -53,6 +66,8 @@ export async function POST(request) {
         buyer_whatsapp: cleanWhatsapp,
         buyer_email: buyer_email.trim(),
         amount,
+        voucher_code: voucherCode,
+        discount_amount: discountAmount,
         status: 'pending',
         payment_method: 'mayar',
       })

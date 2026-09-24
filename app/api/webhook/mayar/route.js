@@ -146,6 +146,10 @@ export async function POST(request) {
         await supabase.rpc('decrement_stock_qty', { p_product_id: order.product.id })
       }
 
+      if (order.status !== 'paid' && order.voucher_code) {
+        await supabase.rpc('increment_voucher_usage', { p_code: order.voucher_code })
+      }
+
       const { error: notifError } = await supabase.from('notifications').insert({
         type: 'order_paid',
         message: `${order.buyer_name} telah membayar ${order.product?.title || 'produk'}`,

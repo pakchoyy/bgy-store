@@ -31,7 +31,7 @@ export default function StickyBuyBar({ product, onAddToCart }) {
   const fmt = (val) => `Rp${Number(val).toLocaleString('id-ID')}`;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/95 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur md:hidden animate-slideUp">
+    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/95 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur animate-slideUp md:bottom-4 md:left-1/2 md:right-auto md:w-[min(100%-2rem,42rem)] md:-translate-x-1/2 md:rounded-2xl md:border md:shadow-2xl">
       <div className="flex items-center justify-between gap-3 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <div className="min-w-0">
           {product.original_price && product.original_price > product.sale_price ? (
@@ -51,7 +51,7 @@ export default function StickyBuyBar({ product, onAddToCart }) {
               type="button"
               onClick={onAddToCart}
               aria-label={`Masukkan ${product.title} ke keranjang`}
-              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#0ea5a0]/25 bg-[#0ea5a0]/10 text-[#0d7a8a] transition-transform duration-150 active:scale-[0.96]"
+              className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#0ea5a0]/25 bg-[#0ea5a0]/10 text-[#0d7a8a] transition-transform duration-150 active:scale-[0.96]"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.1} d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20 8H7m5 2v4m-2-2h4M10 21h.01M17 21h.01" />
@@ -61,7 +61,7 @@ export default function StickyBuyBar({ product, onAddToCart }) {
           <button
             onClick={() => btnRef.current?.click()}
             disabled={isSoldOut}
-            className={`store-buy-button min-h-12 rounded-2xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 ${
+            className={`store-buy-button min-h-12 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 ${
               isSoldOut
                 ? 'bg-gray-300 cursor-not-allowed'
                 : 'bg-gradient-to-r from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] shadow-sm active:scale-[0.96]'
