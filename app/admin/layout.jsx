@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase-server';
+import { getAdminUser } from '@/lib/admin-auth';
 import AdminMobileNav from '@/components/admin/AdminMobileNav';
 import AdminDesktopSidebar from '@/components/admin/AdminDesktopSidebar';
 
@@ -19,11 +20,11 @@ async function getAdminCounts(supabase, isDemo) {
 
 export default async function AdminLayout({ children }) {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const user = await getAdminUser(supabase);
 
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url';
 
-  if (!isDemo && !session) {
+  if (!isDemo && !user) {
     redirect('/login');
   }
 

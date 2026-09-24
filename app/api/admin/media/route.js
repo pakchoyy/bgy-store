@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 import { validateUpload } from '@/lib/media-validation'
 
 async function getAdminClient() {
@@ -8,8 +9,8 @@ async function getAdminClient() {
   }
 
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) return { error: Response.json({ error: 'Sesi admin berakhir. Silakan masuk kembali.' }, { status: 401 }) }
+  const auth = await requireAdmin(supabase)
+  if (auth.error) return { error: auth.error }
   return { supabase }
 }
 

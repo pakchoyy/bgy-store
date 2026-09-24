@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 
 function normalizeWebhookPayload(parsed) {
   const data = parsed?.data || parsed?.payload || parsed || {}
@@ -74,7 +75,7 @@ async function findOrder(supabase, { localOrderId, mayarId }) {
 }
 
 function makeDownloadToken(orderId) {
-  return `${orderId}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  return `${orderId}-${Date.now()}-${crypto.randomBytes(24).toString('base64url')}`
 }
 
 export async function POST(request) {

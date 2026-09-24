@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 import { generateSlug } from '@/lib/utils'
 
 function normalizeFileUrl(value) {
@@ -55,8 +56,8 @@ export async function POST(request) {
     }
 
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireAdmin(supabase)
+    if (auth.error) return auth.error
 
     const product = sanitizeProduct(body)
 
@@ -92,8 +93,8 @@ export async function PUT(request) {
     }
 
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireAdmin(supabase)
+    if (auth.error) return auth.error
 
     const product = sanitizeProduct(rest)
     const { data, error } = await supabase.from('products').update(product).eq('id', id).select().single()
@@ -124,8 +125,8 @@ export async function PATCH(request) {
     }
 
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireAdmin(supabase)
+    if (auth.error) return auth.error
 
     const updates = products
       .filter((product) => product.id)

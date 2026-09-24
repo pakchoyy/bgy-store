@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
+import { isAdmin } from './lib/admin-role'
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
@@ -14,7 +15,7 @@ export async function middleware(request) {
   const hasSupabase = supabaseUrl && supabaseUrl !== 'your_supabase_url'
 
   const response = NextResponse.next()
-  let session = null
+  let user = null
 
   if (hasSupabase) {
     try {
@@ -30,8 +31,8 @@ export async function middleware(request) {
           },
         },
       })
-      const { data } = await supabase.auth.getSession()
-      session = data?.session
+      const { data } = await supabase.auth.getUser()
+      user = data?.user || null
     } catch (e) {
       console.error('Middleware auth check failed:', e)
     }
@@ -42,7 +43,7 @@ export async function middleware(request) {
     if (!hasSupabase) {
       return response
     }
-    if (!session) {
+    if (!isAdmin(user)) {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
@@ -52,7 +53,7 @@ export async function middleware(request) {
 
   // Login page — redirect to /admin if already logged in
   if (pathname === '/login') {
-    if (session) {
+    if (isAdmin(user)) {
       return NextResponse.redirect(new URL('/admin', request.url))
     }
   }

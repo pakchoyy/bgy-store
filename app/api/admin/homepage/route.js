@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function POST(request) {
   try {
@@ -15,13 +16,8 @@ export async function POST(request) {
     }
 
     const supabase = await createClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    if (!session) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const auth = await requireAdmin(supabase)
+    if (auth.error) return auth.error
 
     for (let i = 0; i < sections.length; i++) {
       const s = sections[i]

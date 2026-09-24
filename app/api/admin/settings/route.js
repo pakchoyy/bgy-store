@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function GET() {
   try {
@@ -8,10 +9,8 @@ export async function GET() {
     }
 
     const supabase = await createClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireAdmin(supabase)
+    if (auth.error) return auth.error
 
     const { data, error } = await supabase.from('settings').select('*')
     if (error) return Response.json({ error: error.message }, { status: 500 })
@@ -41,10 +40,8 @@ export async function POST(request) {
     }
 
     const supabase = await createClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireAdmin(supabase)
+    if (auth.error) return auth.error
 
     const entries = Object.entries(settings).map(([key, value]) => ({
       key,
