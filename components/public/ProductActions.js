@@ -96,7 +96,7 @@ export default function ProductActions({ product, settings }) {
                 </label>
                 <label className="block text-sm font-semibold text-slate-700">
                   <span className="text-red-500">*</span> Phone Number
-                  <input name="buyer_whatsapp" type="tel" autoComplete="tel" required pattern="[+0-9 ()-]{8,25}" placeholder="08xxxxxx" className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-base outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100" />
+                  <input name="buyer_whatsapp" type="tel" autoComplete="tel" required pattern="[+0-9 ()\\-]{8,25}" placeholder="08xxxxxx" className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-base outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100" />
                 </label>
               </div>
             </section>

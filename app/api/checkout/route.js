@@ -4,10 +4,12 @@ export async function POST(request) {
   try {
     const body = await request.json()
     const { product_id, buyer_name, buyer_whatsapp, buyer_email } = body
+    const cleanWhatsapp = String(buyer_whatsapp || '').replace(/[^\d+]/g, '')
 
     if (!product_id) return NextResponse.json({ error: 'product_id diperlukan' }, { status: 400 })
     if (!buyer_name?.trim()) return NextResponse.json({ error: 'Nama pembeli diperlukan' }, { status: 400 })
     if (!buyer_whatsapp?.trim()) return NextResponse.json({ error: 'Nomor WhatsApp diperlukan' }, { status: 400 })
+    if (cleanWhatsapp.replace(/\D/g, '').length < 8) return NextResponse.json({ error: 'Nomor WhatsApp tidak valid' }, { status: 400 })
     if (!buyer_email?.trim()) return NextResponse.json({ error: 'Email pembeli diperlukan' }, { status: 400 })
 
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -48,7 +50,7 @@ export async function POST(request) {
       .insert({
         product_id: product.id,
         buyer_name: buyer_name.trim(),
-        buyer_whatsapp: buyer_whatsapp.trim(),
+        buyer_whatsapp: cleanWhatsapp,
         buyer_email: buyer_email.trim(),
         amount,
         status: 'pending',
@@ -69,8 +71,7 @@ export async function POST(request) {
         name,
         description: `Pembelian ${name}`,
         redirectUrl,
-        referenceId: order.id,
-        customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: buyer_whatsapp.trim() },
+        customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: cleanWhatsapp },
       })
       const { paymentUrl, invoiceId } = extractMayarInvoice(mayarResponse)
 
