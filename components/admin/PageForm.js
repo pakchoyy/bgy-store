@@ -3,9 +3,17 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { generateSlug } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
+import { useToast } from '@/components/ui/toast'
 
 export default function PageForm({ initialData }) {
   const router = useRouter()
+  const { addToast } = useToast()
   const isEditing = !!initialData
   const draftKey = isEditing ? `draft_page_${initialData.id}` : 'draft_page_new'
 
@@ -20,7 +28,6 @@ export default function PageForm({ initialData }) {
     meta_description: initialData?.meta_description ?? initialData?.meta_desc ?? '',
   })
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
-  const [toast, setToast] = useState(null)
   const [saving, setSaving] = useState(false)
   const [savedDraft, setSavedDraft] = useState(false)
 
@@ -69,150 +76,118 @@ export default function PageForm({ initialData }) {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Gagal menyimpan halaman')
       localStorage.removeItem(draftKey)
-      setToast({ type: 'success', message: isEditing ? 'Halaman berhasil diperbarui!' : 'Halaman berhasil disimpan!' })
+      addToast(isEditing ? 'Halaman berhasil diperbarui!' : 'Halaman berhasil disimpan!', 'success')
       setTimeout(() => router.push('/admin/halaman'), 1000)
     } catch (err) {
-      setToast({ type: 'error', message: err.message })
+      addToast(err.message, 'error')
       setSaving(false)
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {toast && (
-        <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${
-          toast.type === 'success'
-            ? 'bg-green-50 text-green-700 border-green-200'
-            : toast.type === 'error'
-              ? 'bg-red-50 text-red-700 border-red-200'
-              : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-        }`}>
-          {toast.message}
-        </div>
-      )}
       {savedDraft && (
-        <div className="px-4 py-2 bg-blue-50 text-blue-600 text-xs rounded-lg border border-blue-200 flex items-center gap-2">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          Draft tersimpan otomatis
-        </div>
+        <Alert className="bg-blue-50 border-blue-200">
+          <AlertDescription className="text-blue-700">
+            ✓ Draft tersimpan otomatis
+          </AlertDescription>
+        </Alert>
       )}
 
-      <div className="bg-white rounded-xl shadow-card p-6">
-        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-100">Informasi Halaman</h3>
-        <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <h3 className="font-semibold">Informasi Halaman</h3>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Judul Halaman</label>
-            <input
+            <label className="text-sm font-medium mb-1 block">Judul Halaman</label>
+            <Input
               type="text"
               value={form.title}
               onChange={e => updateField('title', e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
               placeholder="Masukkan judul halaman"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-            <input
+            <label className="text-sm font-medium mb-1 block">Slug</label>
+            <Input
               type="text"
               value={form.slug}
               onChange={e => { setSlugManuallyEdited(true); updateField('slug', e.target.value) }}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-mono bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
               placeholder="auto-generated-slug"
+              className="font-mono"
               required
             />
-            <p className="text-xs text-gray-400 mt-1">URL: /halaman/{form.slug || '...'}</p>
+            <p className="text-xs text-slate-500 mt-1">URL: /halaman/{form.slug || '...'}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Konten (HTML)</label>
-            <textarea
+            <label className="text-sm font-medium mb-1 block">Konten (HTML)</label>
+            <Textarea
               value={form.content}
               onChange={e => updateField('content', e.target.value)}
               rows={14}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-mono bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
               placeholder="<h1>Selamat Datang</h1><p>Tulis konten halaman di sini...</p>"
+              className="font-mono"
             />
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-white rounded-xl shadow-card p-6">
-        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-100">Status</h3>
-        <label className="flex items-center gap-3 cursor-pointer">
-          <div
-            className={`relative w-10 h-5 rounded-full transition-colors ${
-              form.is_active ? 'bg-[#0ea5a0]' : 'bg-gray-300'
-            }`}
-          >
-            <div
-              className={`absolute w-4 h-4 bg-white rounded-full top-0.5 transition-transform shadow-sm ${
-                form.is_active ? 'translate-x-5' : 'translate-x-0.5'
-              }`}
-            />
-            <input
-              type="checkbox"
+      <Card>
+        <CardHeader>
+          <h3 className="font-semibold">Status</h3>
+        </CardHeader>
+        <CardContent>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <Checkbox
               checked={form.is_active}
               onChange={e => updateField('is_active', e.target.checked)}
-              className="sr-only"
             />
-          </div>
-          <span className="text-sm font-medium text-gray-700">
-            {form.is_active ? 'Aktif' : 'Draft'}
-          </span>
-        </label>
-      </div>
+            <span className="text-sm font-medium">
+              {form.is_active ? 'Aktif' : 'Draft'}
+            </span>
+          </label>
+        </CardContent>
+      </Card>
 
-      <div className="bg-white rounded-xl shadow-card p-6">
-        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-100">SEO</h3>
-        <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <h3 className="font-semibold">SEO</h3>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
-            <input
+            <label className="text-sm font-medium mb-1 block">Meta Title</label>
+            <Input
               type="text"
               value={form.meta_title}
               onChange={e => updateField('meta_title', e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
               placeholder="{title} — Bantu Guru Yuk"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
-            <textarea
+            <label className="text-sm font-medium mb-1 block">Meta Description</label>
+            <Textarea
               value={form.meta_description}
               onChange={e => updateField('meta_description', e.target.value)}
               rows={2}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
               placeholder="Deskripsi singkat untuk SEO..."
             />
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-200">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
-        >
+      <div className="flex items-center justify-between gap-4 pt-4 border-t border-slate-200">
+        <Button variant="outline" onClick={() => router.back()}>
           Batal
-        </button>
+        </Button>
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => window.open(`/halaman/${form.slug}`, '_blank')}
-            className="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
-          >
-            Preview
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2.5 bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <Button variant="outline" onClick={() => window.open(`/halaman/${form.slug}`, '_blank')}>
+            👁️ Preview
+          </Button>
+          <Button type="submit" disabled={saving}>
             {saving ? 'Menyimpan...' : isEditing ? 'Perbarui Halaman' : 'Simpan Halaman'}
-          </button>
+          </Button>
         </div>
       </div>
     </form>
