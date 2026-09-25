@@ -1,12 +1,25 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import crypto from 'crypto'
 import { formatRupiah } from '@/lib/utils'
 import AdminToast from '@/components/admin/AdminToast'
+import { PrintButton, FollowUpButton, CopyLinkButton } from '@/components/admin/OrderActions'
 
 async function generateLink(formData) {
   'use server'
   const id = formData.get('id')
-  redirect(`/admin/pesanan?toast=success&selected=${id}`)
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/pesanan?toast=success&selected=${id}`)
+
+  const supabase = await createClient()
+  const token = `${id}-${Date.now()}-${crypto.randomBytes(24).toString('base64url')}`
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  const { error } = await supabase
+    .from('orders')
+    .update({ download_token: token, token_expires_at: expiresAt })
+    .eq('id', id)
+
+  redirect(`/admin/pesanan?toast=${error ? 'error' : 'success'}&selected=${id}`)
 }
 
 const statusColors = {
@@ -58,6 +71,7 @@ export default async function AdminPesanan({ searchParams }) {
           price: o.price || o.amount || 0,
           status: o.status || 'pending',
           date: o.created_at ? o.created_at.slice(0, 10) : '2026-01-01',
+          download_token: o.download_token || null,
         }
       })
     }
@@ -207,12 +221,7 @@ export default async function AdminPesanan({ searchParams }) {
         <div className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-white/70">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-bold text-gray-900">Order Details</h2>
-            <button className="inline-flex items-center gap-1.5 rounded-xl border border-[#0ea5a0] px-3 py-1.5 text-xs font-bold text-[#0ea5a0] transition-colors hover:bg-emerald-50">
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6v-7Z" />
-              </svg>
-              Print
-            </button>
+            <PrintButton className="inline-flex items-center gap-1.5 rounded-xl border border-[#0ea5a0] px-3 py-1.5 text-xs font-bold text-[#0ea5a0] transition-colors hover:bg-emerald-50" />
           </div>
           {selectedOrder ? (
             <div className="space-y-3 text-sm">
@@ -245,8 +254,11 @@ export default async function AdminPesanan({ searchParams }) {
         </div>
         <div className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-white/70">
           <h2 className="text-sm font-bold text-gray-900">Follow Up Text</h2>
-          <button className="mt-3 w-full rounded-xl border border-[#0ea5a0] px-4 py-2.5 text-xs font-bold text-[#0ea5a0]">Send Follow Up Text via WhatsApp</button>
-          <p className="mt-3 text-xs text-gray-400">No history yet</p>
+          {selectedOrder ? (
+            <FollowUpButton order={selectedOrder} className="mt-3 w-full rounded-xl border border-[#0ea5a0] px-4 py-2.5 text-xs font-bold text-[#0ea5a0] hover:bg-emerald-50 transition-colors" />
+          ) : (
+            <p className="mt-3 text-xs text-gray-400">Pilih pesanan untuk mengirim follow up.</p>
+          )}
         </div>
       </aside>
       </div>
@@ -302,11 +314,7 @@ export default async function AdminPesanan({ searchParams }) {
                 Generate Ulang Link Download
               </button>
             </form>
-            <button onClick={async () => {
-              try { await navigator.clipboard.writeText(`${window.location.origin}/api/download?token=${selectedOrder.id}`) } catch {}
-            }} className="bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
-              Copy Link
-            </button>
+            <CopyLinkButton downloadToken={selectedOrder.download_token} className="bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors" />
           </div>
         </div>
       )}
