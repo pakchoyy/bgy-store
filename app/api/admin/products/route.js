@@ -113,6 +113,24 @@ export async function PUT(request) {
 export async function PATCH(request) {
   try {
     const body = await request.json()
+
+    if (body.restore) {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      if (!supabaseUrl || supabaseUrl === 'your_supabase_url') {
+        return Response.json({ success: true, demo: true })
+      }
+      const supabase = await createClient()
+      const auth = await requireAdmin(supabase)
+      if (auth.error) return auth.error
+
+      const { error } = await supabase.from('products').update({ deleted_at: null }).eq('id', body.restore)
+      if (error) {
+        console.error('PATCH /api/admin/products restore error:', error)
+        return Response.json({ error: error.message }, { status: 500 })
+      }
+      return Response.json({ success: true })
+    }
+
     const products = Array.isArray(body.products) ? body.products : []
 
     if (!products.length) {
@@ -159,6 +177,7 @@ export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+    const permanent = searchParams.get('permanent') === 'true'
 
     if (!id) {
       return Response.json({ error: 'id required for delete' }, { status: 400 })
@@ -173,10 +192,9 @@ export async function DELETE(request) {
     const auth = await requireAdmin(supabase)
     if (auth.error) return auth.error
 
-    const { error } = await supabase
-      .from('products')
-      .update({ deleted_at: new Date().toISOString(), is_active: false })
-      .eq('id', id)
+    const { error } = permanent
+      ? await supabase.from('products').delete().eq('id', id)
+      : await supabase.from('products').update({ deleted_at: new Date().toISOString(), is_active: false }).eq('id', id)
 
     if (error) {
       console.error('DELETE /api/admin/products error:', error)
