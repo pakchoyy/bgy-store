@@ -79,21 +79,33 @@ export default function ProductCard({ product, className = '' }) {
           </div>
         )}
 
-        {product.badge && (
-          <div className="absolute top-3 left-3 z-20">
-            <span className={`inline-flex items-center gap-1 text-white text-[11px] font-bold px-3 py-1.5 rounded-full uppercase shadow-md transition-transform duration-200 hover:scale-105 ${
-              {
-                baru: 'bg-gradient-to-r from-orange-400 to-orange-500',
-                terlaris: 'bg-gradient-to-r from-blue-500 to-blue-600',
-                diskon: 'bg-gradient-to-r from-red-500 to-red-600',
-                gratis: 'bg-gradient-to-r from-green-500 to-green-600',
-                premium: 'bg-gradient-to-r from-purple-500 to-purple-600',
-                custom: 'bg-gradient-to-r from-indigo-500 to-indigo-600',
-              }[product.badge] || 'bg-gradient-to-r from-slate-500 to-slate-600'
-            }`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-white opacity-60" />
-              {product.badge === 'custom' ? product.badge_custom : product.badge}
-            </span>
+        {(product.badge || product.is_featured || isFree) && (
+          <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
+            {product.is_featured && (
+              <span className="inline-flex items-center gap-1 text-white text-[11px] font-bold px-3 py-1.5 rounded-full uppercase shadow-md bg-gradient-to-r from-amber-400 to-amber-500">
+                ⭐ Unggulan
+              </span>
+            )}
+            {isFree && (
+              <span className="inline-flex items-center gap-1 text-white text-[11px] font-bold px-3 py-1.5 rounded-full uppercase shadow-md bg-gradient-to-r from-green-500 to-green-600">
+                ✓ Gratis
+              </span>
+            )}
+            {product.badge && (
+              <span className={`inline-flex items-center gap-1 text-white text-[11px] font-bold px-3 py-1.5 rounded-full uppercase shadow-md transition-transform duration-200 hover:scale-105 ${
+                {
+                  baru: 'bg-gradient-to-r from-orange-400 to-orange-500',
+                  terlaris: 'bg-gradient-to-r from-blue-500 to-blue-600',
+                  diskon: 'bg-gradient-to-r from-red-500 to-red-600',
+                  gratis: 'bg-gradient-to-r from-green-500 to-green-600',
+                  premium: 'bg-gradient-to-r from-purple-500 to-purple-600',
+                  custom: 'bg-gradient-to-r from-indigo-500 to-indigo-600',
+                }[product.badge] || 'bg-gradient-to-r from-slate-500 to-slate-600'
+              }`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-white opacity-60" />
+                {product.badge === 'custom' ? product.badge_custom : product.badge}
+              </span>
+            )}
           </div>
         )}
         {!isFree && <span className="absolute top-1.5 left-1/2 z-20 -translate-x-1/2 text-[11px] font-semibold tracking-wide text-white">PAID</span>}
