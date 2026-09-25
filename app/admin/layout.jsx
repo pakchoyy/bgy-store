@@ -6,15 +6,24 @@ import AdminMobileNav from '@/components/admin/AdminMobileNav';
 import AdminDesktopSidebar from '@/components/admin/AdminDesktopSidebar';
 
 async function getAdminCounts(supabase, isDemo) {
-  if (isDemo) return { orders: 0 };
+  if (isDemo) return { orders: 0, reviews: 0 };
   try {
-    const { count } = await supabase
-      .from('orders')
-      .select('id', { count: 'exact', head: true })
-      .in('status', ['pending', 'paid']);
-    return { orders: count || 0 };
+    const [ordersResult, reviewsResult] = await Promise.all([
+      supabase
+        .from('orders')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['pending', 'paid']),
+      supabase
+        .from('product_reviews')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_approved', false),
+    ]);
+    return {
+      orders: ordersResult.count || 0,
+      reviews: reviewsResult.count || 0,
+    };
   } catch {
-    return { orders: 0 };
+    return { orders: 0, reviews: 0 };
   }
 }
 
@@ -50,6 +59,7 @@ function Sidebar({ counts }) {
       items: [
         { href: '/admin/produk', label: 'Produk', icon: 'package' },
         { href: '/admin/pesanan', label: 'Pesanan', icon: 'shopping-cart', countKey: 'orders' },
+        { href: '/admin/reviews', label: 'Review', icon: 'star', countKey: 'reviews' },
         { href: '/admin/kategori', label: 'Kategori', icon: 'tags' },
         { href: '/admin/halaman', label: 'Halaman & Navigasi', icon: 'file-text' },
       ],
