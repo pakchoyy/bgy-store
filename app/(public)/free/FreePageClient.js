@@ -6,6 +6,7 @@ import { getCardLayout } from '@/lib/utils'
 import SearchInput from '@/components/public/SearchInput'
 import DownloadModal from '@/components/public/DownloadModal'
 import ProductCard from '@/components/public/ProductCard'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
 export default function FreePageClient({ products, categories, settings }) {
   const router = useRouter()
@@ -89,7 +90,7 @@ export default function FreePageClient({ products, categories, settings }) {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {filtered.map((product) => {
+            {filtered.map((product, idx) => {
               const layout = getCardLayout(product.card_layout)
               const span =
                 layout.value === 'landscape' ||
@@ -98,16 +99,18 @@ export default function FreePageClient({ products, categories, settings }) {
                   ? 'col-span-2'
                   : 'col-span-1'
               return (
-                <div key={product.id} className={`${span} space-y-2`}>
-                  <ProductCard product={product} />
-                  <button
-                    type="button"
-                    onClick={() => setDownloadProduct(product)}
-                    className="w-full bg-white text-[#0d7a8a] font-bold text-sm px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
-                  >
-                    Download Gratis
-                  </button>
-                </div>
+                <ScrollReveal key={product.id} delay={idx * 50}>
+                  <div className={`${span} space-y-2`}>
+                    <ProductCard product={product} />
+                    <button
+                      type="button"
+                      onClick={() => setDownloadProduct(product)}
+                      className="w-full bg-white text-[#0d7a8a] font-bold text-sm px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
+                    >
+                      Download Gratis
+                    </button>
+                  </div>
+                </ScrollReveal>
               )
             })}
           </div>
