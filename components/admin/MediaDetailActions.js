@@ -2,9 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/toast'
 
 export default function MediaDetailActions({ id, url }) {
   const router = useRouter()
+  const { addToast } = useToast()
   const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState(false)
 
@@ -23,22 +26,32 @@ export default function MediaDetailActions({ id, url }) {
       const res = await fetch(`/api/admin/media?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || 'Gagal menghapus media')
-      router.push('/admin/media?toast=success')
+      addToast('Media berhasil dihapus', 'success')
+      router.push('/admin/media')
       router.refresh()
     } catch (e) {
       setBusy(false)
-      alert(e.message)
+      addToast(e.message, 'error')
     }
   }
 
   return (
     <div className="flex gap-2 mt-3">
-      <button onClick={handleCopy} className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors font-medium">
-        {copied ? 'Tersalin!' : 'Copy URL'}
-      </button>
-      <button onClick={handleDelete} disabled={busy} className="text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors font-medium disabled:opacity-50">
-        {busy ? 'Menghapus...' : 'Hapus'}
-      </button>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={handleCopy}
+      >
+        {copied ? '✓ Tersalin!' : '📋 Copy URL'}
+      </Button>
+      <Button
+        variant="destructive"
+        size="sm"
+        onClick={handleDelete}
+        disabled={busy}
+      >
+        {busy ? '⏳ Menghapus...' : '🗑️ Hapus'}
+      </Button>
     </div>
   )
 }
