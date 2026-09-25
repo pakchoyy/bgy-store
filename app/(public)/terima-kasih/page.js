@@ -66,6 +66,7 @@ export default async function TerimaKasihPage({ searchParams }) {
       navItems={navItems}
       footerConfig={footerConfig}
       announcement={announcement}
+      topBarTitle="Terima Kasih"
     >
       <div className="space-y-4">
         <div className="bg-white/95 rounded-2xl shadow-sm p-6 text-center">

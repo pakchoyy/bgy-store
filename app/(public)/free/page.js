@@ -30,6 +30,7 @@ export default async function FreePage() {
       navItems={navItems}
       footerConfig={footerConfig}
       announcement={announcement}
+      topBarTitle="Gratis"
       activeTabLabel="Gratis"
     >
       <Suspense

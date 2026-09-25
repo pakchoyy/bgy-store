@@ -104,6 +104,7 @@ export default async function HalamanPage({ params }) {
       navItems={navItems}
       footerConfig={footerConfig}
       announcement={announcement}
+      topBarTitle={page?.title || 'Halaman'}
       activeTabLabel={page?.title}
     >
       <div className="bg-white/95 rounded-2xl shadow-sm p-5">

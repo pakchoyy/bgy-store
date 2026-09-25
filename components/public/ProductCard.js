@@ -69,13 +69,13 @@ export default function ProductCard({ product, className = '' }) {
           />
         ) : (
           <div
-            className={`w-full h-full flex items-center justify-center text-white font-bold text-sm ${
+            className={`w-full h-full flex items-center justify-center px-3 text-center text-white font-bold text-sm ${
               isFree
                 ? 'bg-gradient-to-br from-sky-400 to-sky-600'
                 : 'bg-gradient-to-br from-amber-400 to-orange-500'
             }`}
           >
-            {isFree ? 'GRATIS' : 'PAID'}
+            {isFree ? 'GRATIS' : 'PRODUK DIGITAL'}
           </div>
         )}
 

@@ -115,7 +115,7 @@ export default function LynkShell({
             </nav>
           </div>
         </details>
-        <p className="text-lg font-semibold">{topBarTitle}</p>
+        <p className="mx-2 min-w-0 flex-1 truncate text-center text-lg font-semibold">{topBarTitle}</p>
         <div className="flex items-center gap-1">
           <details className="relative">
             <summary aria-label="Cari produk" className="flex h-10 w-10 list-none items-center justify-center rounded-full hover:bg-white/10 [&::-webkit-details-marker]:hidden">

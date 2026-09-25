@@ -43,6 +43,7 @@ export default async function ProdukPage({ searchParams }) {
       navItems={navItems}
       footerConfig={footerConfig}
       announcement={announcement}
+      topBarTitle="Produk"
       activeTabLabel="Produk"
     >
       <div className="space-y-3">

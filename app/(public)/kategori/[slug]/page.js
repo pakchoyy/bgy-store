@@ -50,6 +50,7 @@ export default async function KategoriPage({ params }) {
       navItems={navItems}
       footerConfig={footerConfig}
       announcement={announcement}
+      topBarTitle={category.name}
       activeTabLabel={category.name}
     >
       <ProductStack products={products} emptyText="Belum ada produk di kategori ini" />

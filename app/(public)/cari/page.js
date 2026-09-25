@@ -38,6 +38,7 @@ export default async function CariPage({ searchParams }) {
       navItems={navItems}
       footerConfig={footerConfig}
       announcement={announcement}
+      topBarTitle="Cari"
       activeTabLabel={q ? `Cari: ${q}` : 'Cari'}
     >
       <div className="space-y-3">
