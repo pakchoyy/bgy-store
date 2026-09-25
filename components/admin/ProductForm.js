@@ -6,7 +6,14 @@ import { useRouter } from 'next/navigation'
 import { generateSlug, formatRupiah, calcDiscount, CARD_LAYOUTS } from '@/lib/utils'
 import { uploadMedia } from '@/lib/upload-media'
 import FAQEditor from '@/components/admin/FAQEditor'
-import AdminToast from '@/components/admin/AdminToast'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Checkbox } from '@/components/ui/checkbox'
+import { useToast } from '@/components/ui/toast'
+import { Select } from '@/components/ui/select'
 
 const BADGE_OPTIONS = [
   { value: 'baru', label: 'Baru' },
@@ -19,6 +26,7 @@ const BADGE_OPTIONS = [
 
 export default function ProductForm({ initialData, categories = [] }) {
   const router = useRouter()
+  const { addToast } = useToast()
   const isEditing = !!initialData
   const draftKey = isEditing ? `draft_product_${initialData.id}` : 'draft_product_new'
 
@@ -57,7 +65,6 @@ export default function ProductForm({ initialData, categories = [] }) {
   })
 
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
-  const [toast, setToast] = useState(null)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deliveryMode, setDeliveryMode] = useState(initialData?.file_url ? 'link' : 'upload')
@@ -119,10 +126,6 @@ export default function ProductForm({ initialData, categories = [] }) {
     }))
   }
 
-  const showToast = (type, message) => {
-    setToast({ type, message })
-    setTimeout(() => setToast(null), 3000)
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -131,12 +134,12 @@ export default function ProductForm({ initialData, categories = [] }) {
       try {
         if (new URL(form.file_url).protocol !== 'https:') throw new Error()
       } catch {
-        showToast('error', 'Masukkan tautan lengkap yang diawali https://')
+        addToast('Masukkan tautan lengkap yang diawali https://', 'error')
         return
       }
     }
     if (deliveryMode === 'upload' && uploadKind === 'pdf' && form.file_path && !/\.pdf$/i.test(form.file_name || '')) {
-      showToast('error', 'Unggah file PDF untuk mode PDF / Ebook, atau pilih Upload file.')
+      addToast('Unggah file PDF untuk mode PDF / Ebook, atau pilih Upload file.', 'error')
       return
     }
     setSaving(true)
@@ -178,9 +181,9 @@ export default function ProductForm({ initialData, categories = [] }) {
       })
       const data = await res.json()
       if (!res.ok) {
-        showToast('error', (data.error || 'Gagal menyimpan').replace(/[{}"]/g, ''))
+        addToast((data.error || 'Gagal menyimpan').replace(/[{}"]/g, ''), 'error')
       } else {
-        showToast('success', isEditing ? 'Produk diperbarui!' : 'Produk berhasil disimpan!')
+        addToast(isEditing ? 'Produk diperbarui!' : 'Produk berhasil disimpan!', 'success')
         if (isDemo && typeof window !== 'undefined') {
           const existing = JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]')
           const next = isEditing
@@ -192,7 +195,7 @@ export default function ProductForm({ initialData, categories = [] }) {
         setTimeout(() => router.push('/admin/produk'), 1000)
       }
     } catch (e) {
-      showToast('error', e.message || 'Gagal menyimpan')
+      addToast(e.message || 'Gagal menyimpan', 'error')
     } finally {
       setSaving(false)
     }
@@ -223,7 +226,6 @@ export default function ProductForm({ initialData, categories = [] }) {
       {uploading && <p role="status">Mengunggah file…</p>}
       {draftError && <p role="status" className="text-sm text-amber-800">Draf belum bisa disimpan di browser ini. Simpan ke toko sebelum keluar.</p>}
       {dirty && !savedDraft && !draftError && <p role="status" className="text-sm text-slate-600">Perubahan belum disimpan ke toko.</p>}
-      <AdminToast toast={toast?.type} message={toast?.message} />
       {dirty && savedDraft && (
         <div className="px-4 py-2 bg-blue-50 text-blue-600 text-xs rounded-lg border border-blue-200 flex items-center gap-2">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
