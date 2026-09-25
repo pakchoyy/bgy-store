@@ -6,6 +6,7 @@ import StockIndicator from '@/components/public/StockIndicator'
 import ProductFAQ from '@/components/public/ProductFAQ'
 import ShareButtons from '@/components/public/ShareButtons'
 import ProductActions from '@/components/public/ProductActions'
+import ProductReviewList from '@/components/public/ProductReviewList'
 import { demoProducts } from '@/lib/demo-data'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import Link from 'next/link'
@@ -123,6 +124,13 @@ export default async function ProdukDetailPage({ params }) {
           </section>
 
           <ProductFAQ faqs={faqs} />
+
+          {/* Reviews Section */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5">
+            <h2 className="mb-4 text-xl font-semibold text-gray-950">Review dari Pembeli</h2>
+            <ProductReviewList productId={product.id} />
+          </section>
+
           <ShareButtons productUrl={productUrl} title={product.title} />
           <ProductActions
             product={{

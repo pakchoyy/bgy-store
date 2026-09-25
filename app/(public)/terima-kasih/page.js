@@ -1,5 +1,6 @@
 import LynkShell from '@/components/public/LynkShell'
 import ProductStack from '@/components/public/ProductStack'
+import ProductReviewForm from '@/components/public/ProductReviewForm'
 import { demoProducts } from '@/lib/demo-data'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import { parseSocialLinks } from '@/lib/utils'
@@ -123,6 +124,18 @@ export default async function TerimaKasihPage({ searchParams }) {
             </>
           )}
         </div>
+
+        {isPaid && order?.product && (
+          <div>
+            <p className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 px-1">
+              Bagikan Pengalaman
+            </p>
+            <ProductReviewForm
+              productId={order.product.id}
+              orderId={order.id}
+            />
+          </div>
+        )}
 
         {recommended.length > 0 && (
           <div>
