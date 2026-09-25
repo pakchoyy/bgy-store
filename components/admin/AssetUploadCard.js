@@ -1,19 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { uploadMedia } from '@/lib/upload-media'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useToast } from '@/components/ui/toast'
 
 export default function AssetUploadCard({ slotKey, currentUrl }) {
   const router = useRouter()
+  const { addToast } = useToast()
+  const fileInputRef = useRef(null)
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
 
   async function handleFile(e) {
     const file = e.target.files?.[0]
     if (!file) return
     setBusy(true)
-    setError('')
     try {
       const media = await uploadMedia(file, 'cover')
       const res = await fetch('/api/admin/assets', {
@@ -23,43 +26,59 @@ export default function AssetUploadCard({ slotKey, currentUrl }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Gagal menyimpan asset')
+      addToast('Asset berhasil diperbarui', 'success')
       router.refresh()
     } catch (err) {
-      setError(err.message)
+      addToast(err.message, 'error')
     } finally {
       setBusy(false)
-      e.target.value = ''
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
   async function handleDelete() {
     if (!window.confirm('Hapus asset ini?')) return
     setBusy(true)
-    setError('')
     try {
       const res = await fetch(`/api/admin/assets?key=${encodeURIComponent(slotKey)}`, { method: 'DELETE' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Gagal menghapus asset')
+      addToast('Asset berhasil dihapus', 'success')
       router.refresh()
     } catch (err) {
-      setError(err.message)
+      addToast(err.message, 'error')
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
-      {error && <p className="text-[10px] font-medium text-red-600">{error}</p>}
+    <div className="flex flex-col gap-2">
       <div className="flex gap-2">
-        <label className={`flex-1 text-center text-xs text-white px-3 py-1.5 rounded-lg font-medium transition-colors ${busy ? 'bg-gray-300 cursor-wait' : 'bg-[#0ea5a0] hover:bg-[#0d7a8a] cursor-pointer'}`}>
-          {busy ? 'Mengunggah...' : 'Replace'}
-          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFile} disabled={busy} className="hidden" />
-        </label>
+        <Button
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={busy}
+        >
+          {busy ? '⏳ Mengunggah...' : '📤 Replace'}
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          onChange={handleFile}
+          disabled={busy}
+          className="hidden"
+        />
         {currentUrl && (
-          <button type="button" onClick={handleDelete} disabled={busy} className="text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors font-medium disabled:opacity-50">
-            Hapus
-          </button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={busy}
+          >
+            🗑️ Hapus
+          </Button>
         )}
       </div>
     </div>
