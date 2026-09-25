@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import DownloadModal from './DownloadModal';
+import BuyModal from './BuyModal';
 import StickyBuyBar from './StickyBuyBar';
 import { addCartItem } from '@/lib/cart';
 
@@ -10,11 +11,7 @@ export default function ProductActions({ product, settings }) {
   const soldOut = product.stock_type === 'limited' && product.stock_qty <= 0;
   const isFree = product.type === 'free';
   const openOrder = () => {
-    if (!soldOut && isFree) {
-      setOpen(true);
-    } else if (!soldOut) {
-      window.location.assign(`/checkout?product=${encodeURIComponent(product.slug)}`);
-    }
+    if (!soldOut) setOpen(true);
   };
   const addToCart = () => {
     if (soldOut || isFree) return;
@@ -36,5 +33,6 @@ export default function ProductActions({ product, settings }) {
     {!soldOut && <p role="status" className="mt-2 text-center text-xs text-slate-500">{cartMessage || (isFree ? 'File disiapkan langsung dari halaman ini.' : 'Bisa beli langsung atau simpan dulu ke keranjang.')}</p>}
     <StickyBuyBar product={product} onBuy={openOrder} onAddToCart={addToCart} />
     {open && isFree && <DownloadModal product={product} settings={settings} isOpen onClose={() => setOpen(false)} />}
+    {open && !isFree && <BuyModal product={product} isOpen onClose={() => setOpen(false)} />}
   </>;
 }
