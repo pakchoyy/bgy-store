@@ -68,6 +68,7 @@ function Sidebar({ counts }) {
       label: 'Tampilan',
       items: [
         { href: '/admin/homepage', label: 'Appearance', icon: 'home' },
+        { href: '/admin/homepage-sections', label: 'Homepage Sections', icon: 'rectangle' },
         { href: '/admin/footer', label: 'Footer', icon: 'rectangle' },
         { href: '/admin/announcement', label: 'Announcement', icon: 'megaphone' },
       ],
