@@ -3,17 +3,18 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import BulkActions from '@/components/admin/BulkActions'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { useToast } from '@/components/ui/toast'
 
 export default function PageTableClient({ pages: initialPages }) {
+  const { addToast } = useToast()
   const [pages, setPages] = useState(initialPages)
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState([])
-  const [toast, setToast] = useState(null)
-
-  const showToast = (type, message) => {
-    setToast({ type, message })
-    setTimeout(() => setToast(null), 2500)
-  }
 
   const filtered = useMemo(() => {
     if (!search) return pages
@@ -42,7 +43,7 @@ export default function PageTableClient({ pages: initialPages }) {
       if (!response.ok) throw new Error(data.error || 'Gagal mengubah status')
     } catch (e) {
       setPages(prevPages)
-      showToast('error', e.message)
+      addToast(e.message, 'error')
     }
   }
 
@@ -70,7 +71,7 @@ export default function PageTableClient({ pages: initialPages }) {
       if (!response.ok) throw new Error(data.error || 'Gagal menghapus halaman')
     } catch (e) {
       setPages(prevPages)
-      showToast('error', e.message)
+      addToast(e.message, 'error')
     }
   }
 
@@ -96,35 +97,22 @@ export default function PageTableClient({ pages: initialPages }) {
 
   return (
     <div className="space-y-4">
-      {toast && (
-        <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${toast.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
-          {toast.message}
-        </div>
-      )}
       {/* Search & Action Bar */}
       <div className="bg-white rounded-xl shadow-card p-4">
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <div className="relative flex-1 max-w-md">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
+          <div className="flex-1 max-w-md">
+            <Input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Cari judul atau slug..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
             />
           </div>
-          <Link
-            href="/admin/halaman/baru"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shrink-0"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah Halaman
-          </Link>
+          <Button asChild>
+            <Link href="/admin/halaman/baru">
+              ➕ Tambah Halaman
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -143,94 +131,89 @@ export default function PageTableClient({ pages: initialPages }) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50">
+              <tr className="bg-slate-50">
                 <th className="px-6 py-4 text-left">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={selectedIds.length === filtered.length && filtered.length > 0}
                     onChange={toggleAll}
-                    className="rounded text-[#0ea5a0] focus:ring-[#0ea5a0]"
                   />
                 </th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Judul</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Slug</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Status</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Terakhir Diperbarui</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Aksi</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Judul</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Slug</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Status</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Terakhir Diperbarui</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-slate-200">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-400">
+                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-slate-500">
                     Tidak ada halaman ditemukan
                   </td>
                 </tr>
               ) : (
                 filtered.map(page => (
-                  <tr key={page.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={page.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={selectedIds.includes(page.id)}
                         onChange={() => toggleSelect(page.id)}
-                        className="rounded text-[#0ea5a0] focus:ring-[#0ea5a0]"
                       />
                     </td>
                     <td className="px-6 py-4">
                       <Link
                         href={`/admin/halaman/${page.id}/edit`}
-                        className="text-sm font-medium text-gray-900 hover:text-[#0ea5a0] transition-colors"
+                        className="text-sm font-medium text-slate-900 hover:text-teal-600 transition-colors"
                       >
                         {page.title}
                       </Link>
                     </td>
                     <td className="px-6 py-4">
-                      <code className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{page.slug}</code>
+                      <code className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">{page.slug}</code>
                     </td>
                     <td className="px-6 py-4">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => togglePublish(page.id)}
-                        className={`text-xs font-semibold px-2 py-1 rounded-full transition-colors ${
-                          page.is_active
-                            ? 'bg-green-50 text-green-600 hover:bg-green-100'
-                            : 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100'
-                        }`}
+                        className={page.is_active ? 'text-green-600 hover:bg-green-50' : 'text-yellow-600 hover:bg-yellow-50'}
                       >
                         {page.is_active ? 'Aktif' : 'Draft'}
-                      </button>
+                      </Button>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{formatDate(page.updated_at)}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{formatDate(page.updated_at)}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <Link
-                          href={`/admin/halaman/${page.id}/edit`}
-                          className="p-1.5 text-gray-400 hover:text-[#0ea5a0] transition-colors rounded-lg hover:bg-[#0ea5a0]/5"
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
                           title="Edit"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </Link>
-                        <Link
-                          href={`/halaman/${page.slug}`}
-                          target="_blank"
-                          className="p-1.5 text-gray-400 hover:text-[#0ea5a0] transition-colors rounded-lg hover:bg-[#0ea5a0]/5"
+                          <Link href={`/admin/halaman/${page.id}/edit`}>
+                            ✏️
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
                           title="Lihat"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </Link>
-                        <button
+                          <Link href={`/halaman/${page.slug}`} target="_blank">
+                            👁️
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleDelete(page.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                          className="text-red-600 hover:bg-red-50"
                           title="Hapus"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
+                          🗑️
+                        </Button>
                       </div>
                     </td>
                   </tr>
