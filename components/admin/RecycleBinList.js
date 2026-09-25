@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatRupiah } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { useToast } from '@/components/ui/toast'
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'
@@ -11,6 +14,7 @@ function formatDate(dateStr) {
 
 export default function RecycleBinList({ products: initial }) {
   const router = useRouter()
+  const { addToast } = useToast()
   const [products, setProducts] = useState(initial)
   const [busyId, setBusyId] = useState(null)
 
@@ -24,9 +28,10 @@ export default function RecycleBinList({ products: initial }) {
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Gagal memulihkan produk')
       setProducts(prev => prev.filter(p => p.id !== id))
+      addToast('Produk berhasil dipulihkan', 'success')
       router.refresh()
     } catch (e) {
-      alert(e.message)
+      addToast(e.message, 'error')
     } finally {
       setBusyId(null)
     }
@@ -39,57 +44,60 @@ export default function RecycleBinList({ products: initial }) {
       const res = await fetch(`/api/admin/products?id=${encodeURIComponent(id)}&permanent=true`, { method: 'DELETE' })
       if (!res.ok) throw new Error((await res.json()).error || 'Gagal menghapus produk')
       setProducts(prev => prev.filter(p => p.id !== id))
+      addToast('Produk berhasil dihapus permanen', 'success')
       router.refresh()
     } catch (e) {
-      alert(e.message)
+      addToast(e.message, 'error')
     } finally {
       setBusyId(null)
     }
   }
 
   if (products.length === 0) {
-    return <div className="bg-white rounded-xl shadow-card p-12 text-center text-sm text-gray-400">Recycle bin kosong</div>
+    return <Card className="p-12 text-center text-sm text-slate-500">Recycle bin kosong</Card>
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-card overflow-hidden">
+    <Card className="overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase">Produk</th>
-              <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase">Harga</th>
-              <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase hidden sm:table-cell">Dihapus</th>
-              <th className="text-right px-4 py-3 text-xs font-bold text-gray-500 uppercase">Aksi</th>
+            <tr className="bg-slate-50 border-b border-slate-200">
+              <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase">Produk</th>
+              <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase">Harga</th>
+              <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase hidden sm:table-cell">Dihapus</th>
+              <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 uppercase">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-slate-200">
             {products.map(p => (
-              <tr key={p.id} className="hover:bg-gray-50/50">
-                <td className="px-4 py-3 font-medium text-gray-900">{p.title}</td>
-                <td className="px-4 py-3 text-gray-700">{p.type === 'free' ? 'Gratis' : formatRupiah(p.sale_price)}</td>
-                <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">{formatDate(p.deleted_at)}</td>
+              <tr key={p.id} className="hover:bg-slate-50">
+                <td className="px-4 py-3 font-medium text-slate-900">{p.title}</td>
+                <td className="px-4 py-3 text-slate-700">{p.type === 'free' ? 'Gratis' : formatRupiah(p.sale_price)}</td>
+                <td className="px-4 py-3 text-slate-600 text-xs hidden sm:table-cell">{formatDate(p.deleted_at)}</td>
                 <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
-                  <button
+                  <Button
+                    variant="link"
+                    size="sm"
                     onClick={() => restore(p.id)}
                     disabled={busyId === p.id}
-                    className="text-xs font-semibold text-[#0ea5a0] hover:text-[#0d7a8a] disabled:opacity-50"
                   >
-                    Pulihkan
-                  </button>
-                  <button
+                    ↶ Pulihkan
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
                     onClick={() => deleteForever(p.id)}
                     disabled={busyId === p.id}
-                    className="text-xs font-semibold text-red-500 hover:text-red-700 disabled:opacity-50"
                   >
-                    Hapus Permanen
-                  </button>
+                    🗑️ Hapus
+                  </Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   )
 }
