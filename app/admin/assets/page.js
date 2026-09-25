@@ -1,19 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
-import { redirect } from 'next/navigation'
-
-async function saveAsset(formData) {
-  'use server'
-  const supabase = await createClient()
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/assets?toast=demo')
-  redirect('/admin/assets?toast=success')
-}
-
-async function deleteAsset(formData) {
-  'use server'
-  const supabase = await createClient()
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/assets?toast=demo')
-  redirect('/admin/assets?toast=success')
-}
+import AssetUploadCard from '@/components/admin/AssetUploadCard'
 
 function DemoBadge() {
   return (
@@ -62,9 +48,9 @@ export default async function AdminAssets({ searchParams }) {
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
   let assets = {}
   if (!isDemo) {
-    const { data } = await supabase.from('assets').select('*')
+    const { data } = await supabase.from('assets').select('*, media:media(url, name)')
     if (data) {
-      for (const a of data) assets[a.key] = a.value
+      for (const a of data) assets[a.key] = a.media?.url || null
     }
   }
 
@@ -86,14 +72,9 @@ export default async function AdminAssets({ searchParams }) {
                   <span className="w-2 h-2 rounded-full bg-green-400" title="Tersedia" />
                 )}
               </div>
-              <div className={`aspect-video rounded-lg mb-3 flex items-center justify-center ${currentValue ? 'bg-gray-100' : 'bg-gray-50 border-2 border-dashed border-gray-200'}`}>
+              <div className={`aspect-video rounded-lg mb-3 flex items-center justify-center overflow-hidden ${currentValue ? 'bg-gray-100' : 'bg-gray-50 border-2 border-dashed border-gray-200'}`}>
                 {currentValue ? (
-                  <div className="flex flex-col items-center gap-1">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-[10px] text-gray-400 truncate max-w-full px-2">{currentValue.split('/').pop()}</span>
-                  </div>
+                  <img src={currentValue} alt={slot.label} className="w-full h-full object-contain" />
                 ) : (
                   <div className="flex flex-col items-center gap-1">
                     <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,22 +85,7 @@ export default async function AdminAssets({ searchParams }) {
                 )}
               </div>
               <h3 className="text-sm font-semibold text-gray-900 mb-2">{slot.label}</h3>
-              <div className="flex gap-2">
-                <form action={saveAsset} className="flex-1">
-                  <input type="hidden" name="key" value={slot.key} />
-                  <button type="submit" className="w-full text-xs bg-[#0ea5a0] text-white px-3 py-1.5 rounded-lg hover:bg-[#0d7a8a] transition-colors font-medium">
-                    Replace
-                  </button>
-                </form>
-                {currentValue && (
-                  <form action={deleteAsset}>
-                    <input type="hidden" name="key" value={slot.key} />
-                    <button type="submit" className="text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors font-medium">
-                      Hapus
-                    </button>
-                  </form>
-                )}
-              </div>
+              <AssetUploadCard slotKey={slot.key} currentUrl={currentValue} />
             </div>
           )
         })}

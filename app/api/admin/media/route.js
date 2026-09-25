@@ -52,11 +52,36 @@ export async function PUT(request) {
       size: input.size,
       mime_type: input.type,
     }
-    const { error } = await auth.supabase.from('media').insert(media)
+    const { data, error } = await auth.supabase.from('media').insert(media).select().single()
     if (error) return Response.json({ error: 'File terunggah, tetapi informasinya gagal disimpan.' }, { status: 500 })
 
-    return Response.json({ media: { ...media, bucket } })
+    return Response.json({ media: { ...data, bucket } })
   } catch (error) {
     return Response.json({ error: error.message || 'Data unggahan tidak valid.' }, { status: 400 })
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const auth = await getAdminClient()
+    if (auth.error) return auth.error
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    if (!id) return Response.json({ error: 'id required' }, { status: 400 })
+
+    const { data: media } = await auth.supabase.from('media').select('path').eq('id', id).single()
+
+    const { error } = await auth.supabase.from('media').delete().eq('id', id)
+    if (error) return Response.json({ error: error.message }, { status: 500 })
+
+    if (media?.path) {
+      await auth.supabase.storage.from('site-media').remove([media.path]).catch(() => {})
+      await auth.supabase.storage.from('product-files').remove([media.path]).catch(() => {})
+    }
+
+    return Response.json({ success: true })
+  } catch (error) {
+    return Response.json({ error: error.message || 'Gagal menghapus media.' }, { status: 400 })
   }
 }

@@ -1,12 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
-import { redirect } from 'next/navigation'
-
-async function saveMedia(formData) {
-  'use server'
-  const supabase = await createClient()
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/media?toast=demo')
-  redirect('/admin/media?toast=success')
-}
+import MediaUploadButton from '@/components/admin/MediaUploadButton'
+import MediaDetailActions from '@/components/admin/MediaDetailActions'
 
 function DemoBadge() {
   return (
@@ -61,14 +55,18 @@ export default async function AdminMedia({ searchParams }) {
   if (!isDemo) {
     const { data } = await supabase.from('media').select('*').order('created_at', { ascending: false })
     if (data && data.length > 0) {
-      media = data.map(m => ({
-        id: m.id,
-        name: m.name || 'Untitled',
-        size: m.size ? `${(m.size / 1024).toFixed(0)} KB` : '0 KB',
-        type: m.type || 'image',
-        date: m.created_at ? m.created_at.slice(0, 10) : '2026-01-01',
-        color: m.type === 'document' ? '#2563eb' : '#0ea5a0',
-      }))
+      media = data.map(m => {
+        const type = m.mime_type?.startsWith('image/') ? 'image' : 'document'
+        return {
+          id: m.id,
+          name: m.name || 'Untitled',
+          url: m.url,
+          size: m.size ? `${(m.size / 1024).toFixed(0)} KB` : '0 KB',
+          type,
+          date: m.created_at ? m.created_at.slice(0, 10) : '2026-01-01',
+          color: type === 'document' ? '#2563eb' : '#0ea5a0',
+        }
+      })
     }
   }
   const filtered = filter === 'all' ? media : media.filter(m => m.type === filter)
@@ -78,14 +76,7 @@ export default async function AdminMedia({ searchParams }) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-lg font-extrabold text-gray-900">Media Library</h1>
-        <form action={saveMedia}>
-          <button type="submit" className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Upload
-          </button>
-        </form>
+        <MediaUploadButton />
       </div>
       {isDemo && <DemoBadge />}
       <ToastBar toast={toast} />
@@ -170,14 +161,7 @@ export default async function AdminMedia({ searchParams }) {
                   <tr><td className="py-0.5 pr-4 font-medium">Tanggal</td><td>{selected.date}</td></tr>
                 </tbody>
               </table>
-              <div className="flex gap-2 mt-3">
-                <button onClick={() => navigator.clipboard?.writeText(selected.name)} className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors font-medium">
-                  Copy URL
-                </button>
-                <button className="text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors font-medium">
-                  Hapus
-                </button>
-              </div>
+              <MediaDetailActions id={selected.id} url={selected.url} />
             </div>
             <a href={`/admin/media?filter=${filter}`} className="text-gray-400 hover:text-gray-600">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
