@@ -12,7 +12,8 @@
       "Bash(curl -sI http://localhost:3000/logos/qris.svg)",
       "Bash(curl -s http://localhost:3000/logos/qris.svg)",
       "Bash(xxd)",
-      "Bash(curl -sI http://localhost:3000/checkout?product=media-pembelajaran-ipa-kelas-3-sd)"
+      "Bash(curl -sI http://localhost:3000/checkout?product=media-pembelajaran-ipa-kelas-3-sd)",
+      "Bash(git commit *)"
     ]
   }
 }
