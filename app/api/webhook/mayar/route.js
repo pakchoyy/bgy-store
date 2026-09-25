@@ -12,6 +12,7 @@ function normalizeWebhookPayload(parsed) {
     || parsed?.type
     || ''
   const status = String(rawStatus).toLowerCase()
+  const isNegative = /unpaid|not[_\s-]?paid|unsuccess|incomplete|pending|fail|expire|cancel|void/.test(status)
   const localOrderId = metadata.order_id
     || metadata.orderId
     || data.referenceId
@@ -42,7 +43,7 @@ function normalizeWebhookPayload(parsed) {
     localOrderId,
     mayarId,
     paymentId,
-    isPaid: ['paid', 'settled', 'success', 'succeeded', 'completed'].some((item) => status.includes(item)),
+    isPaid: !isNegative && ['paid', 'settled', 'success', 'succeeded', 'completed'].some((item) => status.includes(item)),
     isFailed: ['failed', 'expired', 'cancel', 'void'].some((item) => status.includes(item)),
   }
 }
