@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { parseSocialLinks } from '@/lib/utils'
 import { themeFonts } from '@/lib/store-theme'
 import { uploadMedia } from '@/lib/upload-media'
-import AdminToast from '@/components/admin/AdminToast'
+import { useToast } from '@/components/ui/toast'
 
 const PLATFORMS = [
   'whatsapp',
@@ -32,6 +32,7 @@ export default function AppearanceBuilder({
   siteName = 'BGY',
 }) {
   const router = useRouter()
+  const { addToast } = useToast()
   const [form, setForm] = useState(() => ({
     profile_name: initialAppearance.profileName || siteName,
     profile_handle: initialAppearance.profileHandle || '@bgy',
@@ -50,7 +51,6 @@ export default function AppearanceBuilder({
     social_links: parseSocialLinks(initialAppearance.socialLinks || []),
   }))
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState(null)
   const [uploading, setUploading] = useState('')
 
   const previewProducts = useMemo(
@@ -60,11 +60,6 @@ export default function AppearanceBuilder({
 
   function update(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }))
-  }
-
-  function showToast(type, msg) {
-    setToast({ type, msg })
-    setTimeout(() => setToast(null), 2500)
   }
 
   function addSocial(platform) {
@@ -95,9 +90,9 @@ export default function AppearanceBuilder({
     try {
       const media = await uploadMedia(file, 'cover')
       update(settingKey, media.url)
-      showToast('success', 'Foto berhasil diunggah. Simpan perubahan untuk menerapkan.')
+      addToast('Foto berhasil diunggah. Simpan perubahan untuk menerapkan.', 'success')
     } catch (error) {
-      showToast('error', error?.message || 'Foto gagal diunggah.')
+      addToast(error?.message || 'Foto gagal diunggah.', 'error')
     } finally {
       setUploading('')
       event.target.value = ''
@@ -134,13 +129,13 @@ export default function AppearanceBuilder({
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        showToast('error', data.error || 'Gagal menyimpan')
+        addToast(data.error || 'Gagal menyimpan', 'error')
       } else {
-        showToast('success', data.demo ? 'Mode demo — tidak ke DB' : 'Appearance tersimpan!')
+        addToast(data.demo ? 'Mode demo — tidak ke DB' : 'Appearance tersimpan!', 'success')
         router.refresh()
       }
     } catch (e) {
-      showToast('error', e.message || 'Gagal menyimpan')
+      addToast(e.message || 'Gagal menyimpan', 'error')
     } finally {
       setSaving(false)
     }
@@ -171,8 +166,6 @@ export default function AppearanceBuilder({
           </button>
         </div>
       </div>
-
-      <AdminToast toast={toast?.type} message={toast?.msg} />
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
         <div className="space-y-4">
