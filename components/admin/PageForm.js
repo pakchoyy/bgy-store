@@ -17,6 +17,7 @@ export default function PageForm({ initialData }) {
     meta_title: '',
     meta_description: '',
     ...initialData,
+    meta_description: initialData?.meta_description ?? initialData?.meta_desc ?? '',
   })
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
   const [toast, setToast] = useState(null)
@@ -59,11 +60,21 @@ export default function PageForm({ initialData }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
-    await new Promise(r => setTimeout(r, 800))
-    localStorage.removeItem(draftKey)
-    setToast({ type: 'success', message: isEditing ? 'Halaman berhasil diperbarui!' : 'Halaman berhasil disimpan!' })
-    setSaving(false)
-    setTimeout(() => router.push('/admin/halaman'), 1500)
+    try {
+      const response = await fetch('/api/admin/pages', {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(isEditing ? { ...form, id: initialData.id } : form),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Gagal menyimpan halaman')
+      localStorage.removeItem(draftKey)
+      setToast({ type: 'success', message: isEditing ? 'Halaman berhasil diperbarui!' : 'Halaman berhasil disimpan!' })
+      setTimeout(() => router.push('/admin/halaman'), 1000)
+    } catch (err) {
+      setToast({ type: 'error', message: err.message })
+      setSaving(false)
+    }
   }
 
   return (
@@ -72,7 +83,9 @@ export default function PageForm({ initialData }) {
         <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${
           toast.type === 'success'
             ? 'bg-green-50 text-green-700 border-green-200'
-            : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+            : toast.type === 'error'
+              ? 'bg-red-50 text-red-700 border-red-200'
+              : 'bg-yellow-50 text-yellow-700 border-yellow-200'
         }`}>
           {toast.message}
         </div>

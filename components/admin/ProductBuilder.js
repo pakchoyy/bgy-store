@@ -70,39 +70,79 @@ export default function ProductBuilder({ products: initialProducts, categories =
     })
   }
 
+  async function patchProduct(id, patch) {
+    const current = products.find((p) => p.id === id)
+    if (!current) return
+    const prevProducts = products
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)))
+    try {
+      const res = await fetch('/api/admin/products', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          products: [{
+            id,
+            sort_order: current.sort_order || 1,
+            is_active: patch.is_active ?? current.is_active,
+            is_featured: patch.is_featured ?? current.is_featured,
+          }],
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Gagal menyimpan perubahan')
+      if (data.demo) showToast('success', 'Mode demo — perubahan tidak ke DB')
+    } catch (e) {
+      setProducts(prevProducts)
+      showToast('error', e.message || 'Gagal menyimpan perubahan')
+    }
+  }
+
   function toggleActive(id) {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, is_active: !p.is_active } : p))
-    )
+    const product = products.find((p) => p.id === id)
+    if (product) patchProduct(id, { is_active: !product.is_active })
   }
 
   function toggleHighlight(id) {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, is_featured: !p.is_featured } : p))
-    )
+    const product = products.find((p) => p.id === id)
+    if (product) patchProduct(id, { is_featured: !product.is_featured })
   }
 
-  function duplicateProduct(product) {
-    const id = `${product.id}-copy-${Date.now()}`
-    setProducts((prev) => [
-      ...prev,
-      {
-        ...product,
-        id,
-        title: `${product.title} (Copy)`,
-        slug: `${product.slug || 'produk'}-copy-${Date.now()}`,
-        sort_order: prev.length + 1,
-        is_active: false,
-      },
-    ])
-    setSelectedId(id)
-    showToast('success', 'Produk diduplikasi sebagai draft.')
+  async function duplicateProduct(product) {
+    try {
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...product,
+          title: `${product.title} (Copy)`,
+          slug: `${product.slug || 'produk'}-copy-${Date.now()}`,
+          is_active: false,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Gagal menduplikasi produk')
+      const newProduct = data.product
+      setProducts((prev) => [...prev, { ...newProduct, sort_order: prev.length + 1 }])
+      setSelectedId(newProduct.id)
+      showToast('success', data.demo ? 'Produk diduplikasi (mode demo).' : 'Produk diduplikasi sebagai draft.')
+    } catch (e) {
+      showToast('error', e.message || 'Gagal menduplikasi produk')
+    }
   }
 
-  function deleteProduct(id) {
+  async function deleteProduct(id) {
+    const prevProducts = products
     setProducts((prev) => prev.filter((p) => p.id !== id))
     setSelectedId((current) => (current === id ? products.find((p) => p.id !== id)?.id || null : current))
-    showToast('success', 'Produk dihapus dari daftar lokal.')
+    try {
+      const res = await fetch(`/api/admin/products?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Gagal menghapus produk')
+      showToast('success', data.demo ? 'Produk dihapus (mode demo).' : 'Produk dipindahkan ke recycle bin.')
+    } catch (e) {
+      setProducts(prevProducts)
+      showToast('error', e.message || 'Gagal menghapus produk')
+    }
   }
 
   async function handleSaveOrder() {

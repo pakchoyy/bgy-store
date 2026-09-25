@@ -8,6 +8,12 @@ export default function PageTableClient({ pages: initialPages }) {
   const [pages, setPages] = useState(initialPages)
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState([])
+  const [toast, setToast] = useState(null)
+
+  const showToast = (type, message) => {
+    setToast({ type, message })
+    setTimeout(() => setToast(null), 2500)
+  }
 
   const filtered = useMemo(() => {
     if (!search) return pages
@@ -23,30 +29,61 @@ export default function PageTableClient({ pages: initialPages }) {
     setSelectedIds(prev => prev.length === filtered.length ? [] : filtered.map(p => p.id))
   }
 
+  const setPublishState = async (ids, is_active) => {
+    const prevPages = pages
+    setPages(prev => prev.map(p => ids.includes(p.id) ? { ...p, is_active } : p))
+    try {
+      const response = await fetch('/api/admin/pages', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, is_active }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Gagal mengubah status')
+    } catch (e) {
+      setPages(prevPages)
+      showToast('error', e.message)
+    }
+  }
+
   const togglePublish = (id) => {
-    setPages(prev => prev.map(p => p.id === id ? { ...p, is_active: !p.is_active } : p))
+    const page = pages.find(p => p.id === id)
+    setPublishState([id], !page.is_active)
   }
 
   const handleBulkPublish = () => {
-    setPages(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, is_active: true } : p))
+    setPublishState(selectedIds, true)
     setSelectedIds([])
   }
 
   const handleBulkUnpublish = () => {
-    setPages(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, is_active: false } : p))
+    setPublishState(selectedIds, false)
     setSelectedIds([])
+  }
+
+  const deleteIds = async (ids) => {
+    const prevPages = pages
+    setPages(prev => prev.filter(p => !ids.includes(p.id)))
+    try {
+      const response = await fetch(`/api/admin/pages?ids=${ids.map(encodeURIComponent).join(',')}`, { method: 'DELETE' })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Gagal menghapus halaman')
+    } catch (e) {
+      setPages(prevPages)
+      showToast('error', e.message)
+    }
   }
 
   const handleBulkDelete = () => {
     if (window.confirm(`Hapus ${selectedIds.length} halaman?`)) {
-      setPages(prev => prev.filter(p => !selectedIds.includes(p.id)))
+      deleteIds(selectedIds)
       setSelectedIds([])
     }
   }
 
   const handleDelete = (id) => {
     if (window.confirm('Hapus halaman ini?')) {
-      setPages(prev => prev.filter(p => p.id !== id))
+      deleteIds([id])
     }
   }
 
@@ -59,6 +96,11 @@ export default function PageTableClient({ pages: initialPages }) {
 
   return (
     <div className="space-y-4">
+      {toast && (
+        <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${toast.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+          {toast.message}
+        </div>
+      )}
       {/* Search & Action Bar */}
       <div className="bg-white rounded-xl shadow-card p-4">
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">

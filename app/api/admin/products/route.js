@@ -154,3 +154,38 @@ export async function PATCH(request) {
     return Response.json({ error: e.message || 'Internal error' }, { status: 500 })
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return Response.json({ error: 'id required for delete' }, { status: 400 })
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!supabaseUrl || supabaseUrl === 'your_supabase_url') {
+      return Response.json({ success: true, demo: true })
+    }
+
+    const supabase = await createClient()
+    const auth = await requireAdmin(supabase)
+    if (auth.error) return auth.error
+
+    const { error } = await supabase
+      .from('products')
+      .update({ deleted_at: new Date().toISOString(), is_active: false })
+      .eq('id', id)
+
+    if (error) {
+      console.error('DELETE /api/admin/products error:', error)
+      return Response.json({ error: error.message }, { status: 500 })
+    }
+
+    return Response.json({ success: true })
+  } catch (e) {
+    console.error('DELETE /api/admin/products unexpected error:', e)
+    return Response.json({ error: e.message || 'Internal error' }, { status: 500 })
+  }
+}

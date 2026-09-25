@@ -13,68 +13,113 @@ export default function KategoriManager({ categories: initialCategories }) {
   const [newCategory, setNewCategory] = useState({ name: '', slug: '', color: '#0ea5a0', sort_order: categories.length + 1 })
   const [toast, setToast] = useState(null)
 
-  const handleSave = (id, field, value) => {
+  const showToast = (type, message) => {
+    setToast({ type, message })
+    setTimeout(() => setToast(null), 2500)
+  }
+
+  const handleSave = async (id, field, value) => {
+    const prevCategories = categories
     setCategories(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c))
     setEditing(null)
-    setToast({ type: 'success', message: 'Kategori diperbarui!' })
-    setTimeout(() => setToast(null), 2000)
+    try {
+      const response = await fetch('/api/admin/categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, [field]: value }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Gagal menyimpan kategori')
+      showToast('success', 'Kategori diperbarui!')
+    } catch (e) {
+      setCategories(prevCategories)
+      showToast('error', e.message)
+    }
   }
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newCategory.name.trim()) return
-    const id = `cat-${Date.now()}`
-    setCategories(prev => [...prev, {
-      id,
-      name: newCategory.name,
-      slug: newCategory.slug || generateSlug(newCategory.name),
-      color: newCategory.color,
-      sort_order: newCategory.sort_order,
-    }])
-    setNewCategory({ name: '', slug: '', color: '#0ea5a0', sort_order: categories.length + 2 })
-    setShowAddForm(false)
-    setToast({ type: 'success', message: 'Kategori ditambahkan!' })
-    setTimeout(() => setToast(null), 2000)
+    try {
+      const response = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newCategory.name,
+          slug: newCategory.slug || generateSlug(newCategory.name),
+          color: newCategory.color,
+          sort_order: newCategory.sort_order,
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Gagal menambah kategori')
+      setCategories(prev => [...prev, data.category])
+      setNewCategory({ name: '', slug: '', color: '#0ea5a0', sort_order: categories.length + 2 })
+      setShowAddForm(false)
+      showToast('success', 'Kategori ditambahkan!')
+    } catch (e) {
+      showToast('error', e.message)
+    }
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const cat = categories.find(c => c.id === id)
     if (cat && (cat.product_count || 0) > 0) {
       alert(`Tidak dapat menghapus "${cat.name}" karena masih memiliki ${cat.product_count} produk aktif.`)
       return
     }
-    if (window.confirm(`Hapus kategori "${cat?.name}"?`)) {
+    if (!window.confirm(`Hapus kategori "${cat?.name}"?`)) return
+    try {
+      const response = await fetch(`/api/admin/categories?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Gagal menghapus kategori')
       setCategories(prev => prev.filter(c => c.id !== id))
-      setToast({ type: 'success', message: 'Kategori dihapus!' })
-      setTimeout(() => setToast(null), 2000)
+      showToast('success', 'Kategori dihapus!')
+    } catch (e) {
+      showToast('error', e.message)
+    }
+  }
+
+  const swapOrder = async (index, otherIndex) => {
+    const a = categories[index]
+    const b = categories[otherIndex]
+    const prevCategories = categories
+    const updated = [...categories]
+    updated[index] = { ...b, sort_order: a.sort_order }
+    updated[otherIndex] = { ...a, sort_order: b.sort_order }
+    setCategories(updated)
+    try {
+      const response = await fetch('/api/admin/categories', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          categories: [
+            { id: a.id, sort_order: b.sort_order },
+            { id: b.id, sort_order: a.sort_order },
+          ],
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Gagal mengubah urutan')
+    } catch (e) {
+      setCategories(prevCategories)
+      showToast('error', e.message)
     }
   }
 
   const moveUp = (index) => {
     if (index === 0) return
-    setCategories(prev => {
-      const updated = [...prev]
-      const temp = { ...updated[index], sort_order: updated[index - 1].sort_order }
-      updated[index] = { ...updated[index - 1], sort_order: updated[index].sort_order }
-      updated[index - 1] = temp
-      return updated
-    })
+    swapOrder(index, index - 1)
   }
 
   const moveDown = (index) => {
     if (index >= categories.length - 1) return
-    setCategories(prev => {
-      const updated = [...prev]
-      const temp = { ...updated[index], sort_order: updated[index + 1].sort_order }
-      updated[index] = { ...updated[index + 1], sort_order: updated[index].sort_order }
-      updated[index + 1] = temp
-      return updated
-    })
+    swapOrder(index, index + 1)
   }
 
   return (
     <div className="space-y-4">
       {toast && (
-        <div className="px-4 py-3 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-medium">
+        <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${toast.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
           {toast.message}
         </div>
       )}
