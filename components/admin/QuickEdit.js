@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 export default function QuickEdit({ value, field, onSave, onCancel }) {
   const [editValue, setEditValue] = useState(value)
@@ -25,35 +27,35 @@ export default function QuickEdit({ value, field, onSave, onCancel }) {
   }
 
   return (
-    <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
-      <input
+    <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+      <Input
         ref={inputRef}
         type="text"
         value={editValue}
         onChange={e => setEditValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="w-full border border-[#0ea5a0] rounded-md px-2 py-1 text-sm outline-none ring-1 ring-[#0ea5a0]/30 bg-white"
+        className="w-full h-8 px-2 text-sm"
       />
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={handleSave}
-        className="p-1 text-[#0ea5a0] hover:text-[#0d7a8a] transition-colors"
+        className="h-8 w-8 p-0"
         title="Simpan"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      </button>
-      <button
+        ✓
+      </Button>
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={onCancel}
-        className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+        className="h-8 w-8 p-0"
         title="Batal"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+        ✕
+      </Button>
     </div>
   )
 }
