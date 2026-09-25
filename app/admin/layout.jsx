@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase-server';
 import { getAdminUser } from '@/lib/admin-auth';
 import AdminMobileNav from '@/components/admin/AdminMobileNav';
 import AdminDesktopSidebar from '@/components/admin/AdminDesktopSidebar';
+import { AdminProvider } from '@/components/admin/AdminProvider';
 
 async function getAdminCounts(supabase, isDemo) {
   if (isDemo) return { orders: 0, reviews: 0 };
@@ -40,15 +41,17 @@ export default async function AdminLayout({ children }) {
   const counts = await getAdminCounts(supabase, isDemo);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#edf8f5] bg-[radial-gradient(circle_at_top_left,rgba(46,204,146,0.20),transparent_34rem),linear-gradient(180deg,#f4fbf8_0%,#edf8f5_48%,#f8fafc_100%)] lg:flex-row">
-      <Sidebar counts={counts} />
-      <div className="flex-1 lg:pl-64">
-        <Header />
-        <main className="p-4 pb-24 md:p-6 lg:pb-6">
-          {children}
-        </main>
+    <AdminProvider>
+      <div className="flex min-h-screen flex-col bg-[#edf8f5] bg-[radial-gradient(circle_at_top_left,rgba(46,204,146,0.20),transparent_34rem),linear-gradient(180deg,#f4fbf8_0%,#edf8f5_48%,#f8fafc_100%)] lg:flex-row">
+        <Sidebar counts={counts} />
+        <div className="flex-1 lg:pl-64">
+          <Header />
+          <main className="p-4 pb-24 md:p-6 lg:pb-6">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </AdminProvider>
   );
 }
 

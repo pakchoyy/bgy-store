@@ -420,6 +420,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           </Card>
                         )}
                       </div>
+                      </div>
                     </ScrollReveal>
                   )
                 })}
