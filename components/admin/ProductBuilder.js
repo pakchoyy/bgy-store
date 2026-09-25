@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/components/ui/toast'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
 function priceLabel(p) {
   if (p.type === 'free' || !p.sale_price) return 'GRATIS'
@@ -294,39 +295,37 @@ export default function ProductBuilder({ products: initialProducts, categories =
                 Belum ada produk. Klik <strong>Add new block</strong>.
               </div>
             ) : (
-              <div className="space-y-2 p-3">{filtered.map((p) => {
-
-                {filtered.map((p) => {
+              <div className="space-y-2 p-3">{filtered.map((p, idx) => {
                   const active = selectedId === p.id
                   const isOver = overId === p.id && dragId !== p.id
                   const cat = p.category || categories.find((c) => c.id === p.category_id)
                   return (
-                    <div
-                      key={p.id}
-                      draggable
-                      onDragStart={() => setDragId(p.id)}
-                      onDragEnd={() => {
-                        setDragId(null)
-                        setOverId(null)
-                      }}
-                      onDragOver={(e) => {
-                        e.preventDefault()
-                        setOverId(p.id)
-                      }}
-                      onDrop={(e) => {
-                        e.preventDefault()
-                        reorder(dragId, p.id)
-                        setDragId(null)
-                        setOverId(null)
-                      }}
-                      onClick={() => setSelectedId(p.id)}
-                      className={`relative flex cursor-pointer items-center gap-3 rounded-2xl border px-3 py-3 shadow-sm transition-all ${
-                        active ? 'border-[#0ea5a0]/30 bg-[rgba(14,165,160,0.07)]' : 'border-gray-100 bg-white hover:bg-gray-50/80'
-                      } ${isOver ? 'ring-2 ring-inset ring-[#0ea5a0]/40' : ''} ${
-                        dragId === p.id ? 'opacity-40' : ''
-                      } ${p.is_featured ? 'bgy-highlight-block ring-2 ring-amber-300/80 shadow-[0_0_22px_rgba(251,191,36,0.22)]' : ''}
-                      `}
-                    >
+                    <ScrollReveal key={p.id} delay={idx * 50}>
+                      <div
+                        draggable
+                        onDragStart={() => setDragId(p.id)}
+                        onDragEnd={() => {
+                          setDragId(null)
+                          setOverId(null)
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault()
+                          setOverId(p.id)
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          reorder(dragId, p.id)
+                          setDragId(null)
+                          setOverId(null)
+                        }}
+                        onClick={() => setSelectedId(p.id)}
+                        className={`relative flex cursor-pointer items-center gap-3 rounded-2xl border px-3 py-3 shadow-sm transition-all ${
+                          active ? 'border-[#0ea5a0]/30 bg-[rgba(14,165,160,0.07)]' : 'border-gray-100 bg-white hover:bg-gray-50/80'
+                        } ${isOver ? 'ring-2 ring-inset ring-[#0ea5a0]/40' : ''} ${
+                          dragId === p.id ? 'opacity-40' : ''
+                        } ${p.is_featured ? 'bgy-highlight-block ring-2 ring-amber-300/80 shadow-[0_0_22px_rgba(251,191,36,0.22)]' : ''}
+                        `}
+                      >
                       <span className="text-gray-300 cursor-grab active:cursor-grabbing select-none text-lg px-0.5">
                         ⠿
                       </span>
@@ -421,7 +420,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           </Card>
                         )}
                       </div>
-                    </div>
+                    </ScrollReveal>
                   )
                 })}
               </div>
