@@ -1,5 +1,8 @@
+'use client'
+
 import ProductCard from '@/components/public/ProductCard'
 import { getCardLayout } from '@/lib/utils'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
 export default function ProductStack({ products = [], emptyText = 'Belum ada produk' }) {
   if (!products.length) {
@@ -20,13 +23,11 @@ export default function ProductStack({ products = [], emptyText = 'Belum ada pro
             : 'col-span-1'
 
         return (
-          <div
-            key={product.id}
-            className={`${span} animate-cardIn`}
-            style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
-          >
-            <ProductCard product={product} />
-          </div>
+          <ScrollReveal key={product.id} delay={Math.min(index, 8) * 45}>
+            <div className={`${span} animate-cardIn`} style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}>
+              <ProductCard product={product} />
+            </div>
+          </ScrollReveal>
         )
       })}
     </div>
