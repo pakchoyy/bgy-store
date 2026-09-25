@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
 export default function ProductReviewList({ productId }) {
   const [reviews, setReviews] = useState([])
@@ -76,8 +77,9 @@ export default function ProductReviewList({ productId }) {
 
       {/* Reviews List */}
       <div className="space-y-3">
-        {reviews.map((review) => (
-          <div key={review.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+        {reviews.map((review, idx) => (
+          <ScrollReveal key={review.id} delay={idx * 50}>
+            <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
             {/* Header */}
             <div className="flex items-start justify-between mb-2">
               <div>
@@ -116,7 +118,8 @@ export default function ProductReviewList({ productId }) {
                 ✓ Pembeli Terverifikasi
               </span>
             </div>
-          </div>
+            </div>
+          </ScrollReveal>
         ))}
       </div>
     </div>
