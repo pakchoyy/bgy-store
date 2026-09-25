@@ -27,7 +27,13 @@ const buttonVariants = cva(
   }
 );
 
-export function Button({ className, variant, size, ...props }) {
+export function Button({ className, variant, size, asChild, ...props }) {
+  const Comp = asChild ? 'div' : 'button';
+  if (asChild) {
+    return (
+      <div className={cn(buttonVariants({ variant, size }), className)} {...props} />
+    );
+  }
   return (
     <button className={cn(buttonVariants({ variant, size }), className)} {...props} />
   );
