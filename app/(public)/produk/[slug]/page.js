@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '@/lib/sanitize-html'
 import LynkShell from '@/components/public/LynkShell'
 import ProductBadge from '@/components/public/ProductBadge'
 import CategoryBadge from '@/components/public/CategoryBadge'
@@ -8,7 +9,7 @@ import ShareButtons from '@/components/public/ShareButtons'
 import ProductActions from '@/components/public/ProductActions'
 import ProductReviewList from '@/components/public/ProductReviewList'
 import { demoProducts } from '@/lib/demo-data'
-import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
+import { fetchStoreShell, demoShellData, hasSupabase, PUBLIC_PRODUCT_COLUMNS } from '@/lib/store-shell'
 import Link from 'next/link'
 
 async function getProduct(slug) {
@@ -23,7 +24,7 @@ async function getProduct(slug) {
 
   const { data: product } = await supabase
     .from('products')
-    .select('*, category:categories(*)')
+    .select(`${PUBLIC_PRODUCT_COLUMNS}, category:categories(*)`)
     .eq('slug', slug)
     .eq('is_active', true)
     .is('deleted_at', null)
@@ -45,9 +46,19 @@ async function getProduct(slug) {
 export async function generateMetadata({ params }) {
   const { product } = await getProduct(params.slug)
   if (!product) return { title: 'Produk tidak ditemukan', robots: { index: false } }
+  const title = product.meta_title || `${product.title} | Bantu Guru Yuk`
+  const description = product.meta_description || product.meta_desc || (product.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
   return {
-    title: product.meta_title || `${product.title} | Bantu Guru Yuk`,
-    description: product.meta_description || product.meta_desc || (product.description || '').replace(/<[^>]*>/g, '').slice(0, 160),
+    title,
+    description,
+    alternates: { canonical: `/produk/${product.slug}` },
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      url: `/produk/${product.slug}`,
+      ...(product.cover_path ? { images: [{ url: product.cover_path }] } : {}),
+    },
   }
 }
 
@@ -111,7 +122,7 @@ export default async function ProdukDetailPage({ params }) {
               <h2 className="mb-3 text-xl font-semibold text-gray-950">Detail Produk</h2>
               <div
                 className="rich-content text-base text-gray-700 leading-relaxed prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: product.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }}
               />
             </section>
           )}

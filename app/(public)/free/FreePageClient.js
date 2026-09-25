@@ -99,8 +99,8 @@ export default function FreePageClient({ products, categories, settings }) {
                   ? 'col-span-2'
                   : 'col-span-1'
               return (
-                <ScrollReveal key={product.id} delay={idx * 50}>
-                  <div className={`${span} space-y-2`}>
+                <ScrollReveal key={product.id} className={span} delay={Math.min(idx, 8) * 50}>
+                  <div className="space-y-2">
                     <ProductCard product={product} />
                     <button
                       type="button"

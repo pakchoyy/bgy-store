@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '@/lib/sanitize-html'
 import LynkShell from '@/components/public/LynkShell'
 import FAQAccordion from '@/components/public/FAQAccordion'
 import Link from 'next/link'
@@ -94,6 +95,15 @@ async function getData(slug) {
   }
 }
 
+export async function generateMetadata({ params }) {
+  const { page } = await getData(params.slug)
+  if (!page) return { title: 'Halaman tidak ditemukan | Bantu Guru Yuk', robots: { index: false } }
+  return {
+    title: `${page.title} | Bantu Guru Yuk`,
+    description: (page.content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160),
+  }
+}
+
 export default async function HalamanPage({ params }) {
   const { slug } = params
   const { page, navItems, appearance, footerConfig, announcement } = await getData(slug)
@@ -123,7 +133,7 @@ export default async function HalamanPage({ params }) {
             ) : (
               <div
                 className="prose prose-sm max-w-none text-gray-600 prose-headings:font-semibold prose-headings:text-gray-900 prose-p:leading-6"
-                dangerouslySetInnerHTML={{ __html: page.content }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }}
               />
             )}
           </>

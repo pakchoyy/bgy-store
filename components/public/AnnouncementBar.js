@@ -1,5 +1,8 @@
-export default function AnnouncementBar({ text, url, bgColor, textColor }) {
+import { safeUrl } from '@/lib/utils';
+
+export default function AnnouncementBar({ text, url: rawUrl, bgColor, textColor }) {
   if (!text) return null;
+  const url = safeUrl(rawUrl);
 
   const content = (
     <div

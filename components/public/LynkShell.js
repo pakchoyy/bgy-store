@@ -197,7 +197,7 @@ export default function LynkShell({
               <img src={profileAvatarUrl} alt={profileName} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xl font-semibold">
-                {(profileName || 'BGY').slice(0, 3).toUpperCase()}
+                {(profileName || 'BGY').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase() || 'BGY'}
               </div>
             )}
           </div>

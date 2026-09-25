@@ -13,7 +13,7 @@ export async function POST(request) {
       )
     }
 
-    if (rating < 1 || rating > 5) {
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
       return Response.json(
         { error: 'Rating must be between 1 and 5' },
         { status: 400 }
@@ -95,7 +95,7 @@ export async function POST(request) {
 
     return Response.json({
       success: true,
-      review,
+      review: { id: review.id, rating: review.rating, is_approved: review.is_approved },
       message: 'Review submitted. Waiting for approval.',
     })
   } catch (error) {
@@ -112,7 +112,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const product_id = searchParams.get('product_id')
-    const limit = Math.min(parseInt(searchParams.get('limit') || '5'), 20)
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '5', 10) || 5, 1), 20)
 
     if (!product_id) {
       return Response.json(
@@ -126,7 +126,7 @@ export async function GET(request) {
     // Get approved reviews with average rating
     const { data: reviews, error: reviewsError } = await supabase
       .from('product_reviews')
-      .select('*')
+      .select('id, reviewer_name, rating, comment, created_at')
       .eq('product_id', product_id)
       .eq('is_approved', true)
       .order('created_at', { ascending: false })

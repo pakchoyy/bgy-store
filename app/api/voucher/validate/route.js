@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { createTrustedServerClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
-    const code = String(searchParams.get('code') || '').trim().toUpperCase()
+    const code = String(searchParams.get('code') || '').trim().toUpperCase().slice(0, 64)
     const amount = Number(searchParams.get('amount') || 0)
     if (!code) return NextResponse.json({ error: 'Masukkan kode voucher.' }, { status: 400 })
 
-    const supabase = await createClient()
-    const { data: voucher, error } = await supabase.from('vouchers').select('*').eq('code', code).eq('is_active', true).maybeSingle()
+    const supabase = await createTrustedServerClient()
+    const { data: voucher, error } = await supabase.from('vouchers').select('code, discount_type, discount_value, min_order_amount, starts_at, ends_at, max_uses, used_count').eq('code', code).eq('is_active', true).maybeSingle()
     if (error || !voucher) return NextResponse.json({ error: 'Voucher tidak ditemukan atau sudah tidak aktif.' }, { status: 404 })
     if (voucher.starts_at && new Date(voucher.starts_at) > new Date()) return NextResponse.json({ error: 'Voucher belum mulai berlaku.' }, { status: 400 })
     if (voucher.ends_at && new Date(voucher.ends_at) < new Date()) return NextResponse.json({ error: 'Voucher sudah kedaluwarsa.' }, { status: 400 })

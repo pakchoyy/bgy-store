@@ -122,23 +122,23 @@ export default async function AdminPesanan({ searchParams }) {
       </div>
       <AdminToast toast={toast} message={toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
       <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex max-w-full gap-1 overflow-x-auto bg-gray-100 rounded-lg p-1">
           {statuses.map(s => (
             <a
               key={s}
               href={`/admin/pesanan?${baseQuery({ status: s })}`}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${statusFilter === s ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${statusFilter === s ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
               {s === 'all' ? 'Semua' : statusLabels[s]}
             </a>
           ))}
         </div>
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex max-w-full gap-1 overflow-x-auto bg-gray-100 rounded-lg p-1">
           {types.map(t => (
             <a
               key={t}
               href={`/admin/pesanan?${baseQuery({ type: t })}`}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${typeFilter === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${typeFilter === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
               {t === 'all' ? 'Semua Tipe' : typeLabels[t]}
             </a>

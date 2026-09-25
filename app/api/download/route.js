@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
+import { resolveProductDownloadUrl } from '@/lib/product-download';
+
+export const dynamic = 'force-dynamic';
+
+function fail(message, status) {
+  return NextResponse.json({ error: message }, { status, headers: { 'Cache-Control': 'no-store' } });
+}
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
 
-    if (!token) {
-      return NextResponse.json({ error: 'Token diperlukan' }, { status: 400 });
+    if (!token || token.length > 256) {
+      return fail('Token diperlukan', 400);
     }
 
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -16,48 +23,33 @@ export async function GET(request) {
       if (token === 'demo-download-token-abc123' || token.startsWith('ORD-')) {
         return NextResponse.redirect('https://example.com/demo-file.pdf');
       }
-      return NextResponse.json({ error: 'Token tidak valid atau kedaluwarsa' }, { status: 403 });
+      return fail('Token tidak valid atau kedaluwarsa', 403);
     }
 
     const { createServiceClient } = await import('@/lib/supabase-server');
-    const supabase = await import('@/lib/supabase-server').then((m) => m.createServiceClient ? m.createServiceClient() : null);
-
-    if (!supabase) {
-      throw new Error('Failed to create Supabase client');
-    }
+    const supabase = await createServiceClient();
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('*, product:products(*)')
+      .select('status, token_expires_at, product:products(file_url, file_path, file_name)')
       .eq('download_token', token)
       .maybeSingle();
 
-    if (orderError || !order) {
-      return NextResponse.json({ error: 'Token tidak valid' }, { status: 403 });
-    }
-
-    if (order.status !== 'paid') {
-      return NextResponse.json({ error: 'Pesanan belum dibayar' }, { status: 403 });
-    }
-
+    if (orderError || !order) return fail('Token tidak valid', 403);
+    if (order.status !== 'paid') return fail('Pesanan belum dibayar', 403);
     if (order.token_expires_at && new Date(order.token_expires_at) < new Date()) {
-      return NextResponse.json({ error: 'Token sudah kedaluwarsa' }, { status: 403 });
+      return fail('Token sudah kedaluwarsa', 403);
     }
 
-    const product = order.product;
-    let downloadUrl;
+    const downloadUrl = await resolveProductDownloadUrl(supabase, order.product);
+    if (!downloadUrl) return fail('File tidak tersedia', 404);
 
-    if (product.file_url) {
-      downloadUrl = product.file_url;
-    } else if (product.file_path) {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      downloadUrl = `${supabaseUrl}/storage/v1/object/public/product-files/${product.file_path}`;
-    } else {
-      return NextResponse.json({ error: 'File tidak tersedia' }, { status: 404 });
-    }
-
-    return NextResponse.json({ url: downloadUrl });
+    const response = NextResponse.redirect(downloadUrl, 302);
+    response.headers.set('Cache-Control', 'no-store');
+    response.headers.set('Referrer-Policy', 'no-referrer');
+    return response;
   } catch (err) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('download error:', err);
+    return fail('Internal server error', 500);
   }
 }

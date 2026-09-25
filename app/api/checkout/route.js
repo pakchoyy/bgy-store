@@ -11,6 +11,15 @@ export async function POST(request) {
     if (!buyer_whatsapp?.trim()) return NextResponse.json({ error: 'Nomor WhatsApp diperlukan' }, { status: 400 })
     if (cleanWhatsapp.replace(/\D/g, '').length < 8) return NextResponse.json({ error: 'Nomor WhatsApp tidak valid' }, { status: 400 })
     if (!buyer_email?.trim()) return NextResponse.json({ error: 'Email pembeli diperlukan' }, { status: 400 })
+    if (typeof buyer_email !== 'string' || buyer_email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyer_email.trim())) {
+      return NextResponse.json({ error: 'Email tidak valid' }, { status: 400 })
+    }
+    if (typeof buyer_name !== 'string' || buyer_name.trim().length > 120) {
+      return NextResponse.json({ error: 'Nama terlalu panjang' }, { status: 400 })
+    }
+    if (typeof product_id !== 'string' || product_id.length > 64) {
+      return NextResponse.json({ error: 'Produk tidak valid' }, { status: 400 })
+    }
 
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
       && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_supabase_url'
@@ -19,12 +28,12 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Database belum dikonfigurasi' }, { status: 500 })
     }
 
-    const { createClient } = await import('@/lib/supabase-server')
-    const supabase = await createClient()
+    const { createTrustedServerClient } = await import('@/lib/supabase-server')
+    const supabase = await createTrustedServerClient()
 
     const { data: product, error: productError } = await supabase
       .from('products')
-      .select('*')
+      .select('id, title, type, sale_price, stock_type, stock_qty')
       .eq('id', product_id)
       .eq('is_active', true)
       .is('deleted_at', null)
@@ -40,7 +49,7 @@ export async function POST(request) {
     let voucherCode = null
     let discountAmount = 0
     if (voucher_code) {
-      voucherCode = String(voucher_code).trim().toUpperCase()
+      voucherCode = String(voucher_code).trim().toUpperCase().slice(0, 64)
       const { data: voucher } = await supabase.from('vouchers').select('*').eq('code', voucherCode).eq('is_active', true).maybeSingle()
       if (!voucher) return NextResponse.json({ error: 'Voucher tidak ditemukan atau sudah tidak aktif' }, { status: 400 })
       const now = new Date()
@@ -55,7 +64,10 @@ export async function POST(request) {
     const { hasMayarApiKey, createPaymentLink, extractMayarInvoice } = await import('@/lib/mayar')
 
     if (!hasMayarApiKey()) {
-      return NextResponse.json({ error: 'Mayar API key belum dikonfigurasi' }, { status: 500 })
+      return NextResponse.json({ error: 'Pembayaran belum dikonfigurasi. Hubungi admin.' }, { status: 500 })
+    }
+    if (amount < 1000) {
+      return NextResponse.json({ error: 'Total pembayaran minimal Rp1.000' }, { status: 400 })
     }
 
     const { data: order, error: orderError } = await supabase
@@ -63,7 +75,7 @@ export async function POST(request) {
       .insert({
         product_id: product.id,
         buyer_name: buyer_name.trim(),
-        buyer_whatsapp: cleanWhatsapp,
+        buyer_whatsapp: cleanWhatsapp.slice(0, 25),
         buyer_email: buyer_email.trim(),
         amount,
         voucher_code: voucherCode,
@@ -112,6 +124,6 @@ export async function POST(request) {
     }
   } catch (err) {
     console.error('checkout error:', err)
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Pesanan belum dapat diproses. Coba lagi.' }, { status: 500 })
   }
 }

@@ -6,6 +6,8 @@ import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import { parseSocialLinks } from '@/lib/utils'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 async function getOrder({ token, orderId }) {
   if (!hasSupabase() || (!token && !orderId)) {
     if (!token && !orderId) return { ...demoShellData(), order: null }
@@ -24,12 +26,15 @@ async function getOrder({ token, orderId }) {
   }
 
   const shell = await fetchStoreShell()
-  const { createClient } = await import('@/lib/supabase-server')
-  const supabase = await createClient()
+  const { createTrustedServerClient } = await import('@/lib/supabase-server')
+  const supabase = await createTrustedServerClient()
+
+  if (orderId && !/^[0-9a-f-]{36}$/i.test(orderId)) return { ...shell, order: null }
+  if (token && token.length > 256) return { ...shell, order: null }
 
   let query = supabase
     .from('orders')
-    .select('*, product:products(*)')
+    .select('id, buyer_name, status, download_token, token_expires_at, product:products(id, title, slug)')
 
   query = token ? query.eq('download_token', token) : query.eq('id', orderId)
 
@@ -52,8 +57,8 @@ export default async function TerimaKasihPage({ searchParams }) {
   const token = searchParams?.token || ''
   const orderId = searchParams?.order || ''
   const data = await getOrder({ token, orderId })
-  const { order, navItems, appearance, footerConfig, announcement } = data
-  const recommended = demoProducts
+  const { order, navItems, appearance, footerConfig, announcement, products } = data
+  const recommended = (products || [])
     .filter((p) => p.is_active && p.id !== order?.product?.id)
     .slice(0, 3)
   const isPaid = order && order.status === 'paid' && order.download_token
@@ -81,12 +86,12 @@ export default async function TerimaKasihPage({ searchParams }) {
               <p className="text-sm text-gray-600 mb-4">
                 Terima kasih, <span className="font-semibold">{order.buyer_name}</span>!
               </p>
-              <Link
-                href={`/api/download?token=${order.download_token}`}
+              <a
+                href={`/api/download?token=${encodeURIComponent(order.download_token)}`}
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white font-bold px-5 py-2.5 rounded-xl text-sm"
               >
                 Download Sekarang
-              </Link>
+              </a>
             </>
           ) : isPending ? (
             <>

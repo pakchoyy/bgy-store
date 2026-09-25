@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 const ToastContext = createContext();
@@ -15,23 +15,23 @@ export function useToast() {
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
-
-  const addToast = useCallback((message, type = 'default', duration = 3000) => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
-
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
-
-    return id;
-  }, []);
+  const nextId = useRef(0);
 
   const removeToast = useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  const addToast = useCallback((message, type = 'default', duration = 3000) => {
+    nextId.current += 1;
+    const id = nextId.current;
+    setToasts((prev) => [...prev.slice(-3), { id, message, type }]);
+
+    if (duration > 0) {
+      setTimeout(() => removeToast(id), type === 'error' ? Math.max(duration, 5000) : duration);
+    }
+
+    return id;
+  }, [removeToast]);
 
   return (
     <ToastContext.Provider value={{ addToast, removeToast, toasts }}>
@@ -51,6 +51,7 @@ export function Toast({ id, message, type = 'default', onClose }) {
 
   return (
     <div
+      role={type === 'error' ? 'alert' : 'status'}
       className={cn(
         'rounded-lg px-4 py-3 shadow-lg flex items-center justify-between gap-4',
         bgColor
@@ -58,8 +59,10 @@ export function Toast({ id, message, type = 'default', onClose }) {
     >
       <p className="text-sm font-medium">{message}</p>
       <button
+        type="button"
         onClick={() => onClose(id)}
-        className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded hover:opacity-75"
+        aria-label="Tutup notifikasi"
+        className="ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded hover:opacity-75"
       >
         <svg
           className="h-4 w-4"
@@ -83,7 +86,7 @@ export function Toaster() {
   const { toasts, removeToast } = useContext(ToastContext);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-4 bottom-24 z-[60] flex flex-col items-end gap-2 sm:left-auto lg:bottom-4 [&>*]:pointer-events-auto">
       {toasts.map((toast) => (
         <Toast
           key={toast.id}

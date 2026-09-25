@@ -4,6 +4,11 @@ import FreePageClient from './FreePageClient'
 import { fetchStoreShell, demoShellDataWithProducts, hasSupabase } from '@/lib/store-shell'
 import { demoProducts, demoCategories } from '@/lib/demo-data'
 
+export const metadata = {
+  title: 'Produk Gratis | Bantu Guru Yuk',
+  description: 'Download gratis modul ajar, ATP, dan media pembelajaran untuk guru SD.',
+}
+
 async function getData() {
   if (!hasSupabase()) {
     const saved = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]') : []

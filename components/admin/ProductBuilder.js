@@ -1,16 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { formatRupiah } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/components/ui/toast'
-import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import AddBlockModal from '@/components/admin/AddBlockModal'
 
 function priceLabel(p) {
@@ -19,21 +16,15 @@ function priceLabel(p) {
 }
 
 const BLOCK_ICON = { image: '▧', text: 'T', link: '↗' }
+const DEMO_KEY = '_bgym_demo_products'
+const IS_DEMO = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
+const bySortOrder = (a, b) => (a.sort_order || 0) - (b.sort_order || 0)
 
 export default function ProductBuilder({ products: initialProducts, categories = [], contentBlocks: initialContentBlocks = [], siteName = 'BGY' }) {
   const { addToast } = useToast()
-  const [products, setProducts] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]')
-        if (saved.length) {
-          return [...saved].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-        }
-      } catch {}
-    }
-    return [...initialProducts].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-  })
-  const [blocks, setBlocks] = useState(() => [...initialContentBlocks].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)))
+  const [products, setProducts] = useState(() => [...initialProducts].sort(bySortOrder))
+  const [blocks, setBlocks] = useState(() => [...initialContentBlocks].sort(bySortOrder))
+  const demoLoaded = useRef(!IS_DEMO)
   const [tab, setTab] = useState('all')
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState(initialProducts[0]?.id || null)
@@ -43,12 +34,37 @@ export default function ProductBuilder({ products: initialProducts, categories =
   const [openMenuId, setOpenMenuId] = useState(null)
   const [showBlockPicker, setShowBlockPicker] = useState(false)
   const [blockModalType, setBlockModalType] = useState(null)
+  const [orderDirty, setOrderDirty] = useState(false)
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('_bgym_demo_products', JSON.stringify(products))
-    }
+    if (!IS_DEMO) return
+    try {
+      const saved = JSON.parse(localStorage.getItem(DEMO_KEY) || '[]')
+      if (Array.isArray(saved) && saved.length) setProducts([...saved].sort(bySortOrder))
+    } catch {}
+    demoLoaded.current = true
+  }, [])
+
+  useEffect(() => {
+    if (!IS_DEMO || !demoLoaded.current) return
+    try {
+      localStorage.setItem(DEMO_KEY, JSON.stringify(products))
+    } catch {}
   }, [products])
+
+  useEffect(() => {
+    if (!orderDirty) return
+    const onBeforeUnload = (e) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [orderDirty])
+
+  useEffect(() => {
+    if (!openMenuId) return
+    const onKey = (e) => { if (e.key === 'Escape') setOpenMenuId(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [openMenuId])
 
   const filtered = useMemo(() => {
     let list = [...products]
@@ -80,6 +96,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
   }, [filtered, filteredBlocks])
 
   const selected = products.find((p) => p.id === selectedId) || null
+  const menuProduct = openMenuId ? products.find((p) => p.id === openMenuId) || null : null
   const previewList = products.filter((p) => p.is_active).slice(0, 8)
 
   function showToast(type, msg) {
@@ -88,6 +105,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
 
   function reorder(fromId, toId) {
     if (!fromId || !toId || fromId === toId) return
+    setOrderDirty(true)
     setProducts((prev) => {
       const next = [...prev].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
       const fromIdx = next.findIndex((p) => p.id === fromId)
@@ -110,6 +128,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1
     if (targetIdx < 0 || targetIdx >= combined.length) return
 
+    setOrderDirty(true)
     const next = [...combined]
     const [moved] = next.splice(idx, 1)
     next.splice(targetIdx, 0, moved)
@@ -258,6 +277,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
       if (failed) {
         showToast('error', payloads.find((p) => p.error)?.error || 'Gagal menyimpan')
       } else {
+        setOrderDirty(false)
         showToast('success', payloads[0]?.demo ? 'Mode demo — urutan tidak ke DB' : 'Urutan tersimpan!')
       }
     } catch (e) {
@@ -274,7 +294,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
         <div>
           <h1 className="text-2xl font-bold">My Produk</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Drag & drop urutan · Preview HP realtime
+            {orderDirty ? 'Urutan berubah — klik Simpan Urutan' : 'Atur urutan dengan ▲▼ · Preview HP realtime'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -284,7 +304,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
             </a>
           </Button>
           <Button onClick={handleSaveOrder} disabled={saving}>
-            {saving ? 'Menyimpan...' : 'Simpan Urutan'}
+            {saving ? 'Menyimpan...' : orderDirty ? 'Simpan Urutan •' : 'Simpan Urutan'}
           </Button>
         </div>
       </div>
@@ -401,7 +421,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
               <div className="space-y-2 p-3">{mergedList.map((item, idx) => {
                   if (item._kind === 'block') {
                     return (
-                      <ScrollReveal key={`block-${item.id}`} delay={idx * 50}>
+                      <div key={`block-${item.id}`}>
                         <div className="relative flex items-center gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
                           <div className="flex flex-col items-center shrink-0">
                             <button
@@ -443,12 +463,12 @@ export default function ProductBuilder({ products: initialProducts, categories =
                             size="sm"
                             variant="outline"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => deleteBlock(item.id)}
+                            onClick={() => { if (window.confirm('Hapus block ini?')) deleteBlock(item.id) }}
                           >
                             Hapus
                           </Button>
                         </div>
-                      </ScrollReveal>
+                      </div>
                     )
                   }
 
@@ -457,7 +477,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                   const isOver = overId === p.id && dragId !== p.id
                   const cat = p.category || categories.find((c) => c.id === p.category_id)
                   return (
-                    <ScrollReveal key={p.id} delay={idx * 50}>
+                    <div key={`product-${p.id}`}>
                       <div
                         draggable
                         onDragStart={() => setDragId(p.id)}
@@ -565,46 +585,14 @@ export default function ProductBuilder({ products: initialProducts, categories =
                             setOpenMenuId((current) => (current === p.id ? null : p.id))
                           }}
                           aria-label={`Buka menu ${p.title}`}
+                          aria-haspopup="dialog"
                           aria-expanded={openMenuId === p.id}
                         >
                           ⋯
                         </Button>
-                        {openMenuId === p.id && (
-                          <Card className="absolute right-0 top-11 z-20 w-64 shadow-xl">
-                            <div className="space-y-0">
-                              <Button variant="ghost" className="w-full justify-between rounded-none" onClick={(e) => { e.stopPropagation(); toggleActive(p.id); setOpenMenuId(null) }}>
-                                <span>Show / Hide</span>
-                                <span className={`h-5 w-9 rounded-full p-0.5 ${p.is_active ? 'bg-teal-600' : 'bg-slate-200'}`}>
-                                  <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${p.is_active ? 'translate-x-4' : ''}`} />
-                                </span>
-                              </Button>
-                              <Button variant="ghost" className="w-full justify-between rounded-none" onClick={(e) => { e.stopPropagation(); toggleHighlight(p.id); setOpenMenuId(null) }}>
-                                <span>Highlight</span>
-                                <span className={`h-5 w-9 rounded-full p-0.5 ${p.is_featured ? 'bg-teal-600' : 'bg-slate-200'}`}>
-                                  <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${p.is_featured ? 'translate-x-4' : ''}`} />
-                                </span>
-                              </Button>
-                              <div className="border-t border-slate-100" />
-                              <Button variant="ghost" className="w-full justify-start rounded-none gap-2" onClick={(e) => { e.stopPropagation(); duplicateProduct(p); setOpenMenuId(null) }}>
-                                <span>⧉</span> Duplicate
-                              </Button>
-                              <Button variant="ghost" className="w-full justify-start rounded-none gap-2" onClick={(e) => { e.stopPropagation(); showToast('success', 'Drag produk dari handle kiri untuk memindahkan urutan.'); setOpenMenuId(null) }}>
-                                <span>↔</span> Move Block
-                              </Button>
-                              <Button variant="ghost" className="w-full justify-start rounded-none gap-2" asChild>
-                                <Link href={`/admin/produk/${p.id}/edit`} onClick={(e) => e.stopPropagation()}>
-                                  <span>✎</span> Edit Product
-                                </Link>
-                              </Button>
-                              <Button variant="ghost" className="w-full justify-start rounded-none gap-2 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={(e) => { e.stopPropagation(); deleteProduct(p.id); setOpenMenuId(null) }}>
-                                <span>⌫</span> Delete Product
-                              </Button>
-                            </div>
-                          </Card>
-                        )}
                       </div>
                       </div>
-                    </ScrollReveal>
+                    </div>
                   )
                 })}
               </div>
@@ -736,11 +724,53 @@ export default function ProductBuilder({ products: initialProducts, categories =
               </div>
             </div>
             <p className="text-center text-[11px] text-gray-400 mt-3 px-2">
-              Drag list kiri untuk urutkan · Klik blok untuk pilih
+              Atur urutan dengan ▲▼ · Klik blok untuk pilih
             </p>
           </div>
         </div>
       </div>
+
+
+      {menuProduct && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-0 sm:items-center sm:p-4" onClick={() => setOpenMenuId(null)}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Menu ${menuProduct.title}`}
+            className="w-full max-w-sm overflow-hidden rounded-t-3xl bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+              <p className="min-w-0 truncate text-sm font-bold text-slate-900">{menuProduct.title}</p>
+              <Button variant="ghost" size="sm" aria-label="Tutup menu" onClick={() => setOpenMenuId(null)}>✕</Button>
+            </div>
+            <div className="py-1">
+              <button type="button" className="flex min-h-12 w-full items-center justify-between px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { toggleActive(menuProduct.id); setOpenMenuId(null) }}>
+                <span>Tampilkan di toko</span>
+                <span className={`h-5 w-9 rounded-full p-0.5 ${menuProduct.is_active ? 'bg-teal-600' : 'bg-slate-200'}`}>
+                  <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${menuProduct.is_active ? 'translate-x-4' : ''}`} />
+                </span>
+              </button>
+              <button type="button" className="flex min-h-12 w-full items-center justify-between px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { toggleHighlight(menuProduct.id); setOpenMenuId(null) }}>
+                <span>Highlight</span>
+                <span className={`h-5 w-9 rounded-full p-0.5 ${menuProduct.is_featured ? 'bg-teal-600' : 'bg-slate-200'}`}>
+                  <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${menuProduct.is_featured ? 'translate-x-4' : ''}`} />
+                </span>
+              </button>
+              <div className="my-1 border-t border-slate-100" />
+              <Link href={`/admin/produk/${menuProduct.id}/edit`} className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50">
+                <span aria-hidden="true">✎</span> Edit produk
+              </Link>
+              <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { duplicateProduct(menuProduct); setOpenMenuId(null) }}>
+                <span aria-hidden="true">⧉</span> Duplikat
+              </button>
+              <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-semibold text-red-600 hover:bg-red-50" onClick={() => { const target = menuProduct; setOpenMenuId(null); if (window.confirm(`Hapus "${target.title}"? Produk dipindahkan ke Recycle Bin.`)) deleteProduct(target.id) }}>
+                <span aria-hidden="true">⌫</span> Hapus produk
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {blockModalType && (
         <AddBlockModal

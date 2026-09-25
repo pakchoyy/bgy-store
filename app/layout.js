@@ -8,9 +8,21 @@ const outfit = Outfit({
   display: 'swap',
 })
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
+const siteDescription = 'Download modul ajar, ATP, media pembelajaran, dan administrasi untuk guru SD Indonesia.'
+
 export const metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'Bantu Guru Yuk — Toko Digital untuk Guru SD',
-  description: 'Download modul ajar, ATP, media pembelajaran, dan administrasi untuk guru SD Indonesia.',
+  description: siteDescription,
+  openGraph: {
+    type: 'website',
+    locale: 'id_ID',
+    siteName: 'Bantu Guru Yuk',
+    title: 'Bantu Guru Yuk — Toko Digital untuk Guru SD',
+    description: siteDescription,
+  },
+  twitter: { card: 'summary_large_image' },
 }
 
 export default function RootLayout({ children }) {

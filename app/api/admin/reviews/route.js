@@ -1,11 +1,26 @@
-import { createServiceClient } from '@/lib/supabase-server'
+import { createClient, createServiceClient } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
+
+async function authorize() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!supabaseUrl || supabaseUrl === 'your_supabase_url') return null
+  const auth = await requireAdmin(await createClient())
+  return auth.error || null
+}
+
+function validIds(ids) {
+  return Array.isArray(ids) && ids.length > 0 && ids.length <= 200 && ids.every((id) => typeof id === 'string')
+}
 
 // PATCH /api/admin/reviews - Approve reviews
 export async function PATCH(request) {
   try {
+    const denied = await authorize()
+    if (denied) return denied
+
     const { action, reviewIds } = await request.json()
 
-    if (!action || !reviewIds || reviewIds.length === 0) {
+    if (!action || !validIds(reviewIds)) {
       return Response.json(
         { error: 'Missing action or reviewIds' },
         { status: 400 }
@@ -38,9 +53,12 @@ export async function PATCH(request) {
 // DELETE /api/admin/reviews - Delete reviews
 export async function DELETE(request) {
   try {
+    const denied = await authorize()
+    if (denied) return denied
+
     const { reviewIds } = await request.json()
 
-    if (!reviewIds || reviewIds.length === 0) {
+    if (!validIds(reviewIds)) {
       return Response.json({ error: 'Missing reviewIds' }, { status: 400 })
     }
 

@@ -131,7 +131,7 @@ export default function BuyModal({ product, isOpen, onClose }) {
                 </label>
                 <label className="text-sm font-semibold text-slate-700">
                   <span className="text-red-500">*</span> WhatsApp
-                  <input name="buyer_whatsapp" type="tel" autoComplete="tel" required pattern="[+0-9 ()-]{8,25}" placeholder="08xxxxxxxxxx" className="mt-1 block h-10 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
+                  <input name="buyer_whatsapp" type="tel" autoComplete="tel" required pattern="[0-9+ \(\)\-]{8,25}" inputMode="tel" placeholder="08xxxxxxxxxx" className="mt-1 block h-10 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
                 </label>
               </div>
             </section>

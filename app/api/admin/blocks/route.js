@@ -1,15 +1,16 @@
 import { createClient } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
+import { safeUrl } from '@/lib/utils'
 
 function sanitizeBlock(body) {
   const block_type = ['text', 'image', 'link'].includes(body.block_type) ? body.block_type : null
   return {
     block_type,
     title: (body.title || '').trim() || null,
-    url: (body.url || '').trim() || null,
-    text_content: body.text_content || null,
-    background_color: body.background_color || '#ffffff',
-    image_path: body.image_path || null,
+    url: safeUrl(body.url),
+    text_content: typeof body.text_content === 'string' ? body.text_content.slice(0, 5000) : null,
+    background_color: /^#[0-9a-f]{3,8}$/i.test(body.background_color || '') ? body.background_color : '#ffffff',
+    image_path: safeUrl(body.image_path),
     is_active: body.is_active !== false,
   }
 }
@@ -26,6 +27,18 @@ export async function POST(request) {
 
     if (!block.block_type) {
       return Response.json({ error: 'block_type harus salah satu: text, image, link' }, { status: 400 })
+    }
+    if (body.url && !block.url) {
+      return Response.json({ error: 'URL harus diawali http:// atau https://' }, { status: 400 })
+    }
+    if (block.block_type === 'link' && !block.url) {
+      return Response.json({ error: 'URL wajib diisi' }, { status: 400 })
+    }
+    if (block.block_type === 'image' && !block.image_path) {
+      return Response.json({ error: 'Gambar wajib diunggah' }, { status: 400 })
+    }
+    if (block.block_type === 'text' && !block.text_content?.trim()) {
+      return Response.json({ error: 'Teks wajib diisi' }, { status: 400 })
     }
 
     if (isDemo()) {

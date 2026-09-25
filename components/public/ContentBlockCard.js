@@ -1,14 +1,21 @@
+import { safeUrl } from '@/lib/utils'
+
 export default function ContentBlockCard({ block }) {
-  if (block.block_type === 'image' && block.image_path) {
+  const href = safeUrl(block.url)
+
+  if (block.block_type === 'image') {
+    const src = safeUrl(block.image_path)
+    if (!src) return null
     const content = (
       <img
-        src={block.image_path}
+        src={src}
         alt={block.title || ''}
+        loading="lazy"
         className="w-full h-auto rounded-2xl shadow-sm"
       />
     )
-    return block.url ? (
-      <a href={block.url} target="_blank" rel="noopener noreferrer" className="block">
+    return href ? (
+      <a href={href} target="_blank" rel="noopener noreferrer" className="block">
         {content}
       </a>
     ) : (
@@ -17,20 +24,19 @@ export default function ContentBlockCard({ block }) {
   }
 
   if (block.block_type === 'link') {
+    if (!href) return null
     return (
       <a
-        href={block.url || '#'}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-3 bg-white rounded-2xl shadow-sm hover:shadow-md border border-white/60 transition-all p-4 active:scale-[0.98]"
+        className="flex min-h-14 items-center gap-3 bg-white rounded-2xl shadow-sm hover:shadow-md border border-white/60 transition-all p-4 active:scale-[0.98]"
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[#0d7a8a]">
+        <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[#0d7a8a]">
           ↗
         </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold text-gray-900 truncate">
-            {block.title || block.url}
-          </span>
+        <span className="min-w-0 flex-1 text-sm font-semibold text-gray-900 truncate">
+          {block.title || href}
         </span>
       </a>
     )
@@ -40,9 +46,9 @@ export default function ContentBlockCard({ block }) {
     return (
       <div
         className="rounded-2xl p-4 shadow-sm"
-        style={{ backgroundColor: block.background_color || '#ffffff' }}
+        style={{ backgroundColor: /^#[0-9a-f]{3,8}$/i.test(block.background_color || '') ? block.background_color : '#ffffff' }}
       >
-        {block.title && <h3 className="text-sm font-bold text-gray-900 mb-1">{block.title}</h3>}
+        {block.title && <h2 className="text-sm font-bold text-gray-900 mb-1">{block.title}</h2>}
         <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
           {block.text_content}
         </div>

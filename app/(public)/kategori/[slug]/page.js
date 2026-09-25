@@ -26,6 +26,15 @@ async function getData(slug) {
   }
 }
 
+export async function generateMetadata({ params }) {
+  const { category } = await getData(params.slug)
+  if (!category) return { title: 'Kategori tidak ditemukan | Bantu Guru Yuk', robots: { index: false } }
+  return {
+    title: `${category.name} | Bantu Guru Yuk`,
+    description: `Kumpulan produk digital ${category.name} untuk guru SD.`,
+  }
+}
+
 export default async function KategoriPage({ params }) {
   const { slug } = params
   const data = await getData(slug)

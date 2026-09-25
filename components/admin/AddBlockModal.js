@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
 import { uploadMedia } from '@/lib/upload-media'
+import { safeUrl } from '@/lib/utils'
 
 const TITLES = {
   image: 'Add Image',
@@ -46,6 +47,10 @@ export default function AddBlockModal({ type, onClose, onCreated }) {
     }
     if (type === 'link' && !url.trim()) {
       addToast('URL wajib diisi', 'error')
+      return
+    }
+    if (url.trim() && (!/^https?:\/\//i.test(url.trim()) || !safeUrl(url))) {
+      addToast('URL harus diawali https:// atau http://', 'error')
       return
     }
     if (type === 'text' && !textContent.trim()) {

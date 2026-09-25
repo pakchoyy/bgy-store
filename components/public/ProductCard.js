@@ -22,7 +22,7 @@ export default function ProductCard({ product, className = '' }) {
           }`}
         >
           {product.cover_path ? (
-            <img src={product.cover_path} alt={product.title} className="w-full h-full object-cover" />
+            <img src={product.cover_path} alt="" loading="lazy" className="w-full h-full object-cover" />
           ) : isFree ? (
             'FREE'
           ) : (
@@ -64,7 +64,8 @@ export default function ProductCard({ product, className = '' }) {
         {product.cover_path ? (
           <img
             src={product.cover_path}
-            alt={product.title}
+            alt=""
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
@@ -79,20 +80,15 @@ export default function ProductCard({ product, className = '' }) {
           </div>
         )}
 
-        {(product.badge || product.is_featured || isFree) && (
-          <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
+        {(product.badge || product.is_featured) && (
+          <div className={`absolute left-3 z-20 flex flex-wrap gap-1.5 ${isFree ? 'top-3' : 'top-10'}`}>
             {product.is_featured && (
-              <span className="inline-flex items-center gap-1 text-white text-[11px] font-bold px-3 py-1.5 rounded-full uppercase shadow-md bg-gradient-to-r from-amber-400 to-amber-500">
-                ⭐ Unggulan
-              </span>
-            )}
-            {isFree && (
-              <span className="inline-flex items-center gap-1 text-white text-[11px] font-bold px-3 py-1.5 rounded-full uppercase shadow-md bg-gradient-to-r from-green-500 to-green-600">
-                ✓ Gratis
+              <span className="inline-flex items-center rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-2.5 py-1 text-[10px] font-bold uppercase text-white shadow-md">
+                ★ Unggulan
               </span>
             )}
             {product.badge && (
-              <span className={`inline-flex items-center gap-1 text-white text-[11px] font-bold px-3 py-1.5 rounded-full uppercase shadow-md transition-transform duration-200 hover:scale-105 ${
+              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase text-white shadow-md ${
                 {
                   baru: 'bg-gradient-to-r from-orange-400 to-orange-500',
                   terlaris: 'bg-gradient-to-r from-blue-500 to-blue-600',
@@ -102,7 +98,6 @@ export default function ProductCard({ product, className = '' }) {
                   custom: 'bg-gradient-to-r from-indigo-500 to-indigo-600',
                 }[product.badge] || 'bg-gradient-to-r from-slate-500 to-slate-600'
               }`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-white opacity-60" />
                 {product.badge === 'custom' ? product.badge_custom : product.badge}
               </span>
             )}

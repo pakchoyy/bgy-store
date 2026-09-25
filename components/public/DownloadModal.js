@@ -12,6 +12,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
   const [tipAmount, setTipAmount] = useState(10000);
   const [tipBusy, setTipBusy] = useState(false);
   const [tipError, setTipError] = useState('');
+  const [downloadError, setDownloadError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -22,34 +23,36 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
       setTipAmount(10000);
       setTipBusy(false);
       setTipError('');
+      setDownloadError('');
     }
   }, [isOpen]);
 
+  const triggerDownload = useCallback(async () => {
+    setDownloading(true);
+    setDownloadError('');
+    try {
+      const response = await fetch('/api/download/free', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: product.id }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.url) throw new Error(data.error || 'File belum dapat diunduh.');
+      window.location.assign(data.url);
+    } catch (e) {
+      setDownloading(false);
+      setDownloadError(e.message || 'File belum dapat diunduh. Coba lagi.');
+    }
+  }, [product]);
+
   useEffect(() => {
-    if (phase === 2 && countdown > 0) {
+    if (phase !== 2 || downloading || downloadError) return;
+    if (countdown > 0) {
       const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
       return () => clearTimeout(timer);
     }
-    if (phase === 2 && countdown === 0 && !downloading) {
-      triggerDownload();
-    }
-  }, [phase, countdown]);
-
-  const triggerDownload = useCallback(() => {
-    setDownloading(true);
-    try {
-      if (product.file_url) {
-        const a = document.createElement('a');
-        a.href = product.file_url;
-        a.download = product.file_name || product.title;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
-    } catch (e) {
-      console.error('Download failed:', e);
-    }
-  }, [product]);
+    triggerDownload();
+  }, [phase, countdown, downloading, downloadError, triggerDownload]);
 
   const handleSkipTraktir = useCallback(() => {
     setPhase(2);
@@ -89,6 +92,9 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="download-modal-title"
       style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
       onClick={handleBackdropClick}
     >
@@ -101,8 +107,8 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
         {phase === 1 && (
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">Download {product.title}</h3>
-              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <h3 id="download-modal-title" className="text-lg font-bold text-gray-900">Download {product.title}</h3>
+              <button type="button" onClick={onClose} aria-label="Tutup" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -123,7 +129,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                   <span className="text-xs text-gray-400">{product.file_size}</span>
                 )}
               </div>
-              <p className="text-sm text-gray-600">{product.description}</p>
+              <p className="text-sm text-gray-600 line-clamp-3">{(product.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}</p>
             </div>
 
             {!showTraktirForm && (
@@ -174,6 +180,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                   </div>
                   <input
                     type="number"
+                    aria-label="Nominal traktir lainnya"
                     min={1000}
                     step={1000}
                     value={tipAmount}
@@ -183,9 +190,9 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                   />
                 </div>
 
-                <input name="buyer_email" type="email" required maxLength={254} placeholder="Email" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
-                <input name="buyer_name" required maxLength={120} placeholder="Nama" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
-                <input name="buyer_whatsapp" type="tel" required pattern="[+0-9 ()-]{8,25}" placeholder="No. WhatsApp" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
+                <input name="buyer_email" type="email" aria-label="Email" autoComplete="email" required maxLength={254} placeholder="Email" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
+                <input name="buyer_name" aria-label="Nama" autoComplete="name" required maxLength={120} placeholder="Nama" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
+                <input name="buyer_whatsapp" type="tel" aria-label="Nomor WhatsApp" autoComplete="tel" inputMode="tel" required pattern="[0-9+ \(\)\-]{8,25}" placeholder="No. WhatsApp" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
 
                 <button
                   type="submit"
@@ -238,21 +245,25 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
               </div>
             )}
 
-            {!downloading && countdown === 0 && (
-              <p className="text-sm text-gray-500">Mengunduh file...</p>
+            {downloadError && (
+              <p role="alert" className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                {downloadError}
+              </p>
             )}
 
             {!downloading && (
               <button
+                type="button"
                 onClick={triggerDownload}
                 className="mt-3 text-sm text-[#0ea5a0] hover:text-[#0d7a8a] font-semibold underline transition-colors"
               >
-                Klik jika download tidak dimulai
+                {downloadError ? 'Coba lagi' : 'Klik jika download tidak dimulai'}
               </button>
             )}
 
             {downloading && (
               <button
+                type="button"
                 onClick={onClose}
                 className="mt-4 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
               >

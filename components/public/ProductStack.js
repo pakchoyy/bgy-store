@@ -1,5 +1,3 @@
-'use client'
-
 import ProductCard from '@/components/public/ProductCard'
 import ContentBlockCard from '@/components/public/ContentBlockCard'
 import { getCardLayout } from '@/lib/utils'
@@ -41,10 +39,8 @@ export default function ProductStack({ products = [], contentBlocks = [], emptyT
       {items.map((item, index) => {
         if (item._kind === 'block') {
           return (
-            <ScrollReveal key={item.id} delay={Math.min(index, 8) * 45}>
-              <div className="col-span-2">
-                <ContentBlockCard block={item} />
-              </div>
+            <ScrollReveal key={`block-${item.id}`} className="col-span-2" delay={Math.min(index, 8) * 45}>
+              <ContentBlockCard block={item} />
             </ScrollReveal>
           )
         }
@@ -56,10 +52,8 @@ export default function ProductStack({ products = [], contentBlocks = [], emptyT
             : 'col-span-1'
 
         return (
-          <ScrollReveal key={item.id} delay={Math.min(index, 8) * 45}>
-            <div className={`${span} animate-cardIn`} style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}>
-              <ProductCard product={item} />
-            </div>
+          <ScrollReveal key={`product-${item.id}`} className={span} delay={Math.min(index, 8) * 45}>
+            <ProductCard product={item} />
           </ScrollReveal>
         )
       })}

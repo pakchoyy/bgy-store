@@ -1,12 +1,7 @@
 'use client'
 
-import { ToastProvider, Toaster } from '@/components/ui/toast'
+import { ToastProvider } from '@/components/ui/toast'
 
 export function AdminProvider({ children }) {
-  return (
-    <ToastProvider>
-      {children}
-      <Toaster />
-    </ToastProvider>
-  )
+  return <ToastProvider>{children}</ToastProvider>
 }
