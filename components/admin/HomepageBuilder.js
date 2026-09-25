@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import useUnsavedChanges from '@/lib/use-unsaved-changes'
 import { useRouter } from 'next/navigation'
 import { uploadMedia } from '@/lib/upload-media'
-import AdminToast from '@/components/admin/AdminToast'
+import { useToast } from '@/components/ui/toast'
 
 const BLOCK_META = {
   hero: { icon: 'H', label: 'Hero', color: 'bg-teal-100 text-teal-700' },
@@ -24,13 +24,13 @@ function cloneSections(list) {
 
 export default function HomepageBuilder({ initialSections, products = [], categories = [], siteName = 'BGY' }) {
   const router = useRouter()
+  const { addToast } = useToast()
   const [sections, setSections] = useState(() => cloneSections(initialSections))
   const [selectedId, setSelectedId] = useState(initialSections[0]?.id || null)
   const [dragId, setDragId] = useState(null)
   const [overId, setOverId] = useState(null)
   const pending = useRef(false)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState(null)
   const {dirty, markSaved} = useUnsavedChanges(sections)
 
   const selected = useMemo(
@@ -45,11 +45,6 @@ export default function HomepageBuilder({ initialSections, products = [], catego
 
   const featured = products.filter((p) => p.is_featured).slice(0, 3)
   const free = products.filter((p) => p.type === 'free').slice(0, 3)
-
-  function showToast(type, msg) {
-    setToast({ type, msg })
-
-  }
 
   function reorder(fromId, toId) {
     if (pending.current) return
@@ -114,15 +109,15 @@ export default function HomepageBuilder({ initialSections, products = [], catego
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        showToast('error', data.error || 'Gagal menyimpan')
+        addToast(data.error || 'Gagal menyimpan', 'error')
       } else if (Array.isArray(data.sections)) {
         setSections(data.sections)
         markSaved(data.sections)
-        showToast('success', 'Semua perubahan halaman depan tersimpan!')
+        addToast('Semua perubahan halaman depan tersimpan!', 'success')
         router.refresh()
-      } else { showToast('error', 'Server belum mengonfirmasi penyimpanan. Silakan coba lagi.') }
+      } else { addToast('Server belum mengonfirmasi penyimpanan. Silakan coba lagi.', 'error') }
     } catch (e) {
-      showToast('error', e.message || 'Gagal menyimpan')
+      addToast(e.message || 'Gagal menyimpan', 'error')
     } finally {
       pending.current = false
       setSaving(false)
@@ -155,8 +150,6 @@ export default function HomepageBuilder({ initialSections, products = [], catego
           </button>
         </div>
       </div>
-
-      <AdminToast toast={toast?.type} message={toast?.msg} />
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6 items-start">
         {/* LEFT: blocks + editor */}
