@@ -42,7 +42,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
   }, [product]);
 
   const handleTraktir = useCallback(() => {
-    const traktirUrl = settings?.traktir_url || 'https://saweria.co/bantuguruyuk';
+    const traktirUrl = settings?.traktir_url || 'https://mayar.id/bantuguruyuk';
     window.open(traktirUrl, '_blank', 'noopener,noreferrer');
     setTimeout(() => {
       setPhase(2);
