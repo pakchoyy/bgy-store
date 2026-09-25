@@ -2,16 +2,26 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+const TIP_PRESETS = [5000, 10000, 20000];
+
 export default function DownloadModal({ product, isOpen, onClose, settings }) {
   const [phase, setPhase] = useState(1);
   const [countdown, setCountdown] = useState(5);
   const [downloading, setDownloading] = useState(false);
+  const [showTraktirForm, setShowTraktirForm] = useState(false);
+  const [tipAmount, setTipAmount] = useState(10000);
+  const [tipBusy, setTipBusy] = useState(false);
+  const [tipError, setTipError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setPhase(1);
       setCountdown(5);
       setDownloading(false);
+      setShowTraktirForm(false);
+      setTipAmount(10000);
+      setTipBusy(false);
+      setTipError('');
     }
   }, [isOpen]);
 
@@ -41,17 +51,32 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
     }
   }, [product]);
 
-  const handleTraktir = useCallback(() => {
-    const traktirUrl = settings?.traktir_url || 'https://mayar.id/bantuguruyuk';
-    window.open(traktirUrl, '_blank', 'noopener,noreferrer');
-    setTimeout(() => {
-      setPhase(2);
-    }, 2000);
-  }, [settings]);
-
   const handleSkipTraktir = useCallback(() => {
     setPhase(2);
   }, []);
+
+  const submitTraktir = useCallback(async (event) => {
+    event.preventDefault();
+    setTipBusy(true);
+    setTipError('');
+    try {
+      const fields = Object.fromEntries(new FormData(event.currentTarget));
+      const response = await fetch('/api/traktir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...fields, amount: tipAmount }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Gagal menyiapkan pembayaran. Coba lagi ya.');
+      if (!data.payment_url || new URL(data.payment_url).protocol !== 'https:') throw new Error('Tautan pembayaran tidak tersedia.');
+      window.open(data.payment_url, '_blank', 'noopener,noreferrer');
+      setPhase(2);
+    } catch (submitError) {
+      setTipError(submitError.message);
+    } finally {
+      setTipBusy(false);
+    }
+  }, [tipAmount]);
 
   const handleBackdropClick = useCallback((e) => {
     if (e.target === e.currentTarget && phase === 1) {
@@ -101,23 +126,85 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
               <p className="text-sm text-gray-600">{product.description}</p>
             </div>
 
-            <p className="text-sm text-gray-700 font-medium mb-4 text-center">
-              Dukung kami dengan traktir kopi agar terus berkarya!
-            </p>
+            {!showTraktirForm && (
+              <>
+                <p className="text-sm text-gray-700 font-medium mb-4 text-center">
+                  Dukung kami dengan traktir kopi agar terus berkarya!
+                </p>
 
-            <button
-              onClick={handleTraktir}
-              className="w-full bg-gradient-to-r from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] text-white font-bold px-6 py-3 rounded-xl hover:shadow-md active:scale-[0.98] transition-all duration-200 mb-3"
-            >
-              ☕ Traktir Kopi
-            </button>
+                <button
+                  onClick={() => setShowTraktirForm(true)}
+                  className="w-full bg-gradient-to-r from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] text-white font-bold px-6 py-3 rounded-xl hover:shadow-md active:scale-[0.98] transition-all duration-200 mb-3"
+                >
+                  ☕ Traktir Kopi
+                </button>
 
-            <button
-              onClick={handleSkipTraktir}
-              className="w-full text-sm text-gray-500 hover:text-gray-700 font-medium py-2 transition-colors"
-            >
-              Tidak dulu, langsung download
-            </button>
+                <button
+                  onClick={handleSkipTraktir}
+                  className="w-full text-sm text-gray-500 hover:text-gray-700 font-medium py-2 transition-colors"
+                >
+                  Tidak dulu, langsung download
+                </button>
+              </>
+            )}
+
+            {showTraktirForm && (
+              <form onSubmit={submitTraktir} aria-busy={tipBusy} className="space-y-3">
+                {tipError && (
+                  <p role="alert" className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs font-semibold text-red-700">
+                    {tipError}
+                  </p>
+                )}
+
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 mb-1.5">Nominal traktir</p>
+                  <div className="flex gap-1.5">
+                    {TIP_PRESETS.map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setTipAmount(preset)}
+                        className={`flex-1 rounded-lg border px-2 py-2 text-xs font-bold transition-colors ${
+                          tipAmount === preset ? 'border-[#0ea5a0] bg-[#0ea5a0]/10 text-[#0d7a8a]' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        {`Rp${preset.toLocaleString('id-ID')}`}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="number"
+                    min={1000}
+                    step={1000}
+                    value={tipAmount}
+                    onChange={(e) => setTipAmount(Math.max(0, Number(e.target.value)))}
+                    className="mt-2 h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20"
+                    placeholder="Nominal lainnya"
+                  />
+                </div>
+
+                <input name="buyer_email" type="email" required maxLength={254} placeholder="Email" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
+                <input name="buyer_name" required maxLength={120} placeholder="Nama" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
+                <input name="buyer_whatsapp" type="tel" required pattern="[+0-9 ()-]{8,25}" placeholder="No. WhatsApp" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
+
+                <button
+                  type="submit"
+                  disabled={tipBusy || tipAmount < 1000}
+                  className="w-full bg-gradient-to-r from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] text-white font-bold px-6 py-3 rounded-xl hover:shadow-md active:scale-[0.98] transition-all duration-200 disabled:opacity-60"
+                >
+                  {tipBusy ? 'Menyiapkan pembayaran...' : `Bayar Rp${tipAmount.toLocaleString('id-ID')}`}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSkipTraktir}
+                  disabled={tipBusy}
+                  className="w-full text-sm text-gray-500 hover:text-gray-700 font-medium py-2 transition-colors disabled:opacity-60"
+                >
+                  Tidak dulu, langsung download
+                </button>
+              </form>
+            )}
           </div>
         )}
 
