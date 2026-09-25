@@ -23,10 +23,21 @@ const statusLabels = {
   expired: 'Kadaluarsa',
 }
 
+const typeLabels = {
+  produk: 'Produk',
+  donasi: '☕ Donasi',
+}
+
+const typeColors = {
+  produk: 'bg-blue-100 text-blue-700',
+  donasi: 'bg-amber-100 text-amber-700',
+}
+
 export default async function AdminPesanan({ searchParams }) {
   const supabase = await createClient()
   const toast = searchParams?.toast
   const statusFilter = searchParams?.status || 'all'
+  const typeFilter = searchParams?.type || 'all'
   const search = searchParams?.search || ''
   const selected = searchParams?.selected
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -35,22 +46,29 @@ export default async function AdminPesanan({ searchParams }) {
   if (!isDemo) {
     const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
     if (data && data.length > 0) {
-      orders = data.map(o => ({
-        id: o.id,
-        buyer_name: o.buyer_name || o.customer_name || 'Unknown',
-        whatsapp: o.buyer_whatsapp || o.whatsapp || o.phone || '-',
-        email: o.buyer_email || o.email || '-',
-        product_title: o.product_title || o.product?.title || 'Unknown',
-        price: o.price || o.amount || 0,
-        status: o.status || 'pending',
-        date: o.created_at ? o.created_at.slice(0, 10) : '2026-01-01',
-      }))
+      orders = data.map(o => {
+        const type = o.product_id ? 'produk' : 'donasi'
+        return {
+          id: o.id,
+          type,
+          buyer_name: o.buyer_name || o.customer_name || 'Unknown',
+          whatsapp: o.buyer_whatsapp || o.whatsapp || o.phone || '-',
+          email: o.buyer_email || o.email || '-',
+          product_title: type === 'donasi' ? '☕ Traktir Kopi' : (o.product_title || o.product?.title || 'Unknown'),
+          price: o.price || o.amount || 0,
+          status: o.status || 'pending',
+          date: o.created_at ? o.created_at.slice(0, 10) : '2026-01-01',
+        }
+      })
     }
   }
 
   let filtered = orders
   if (statusFilter !== 'all') {
     filtered = filtered.filter(o => o.status === statusFilter)
+  }
+  if (typeFilter !== 'all') {
+    filtered = filtered.filter(o => o.type === typeFilter)
   }
   if (search) {
     const q = search.toLowerCase()
@@ -63,6 +81,15 @@ export default async function AdminPesanan({ searchParams }) {
 
   const selectedOrder = selected ? orders.find(o => o.id === selected) : null
   const statuses = ['all', 'pending', 'paid', 'failed', 'expired']
+  const types = ['all', 'produk', 'donasi']
+  const baseQuery = (overrides = {}) => {
+    const base = { status: statusFilter, type: typeFilter, search, ...overrides }
+    const params = new URLSearchParams()
+    for (const [key, value] of Object.entries(base)) {
+      if (value) params.set(key, value)
+    }
+    return params.toString()
+  }
 
   return (
     <div>
@@ -70,6 +97,7 @@ export default async function AdminPesanan({ searchParams }) {
         <h1 className="text-lg font-extrabold text-gray-900">Kelola Pesanan</h1>
         <form method="GET" action="/admin/pesanan">
           <input type="hidden" name="status" value={statusFilter} />
+          <input type="hidden" name="type" value={typeFilter} />
           <button type="submit" name="export" value="csv" className="bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -81,21 +109,30 @@ export default async function AdminPesanan({ searchParams }) {
       <AdminToast toast={toast} message={toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-          {statuses.map(s => {
-            const href = search ? `/admin/pesanan?status=${s}&search=${search}` : `/admin/pesanan?status=${s}`
-            return (
-              <a
-                key={s}
-                href={href}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${statusFilter === s ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-              >
-                {s === 'all' ? 'Semua' : statusLabels[s]}
-              </a>
-            )
-          })}
+          {statuses.map(s => (
+            <a
+              key={s}
+              href={`/admin/pesanan?${baseQuery({ status: s })}`}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${statusFilter === s ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              {s === 'all' ? 'Semua' : statusLabels[s]}
+            </a>
+          ))}
+        </div>
+        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+          {types.map(t => (
+            <a
+              key={t}
+              href={`/admin/pesanan?${baseQuery({ type: t })}`}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${typeFilter === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              {t === 'all' ? 'Semua Tipe' : typeLabels[t]}
+            </a>
+          ))}
         </div>
         <form method="GET" action="/admin/pesanan" className="flex-1 max-w-xs">
           <input type="hidden" name="status" value={statusFilter} />
+          <input type="hidden" name="type" value={typeFilter} />
           <input
             type="text"
             name="search"
@@ -124,7 +161,7 @@ export default async function AdminPesanan({ searchParams }) {
               {filtered.map(order => (
                 <tr key={order.id} className="hover:bg-gray-50/50">
                   <td className="px-4 py-3">
-                    <a href={`/admin/pesanan?status=${statusFilter}&search=${search}&selected=${order.id}${toast ? `&toast=${toast}` : ''}`} className="font-medium text-gray-900 hover:text-[#0ea5a0]">
+                    <a href={`/admin/pesanan?${baseQuery({ selected: order.id, toast })}`} className="font-medium text-gray-900 hover:text-[#0ea5a0]">
                       {order.buyer_name}
                     </a>
                   </td>
@@ -132,7 +169,10 @@ export default async function AdminPesanan({ searchParams }) {
                     <div>{order.whatsapp}</div>
                     <div className="truncate max-w-[150px]">{order.email}</div>
                   </td>
-                  <td className="px-4 py-3 text-gray-700 text-xs hidden lg:table-cell truncate max-w-[200px]">{order.product_title}</td>
+                  <td className="px-4 py-3 text-xs hidden lg:table-cell truncate max-w-[200px]">
+                    <span className={`inline-block text-[10px] font-bold px-1.5 py-0.5 rounded mr-1.5 ${typeColors[order.type]}`}>{typeLabels[order.type]}</span>
+                    {order.type === 'produk' && <span className="text-gray-700">{order.product_title}</span>}
+                  </td>
                   <td className="px-4 py-3 font-medium">
                     {order.price === 0 ? (
                       <span className="text-green-600 text-xs font-semibold">Gratis</span>
@@ -148,7 +188,7 @@ export default async function AdminPesanan({ searchParams }) {
                   <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">{order.date}</td>
                   <td className="px-4 py-3 text-right">
                     <a
-                      href={`/admin/pesanan?status=${statusFilter}&search=${search}&selected=${order.id}${toast ? `&toast=${toast}` : ''}`}
+                      href={`/admin/pesanan?${baseQuery({ selected: order.id, toast })}`}
                       className="text-xs text-[#0ea5a0] hover:text-[#0d7a8a] font-medium"
                     >
                       Detail
@@ -177,7 +217,10 @@ export default async function AdminPesanan({ searchParams }) {
           {selectedOrder ? (
             <div className="space-y-3 text-sm">
               <div className="rounded-xl bg-emerald-50 p-3">
-                <p className="text-xs font-semibold text-emerald-700">Order item</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-semibold text-emerald-700">Order item</p>
+                  <span className={`inline-block text-[10px] font-bold px-1.5 py-0.5 rounded ${typeColors[selectedOrder.type]}`}>{typeLabels[selectedOrder.type]}</span>
+                </div>
                 <p className="mt-1 font-bold text-gray-900">{selectedOrder.product_title}</p>
                 <p className="text-xs text-gray-500">{selectedOrder.price === 0 ? 'Gratis' : formatRupiah(selectedOrder.price)}</p>
               </div>
@@ -211,7 +254,7 @@ export default async function AdminPesanan({ searchParams }) {
         <div className="mt-6 rounded-2xl bg-white p-6 shadow-card xl:hidden">
           <div className="flex items-start justify-between mb-4">
             <h3 className="text-sm font-bold text-gray-900">Detail Pesanan — {selectedOrder.id}</h3>
-            <a href={`/admin/pesanan?status=${statusFilter}&search=${search}`} className="text-gray-400 hover:text-gray-600">
+            <a href={`/admin/pesanan?${baseQuery()}`} className="text-gray-400 hover:text-gray-600">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -232,7 +275,10 @@ export default async function AdminPesanan({ searchParams }) {
             </div>
             <div>
               <span className="text-xs text-gray-400 block">Produk</span>
-              <span className="font-medium text-gray-900">{selectedOrder.product_title}</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className={`inline-block text-[10px] font-bold px-1.5 py-0.5 rounded ${typeColors[selectedOrder.type]}`}>{typeLabels[selectedOrder.type]}</span>
+                {selectedOrder.type === 'produk' && <span className="font-medium text-gray-900">{selectedOrder.product_title}</span>}
+              </span>
             </div>
             <div>
               <span className="text-xs text-gray-400 block">Harga</span>
