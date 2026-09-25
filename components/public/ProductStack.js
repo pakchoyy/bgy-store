@@ -12,7 +12,7 @@ export default function ProductStack({ products = [], emptyText = 'Belum ada pro
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      {products.map((product) => {
+      {products.map((product, index) => {
         const layout = getCardLayout(product.card_layout)
         const span =
           layout.value === 'landscape' || layout.value === 'wide' || layout.value === 'compact'
@@ -20,7 +20,11 @@ export default function ProductStack({ products = [], emptyText = 'Belum ada pro
             : 'col-span-1'
 
         return (
-          <div key={product.id} className={span}>
+          <div
+            key={product.id}
+            className={`${span} animate-cardIn`}
+            style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
+          >
             <ProductCard product={product} />
           </div>
         )

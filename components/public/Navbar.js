@@ -31,7 +31,7 @@ export default function Navbar({ items, siteName }) {
             aria-expanded={isOpen}
             aria-controls="site-navigation-menu"
             onClick={() => setIsOpen(!isOpen)}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-white/90 transition-[background-color,transform] duration-150 hover:bg-white/10 active:scale-[0.96]"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-white/90 transition-[background-color,transform] duration-150 hover:bg-white/10 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           >
             <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               {isOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18 18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M12 5.5h.01M12 12h.01M12 18.5h.01" />}
@@ -43,12 +43,12 @@ export default function Navbar({ items, siteName }) {
           </Link>
 
           <div className="flex items-center justify-end gap-1">
-            <Link href="/cari" aria-label="Cari materi" className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-white/90 transition-[background-color,transform] duration-150 hover:bg-white/10 active:scale-[0.96]">
+            <Link href="/cari" aria-label="Cari materi" className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-white/90 transition-[background-color,transform] duration-150 hover:bg-white/10 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
               <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.1} d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
               </svg>
             </Link>
-            <Link href="/produk" aria-label="Keranjang belanja" className="relative flex min-h-11 min-w-11 items-center justify-center rounded-xl text-white/90 transition-[background-color,transform] duration-150 hover:bg-white/10 active:scale-[0.96]">
+            <Link href="/produk" aria-label="Keranjang belanja" className="relative flex min-h-11 min-w-11 items-center justify-center rounded-xl text-white/90 transition-[background-color,transform] duration-150 hover:bg-white/10 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
               <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.1} d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20 8H7M10 21h.01M17 21h.01" />
               </svg>

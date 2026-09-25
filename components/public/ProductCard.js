@@ -12,17 +12,17 @@ export default function ProductCard({ product, className = '' }) {
     return (
       <Link
         href={href}
-        className={`group bg-white rounded-2xl shadow-sm hover:shadow-md border border-white/60 transition-[transform,box-shadow] duration-150 overflow-hidden flex items-center gap-3 p-3 active:scale-[0.96] ${className}`}
+        className={`group bg-white rounded-2xl shadow-sm hover:shadow-md border border-white/60 transition-[transform,box-shadow] duration-150 overflow-hidden flex items-center gap-3 p-3 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0ea5a0] focus-visible:ring-offset-2 ${className}`}
       >
         <div
           className={`w-14 h-14 rounded-xl shrink-0 flex items-center justify-center text-white text-[10px] font-bold overflow-hidden ${
             isFree
               ? 'bg-gradient-to-br from-sky-400 to-sky-600'
-              : 'bg-gradient-to-br from-amber-400 to-orange-500'
+              : 'bg-gradient-to-br from-amber-400 to-amber-600'
           }`}
         >
           {product.cover_path ? (
-            <img src={product.cover_path} alt="" className="w-full h-full object-cover" />
+            <img src={product.cover_path} alt={product.title} className="w-full h-full object-cover" />
           ) : isFree ? (
             'FREE'
           ) : (
@@ -57,9 +57,9 @@ export default function ProductCard({ product, className = '' }) {
   return (
     <Link
       href={href}
-      className={`group relative bg-white rounded-[1.35rem] shadow-sm hover:shadow-md border border-white/60 transition-[transform,box-shadow] duration-150 overflow-hidden flex flex-col active:scale-[0.96] ${className}`}
+      className={`group relative bg-white rounded-[1.35rem] shadow-sm hover:shadow-md border border-white/60 transition-[transform,box-shadow] duration-150 overflow-hidden flex flex-col active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0ea5a0] focus-visible:ring-offset-2 ${className}`}
     >
-      {!isFree && <div className="absolute inset-x-0 top-0 z-10 h-8 bg-gradient-to-r from-amber-400 to-orange-500" />}
+      {!isFree && <div className="absolute inset-x-0 top-0 z-10 h-8 bg-gradient-to-r from-amber-400 to-amber-600" />}
       <div className={`${layout.aspect} bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden`}>
         {product.cover_path ? (
           <img
@@ -72,7 +72,7 @@ export default function ProductCard({ product, className = '' }) {
             className={`w-full h-full flex items-center justify-center px-3 text-center text-white font-bold text-sm ${
               isFree
                 ? 'bg-gradient-to-br from-sky-400 to-sky-600'
-                : 'bg-gradient-to-br from-amber-400 to-orange-500'
+                : 'bg-gradient-to-br from-amber-400 to-amber-600'
             }`}
           >
             {isFree ? 'GRATIS' : 'PRODUK DIGITAL'}
@@ -125,15 +125,15 @@ export default function ProductCard({ product, className = '' }) {
             <div>
               {product.original_price && product.original_price > product.sale_price ? (
                 <div className="flex flex-wrap items-baseline gap-2">
-                  <span className="text-xs line-through text-gray-400 font-semibold">
+                  <span className="font-numeric text-xs line-through text-gray-400 font-semibold">
                     {fmt(product.original_price)}
                   </span>
-                  <span className="text-lg font-semibold text-red-500">
+                  <span className="font-numeric text-lg font-semibold text-rose-600">
                     {fmt(product.sale_price)}
                   </span>
                 </div>
               ) : (
-                <span className="text-lg font-semibold text-gray-950">
+                <span className="font-numeric text-lg font-semibold text-gray-950">
                   {fmt(product.sale_price)}
                 </span>
               )}

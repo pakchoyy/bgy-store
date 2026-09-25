@@ -36,13 +36,13 @@ export default function StickyBuyBar({ product, onAddToCart }) {
         <div className="min-w-0">
           {product.original_price && product.original_price > product.sale_price ? (
             <div className="flex flex-wrap items-baseline gap-x-2">
-              <span className="text-xs line-through text-gray-400">{fmt(product.original_price)}</span>
-              <span className="text-base font-semibold text-red-500">{fmt(product.sale_price)}</span>
+              <span className="font-numeric text-xs line-through text-gray-400">{fmt(product.original_price)}</span>
+              <span className="font-numeric text-base font-semibold text-rose-600">{fmt(product.sale_price)}</span>
             </div>
           ) : product.sale_price === 0 ? (
             <span className="text-base font-semibold text-[#0ea5a0]">Gratis</span>
           ) : (
-            <span className="text-base font-semibold text-gray-900">{fmt(product.sale_price)}</span>
+            <span className="font-numeric text-base font-semibold text-gray-900">{fmt(product.sale_price)}</span>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -51,7 +51,7 @@ export default function StickyBuyBar({ product, onAddToCart }) {
               type="button"
               onClick={onAddToCart}
               aria-label={`Masukkan ${product.title} ke keranjang`}
-              className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#0ea5a0]/25 bg-[#0ea5a0]/10 text-[#0d7a8a] transition-transform duration-150 active:scale-[0.96]"
+              className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#0ea5a0]/25 bg-[#0ea5a0]/10 text-[#0d7a8a] transition-transform duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0ea5a0] focus-visible:ring-offset-2"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.1} d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20 8H7m5 2v4m-2-2h4M10 21h.01M17 21h.01" />
@@ -61,7 +61,7 @@ export default function StickyBuyBar({ product, onAddToCart }) {
           <button
             onClick={() => btnRef.current?.click()}
             disabled={isSoldOut}
-            className={`store-buy-button min-h-12 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 ${
+            className={`store-buy-button min-h-12 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0ea5a0] focus-visible:ring-offset-2 ${
               isSoldOut
                 ? 'bg-gray-300 cursor-not-allowed'
                 : 'bg-gradient-to-r from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] shadow-sm active:scale-[0.96]'
