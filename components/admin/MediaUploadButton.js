@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { uploadMedia } from '@/lib/upload-media'
+import { Button } from '@/components/ui/button'
 
 const IMAGE_EXT = ['jpg', 'jpeg', 'png', 'webp']
 const DOC_EXT = ['pdf', 'zip', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']
 
 export default function MediaUploadButton() {
   const router = useRouter()
+  const fileInputRef = useRef(null)
   const [busy, setBusy] = useState(false)
 
   async function handleFile(e) {
@@ -18,7 +20,7 @@ export default function MediaUploadButton() {
     const kind = IMAGE_EXT.includes(ext) ? 'cover' : DOC_EXT.includes(ext) ? 'file' : null
     if (!kind) {
       router.push('/admin/media?toast=error')
-      e.target.value = ''
+      if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
     setBusy(true)
@@ -30,17 +32,26 @@ export default function MediaUploadButton() {
       router.push('/admin/media?toast=error')
     } finally {
       setBusy(false)
-      e.target.value = ''
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
   return (
-    <label className={`bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 ${busy ? 'opacity-60 cursor-wait' : 'cursor-pointer'}`}>
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-      </svg>
-      {busy ? 'Mengunggah...' : 'Upload'}
-      <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={handleFile} disabled={busy} className="hidden" />
-    </label>
+    <>
+      <Button
+        onClick={() => fileInputRef.current?.click()}
+        disabled={busy}
+      >
+        {busy ? '⏳ Mengunggah...' : '📤 Upload'}
+      </Button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".jpg,.jpeg,.png,.webp,.pdf,.zip,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+        onChange={handleFile}
+        disabled={busy}
+        className="hidden"
+      />
+    </>
   )
 }
