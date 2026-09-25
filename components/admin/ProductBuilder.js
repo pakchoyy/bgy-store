@@ -76,6 +76,19 @@ export default function ProductBuilder({ products: initialProducts, categories =
     })
   }
 
+  function moveProduct(id, direction) {
+    setProducts((prev) => {
+      const next = [...prev].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      const idx = next.findIndex((p) => p.id === id)
+      if (idx < 0) return prev
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+      if (targetIdx < 0 || targetIdx >= next.length) return prev
+      const [item] = next.splice(idx, 1)
+      next.splice(targetIdx, 0, item)
+      return next.map((p, i) => ({ ...p, sort_order: i + 1 }))
+    })
+  }
+
   async function patchProduct(id, patch) {
     const current = products.find((p) => p.id === id)
     if (!current) return
@@ -326,9 +339,35 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         } ${p.is_featured ? 'bgy-highlight-block ring-2 ring-amber-300/80 shadow-[0_0_22px_rgba(251,191,36,0.22)]' : ''}
                         `}
                       >
-                      <span className="text-gray-300 cursor-grab active:cursor-grabbing select-none text-lg px-0.5">
-                        ⠿
-                      </span>
+                      <div className="flex flex-col items-center shrink-0">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            moveProduct(p.id, 'up')
+                          }}
+                          aria-label={`Pindah ${p.title} ke atas`}
+                          className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          ▲
+                        </button>
+                        <span className="text-gray-300 cursor-grab active:cursor-grabbing select-none text-lg px-0.5 hidden sm:inline-flex">
+                          ⠿
+                        </span>
+                        <button
+                          type="button"
+                          disabled={idx === filtered.length - 1}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            moveProduct(p.id, 'down')
+                          }}
+                          aria-label={`Pindah ${p.title} ke bawah`}
+                          className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          ▼
+                        </button>
+                      </div>
 
                       <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-gray-100 ring-1 ring-black/5">
                         {p.cover_path ? (
