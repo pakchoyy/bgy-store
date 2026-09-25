@@ -3,19 +3,23 @@
 import { useState } from 'react'
 import { generateSlug } from '@/lib/utils'
 import QuickEdit from '@/components/admin/QuickEdit'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useToast } from '@/components/ui/toast'
 
 const DEFAULT_COLORS = ['#0ea5a0', '#8b5cf6', '#f59e0b', '#ef4444', '#3b82f6', '#10b981', '#ec4899', '#6b7280']
 
 export default function KategoriManager({ categories: initialCategories }) {
+  const { addToast } = useToast()
   const [categories, setCategories] = useState(initialCategories)
   const [editing, setEditing] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
   const [newCategory, setNewCategory] = useState({ name: '', slug: '', color: '#0ea5a0', sort_order: categories.length + 1 })
-  const [toast, setToast] = useState(null)
 
   const showToast = (type, message) => {
-    setToast({ type, message })
-    setTimeout(() => setToast(null), 2500)
+    addToast(message, type)
   }
 
   const handleSave = async (id, field, value) => {
@@ -118,126 +122,111 @@ export default function KategoriManager({ categories: initialCategories }) {
 
   return (
     <div className="space-y-4">
-      {toast && (
-        <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${toast.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
-          {toast.message}
-        </div>
-      )}
-
       {/* Add Button */}
       <div className="flex justify-end">
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Tambah Kategori
-        </button>
+        <Button onClick={() => setShowAddForm(true)}>
+          + Tambah Kategori
+        </Button>
       </div>
 
       {/* Add Form */}
       {showAddForm && (
-        <div className="bg-white rounded-xl shadow-card p-5 border border-[#0ea5a0]/20">
-          <h4 className="text-sm font-bold text-gray-900 mb-4">Kategori Baru</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-              <input
-                type="text"
-                value={newCategory.name}
-                onChange={e => setNewCategory(prev => ({ ...prev, name: e.target.value, slug: generateSlug(e.target.value) }))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20"
-                placeholder="Nama kategori"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-              <input
-                type="text"
-                value={newCategory.slug}
-                onChange={e => setNewCategory(prev => ({ ...prev, slug: e.target.value }))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20"
-                placeholder="slug-kategori"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Warna Badge</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={newCategory.color}
-                  onChange={e => setNewCategory(prev => ({ ...prev, color: e.target.value }))}
-                  className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer"
+        <Card>
+          <CardHeader>
+            <h3 className="font-semibold">Kategori Baru</h3>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Nama</label>
+                <Input
+                  type="text"
+                  value={newCategory.name}
+                  onChange={e => setNewCategory(prev => ({ ...prev, name: e.target.value, slug: generateSlug(e.target.value) }))}
+                  placeholder="Nama kategori"
                 />
-                <span className="text-xs text-gray-500 font-mono">{newCategory.color}</span>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Slug</label>
+                <Input
+                  type="text"
+                  value={newCategory.slug}
+                  onChange={e => setNewCategory(prev => ({ ...prev, slug: e.target.value }))}
+                  placeholder="slug-kategori"
+                  className="font-mono"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Warna Badge</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={newCategory.color}
+                    onChange={e => setNewCategory(prev => ({ ...prev, color: e.target.value }))}
+                    className="w-10 h-10 rounded border border-slate-200 cursor-pointer"
+                  />
+                  <span className="text-xs text-slate-500 font-mono">{newCategory.color}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex gap-2 justify-end">
-            <button
-              onClick={() => setShowAddForm(false)}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
-            >
-              Batal
-            </button>
-            <button
-              onClick={handleAdd}
-              className="px-4 py-2 bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
-              Simpan
-            </button>
-          </div>
-        </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                Batal
+              </Button>
+              <Button onClick={handleAdd}>
+                Simpan
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-card overflow-hidden">
+      <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Urutan</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Nama</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Slug</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Warna Badge</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Jumlah Produk</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider text-gray-500 font-semibold">Aksi</th>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Urutan</th>
+                <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Nama</th>
+                <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Slug</th>
+                <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Warna Badge</th>
+                <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Jumlah Produk</th>
+                <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-slate-600 font-semibold">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-slate-200">
               {categories.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-400">
+                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-slate-500">
                     Belum ada kategori
                   </td>
                 </tr>
               ) : (
                 categories.map((cat, index) => (
-                  <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={cat.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
-                        <button
+                        <Button
+                          size="sm"
+                          variant="ghost"
                           onClick={() => moveUp(index)}
                           disabled={index === 0}
-                          className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="h-6 w-6 p-0"
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                          </svg>
-                        </button>
-                        <span className="text-sm text-gray-500 w-6 text-center">{cat.sort_order}</span>
-                        <button
+                          ↑
+                        </Button>
+                        <span className="text-sm text-slate-600 w-6 text-center">{cat.sort_order}</span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
                           onClick={() => moveDown(index)}
                           disabled={index >= categories.length - 1}
-                          className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="h-6 w-6 p-0"
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        <span className="text-gray-300 cursor-grab select-none ml-1">⠿</span>
+                          ↓
+                        </Button>
+                        <span className="text-slate-300 cursor-grab select-none ml-1 text-sm">⠿</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -268,7 +257,7 @@ export default function KategoriManager({ categories: initialCategories }) {
                       ) : (
                         <button
                           onClick={() => setEditing(`slug-${cat.id}`)}
-                          className="text-xs font-mono text-gray-500 hover:text-[#0ea5a0] transition-colors bg-gray-50 px-2 py-1 rounded"
+                          className="text-xs font-mono text-slate-500 hover:text-teal-600 transition-colors bg-slate-50 px-2 py-1 rounded"
                         >
                           {cat.slug}
                         </button>
@@ -285,17 +274,17 @@ export default function KategoriManager({ categories: initialCategories }) {
                         <span className="text-xs text-gray-500 font-mono">{cat.color}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{cat.product_count || 0}</td>
+                    <td className="px-6 py-4 text-sm text-slate-700">{cat.product_count || 0}</td>
                     <td className="px-6 py-4">
-                      <button
+                      <Button
+                        size="sm"
+                        variant="ghost"
                         onClick={() => handleDelete(cat.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         title="Hapus"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                        🗑️
+                      </Button>
                     </td>
                   </tr>
                 ))
@@ -303,7 +292,7 @@ export default function KategoriManager({ categories: initialCategories }) {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }
