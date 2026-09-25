@@ -3,41 +3,30 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-const paymentGroups = [
-  { title: 'Pembayaran instan', items: ['QRIS', 'GoPay', 'DANA', 'OVO', 'ShopeePay', 'LinkAja'] },
-  { title: 'Transfer bank / VA', items: ['BCA', 'Mandiri', 'BNI', 'BRI', 'BSI', 'Permata'] },
-  { title: 'Gerai & kartu', items: ['Alfamart', 'Indomaret', 'Kartu'] },
+const paymentLogos = [
+  { name: 'QRIS', src: '/logos/qris.svg' },
+  { name: 'GoPay', src: '/logos/gopay.svg' },
+  { name: 'DANA', src: '/logos/dana.svg' },
+  { name: 'OVO', src: '/logos/ovo.svg' },
+  { name: 'ShopeePay', src: '/logos/shopeepay.svg' },
+  { name: 'LinkAja', src: '/logos/linkaja.svg' },
+  { name: 'BCA', src: '/logos/bca.svg' },
+  { name: 'Mandiri', src: '/logos/mandiri.svg' },
+  { name: 'BNI', src: '/logos/bni.svg' },
+  { name: 'BRI', src: '/logos/bri.svg' },
+  { name: 'BSI', src: '/logos/bsi.svg' },
+  { name: 'Permata', src: '/logos/permata.svg' },
+  { name: 'Alfamart', src: '/logos/alfamart.svg' },
+  { name: 'Indomaret', src: '/logos/indomaret.svg' },
+  { name: 'Visa', src: '/logos/visa.svg' },
+  { name: 'Mastercard', src: '/logos/mastercard.svg' },
 ];
-
-const methodColors = {
-  QRIS: 'bg-slate-950 text-white',
-  GoPay: 'bg-sky-500 text-white',
-  DANA: 'bg-blue-600 text-white',
-  OVO: 'bg-violet-600 text-white',
-  ShopeePay: 'bg-orange-500 text-white',
-  LinkAja: 'bg-red-500 text-white',
-  BCA: 'bg-blue-800 text-white',
-  Mandiri: 'bg-yellow-400 text-slate-900',
-  BNI: 'bg-orange-500 text-white',
-  BRI: 'bg-blue-700 text-white',
-  BSI: 'bg-green-600 text-white',
-  Permata: 'bg-cyan-600 text-white',
-  Alfamart: 'bg-red-600 text-white',
-  Indomaret: 'bg-red-500 text-white',
-  Kartu: 'bg-slate-700 text-white',
-};
 
 function formatRupiah(value) {
   return `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
 }
 
-function MethodMark({ name }) {
-  return <span className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-1.5 text-[10px] font-black tracking-tight ${methodColors[name] || 'bg-slate-200 text-slate-700'}`}>{name === 'ShopeePay' ? 'S' : name}</span>;
-}
-
 export default function CheckoutPage({ product }) {
-  const [methodOpen, setMethodOpen] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState('');
   const [voucherOpen, setVoucherOpen] = useState(false);
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherState, setVoucherState] = useState({ status: 'idle', message: '', discount: 0 });
@@ -73,7 +62,7 @@ export default function CheckoutPage({ product }) {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...fields, product_id: product.id, payment_method: selectedMethod || 'mayar' }),
+        body: JSON.stringify({ ...fields, product_id: product.id }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Pembayaran belum dapat diproses. Silakan coba lagi.');
@@ -143,13 +132,21 @@ export default function CheckoutPage({ product }) {
           </section>
 
           <section className="rounded-2xl border border-emerald-300 bg-white p-4 shadow-sm sm:p-5">
-            <button type="button" onClick={() => setMethodOpen((value) => !value)} aria-expanded={methodOpen} className="flex min-h-12 w-full items-center gap-3 text-left focus:outline-none focus:ring-2 focus:ring-emerald-200">
+            <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-lg text-emerald-700">▣</span>
-              <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-slate-800">{selectedMethod || 'Pilih metode pembayaran'}</span><span className="block text-xs text-slate-500">QRIS, transfer bank, e-wallet, gerai, dan kartu</span></span>
-              <span className="text-xl text-emerald-700" aria-hidden="true">{methodOpen ? '⌃' : '›'}</span>
-            </button>
-            {methodOpen && <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">{paymentGroups.map((group) => <div key={group.title}><p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">{group.title}</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{group.items.map((method) => <button type="button" key={method} onClick={() => setSelectedMethod(method)} className={`flex min-h-12 items-center gap-2 rounded-xl border px-2 text-left text-xs font-bold transition focus:outline-none focus:ring-2 focus:ring-emerald-300 ${selectedMethod === method ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm' : 'border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/50'}`}><MethodMark name={method} /><span className="truncate">{method}</span></button>)}</div></div>)}</div>}
-            <p className="mt-3 text-xs text-slate-500">Metode pilihan akan dilanjutkan ke halaman pembayaran aman.</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-slate-800">Metode pembayaran</p>
+                <p className="text-xs text-slate-500">Pilih salah satu di halaman pembayaran aman Mayar</p>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-6">
+              {paymentLogos.map((logo) => (
+                <div key={logo.name} title={logo.name} className="flex h-11 items-center justify-center rounded-lg border border-slate-200 bg-white p-1.5">
+                  <img src={logo.src} alt={logo.name} loading="lazy" className="h-full w-full object-contain" />
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-slate-500">Setelah klik "Beli sekarang", kamu akan diarahkan ke halaman pembayaran resmi Mayar untuk memilih dan menyelesaikan pembayaran.</p>
           </section>
 
           <section className="space-y-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/80 sm:p-5">
