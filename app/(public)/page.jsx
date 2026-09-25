@@ -26,7 +26,7 @@ async function getData() {
 }
 
 export default async function HomePage() {
-  const { navItems, appearance, footerConfig, announcement, products } = await getData()
+  const { navItems, appearance, footerConfig, announcement, products, contentBlocks } = await getData()
 
   return (
     <LynkShell
@@ -37,7 +37,7 @@ export default async function HomePage() {
       activeTabLabel="Last Updated 👇"
       topBarTitle="Home"
     >
-      <ProductStack products={products} emptyText="Belum ada produk ditampilkan" />
+      <ProductStack products={products} contentBlocks={contentBlocks} emptyText="Belum ada produk ditampilkan" />
     </LynkShell>
   )
 }

@@ -16,9 +16,13 @@ async function getData() {
       .from('categories')
       .select('*')
       .order('sort_order')
-    return { products: products || [], categories: categories || [] }
+    const { data: contentBlocks } = await supabase
+      .from('content_blocks')
+      .select('*')
+      .order('sort_order', { ascending: true })
+    return { products: products || [], categories: categories || [], contentBlocks: contentBlocks || [] }
   } catch {}
-  return { products: [], categories: [] }
+  return { products: [], categories: [], contentBlocks: [] }
 }
 
 export default async function AdminProduk() {
@@ -29,9 +33,9 @@ export default async function AdminProduk() {
     if (!session) redirect('/login')
   }
 
-  const { products, categories } = await getData()
+  const { products, categories, contentBlocks } = await getData()
 
   return (
-    <ProductBuilder products={products} categories={categories} siteName="BGY" />
+    <ProductBuilder products={products} categories={categories} contentBlocks={contentBlocks} siteName="BGY" />
   )
 }

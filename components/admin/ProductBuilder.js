@@ -11,13 +11,16 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/components/ui/toast'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import AddBlockModal from '@/components/admin/AddBlockModal'
 
 function priceLabel(p) {
   if (p.type === 'free' || !p.sale_price) return 'GRATIS'
   return formatRupiah(p.sale_price)
 }
 
-export default function ProductBuilder({ products: initialProducts, categories = [], siteName = 'BGY' }) {
+const BLOCK_ICON = { image: '▧', text: 'T', link: '↗' }
+
+export default function ProductBuilder({ products: initialProducts, categories = [], contentBlocks: initialContentBlocks = [], siteName = 'BGY' }) {
   const { addToast } = useToast()
   const [products, setProducts] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -30,6 +33,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
     }
     return [...initialProducts].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
   })
+  const [blocks, setBlocks] = useState(() => [...initialContentBlocks].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)))
   const [tab, setTab] = useState('all')
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState(initialProducts[0]?.id || null)
@@ -38,6 +42,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
   const [saving, setSaving] = useState(false)
   const [openMenuId, setOpenMenuId] = useState(null)
   const [showBlockPicker, setShowBlockPicker] = useState(false)
+  const [blockModalType, setBlockModalType] = useState(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -55,6 +60,24 @@ export default function ProductBuilder({ products: initialProducts, categories =
     }
     return list.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
   }, [products, tab, search])
+
+  const filteredBlocks = useMemo(() => {
+    if (tab !== 'all') return []
+    let list = [...blocks]
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter((b) => (b.title || '').toLowerCase().includes(q))
+    }
+    return list
+  }, [blocks, tab, search])
+
+  const mergedList = useMemo(() => {
+    const items = [
+      ...filtered.map((p) => ({ ...p, _kind: 'product' })),
+      ...filteredBlocks.map((b) => ({ ...b, _kind: 'block' })),
+    ]
+    return items.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+  }, [filtered, filteredBlocks])
 
   const selected = products.find((p) => p.id === selectedId) || null
   const previewList = products.filter((p) => p.is_active).slice(0, 8)
@@ -76,17 +99,50 @@ export default function ProductBuilder({ products: initialProducts, categories =
     })
   }
 
-  function moveProduct(id, direction) {
-    setProducts((prev) => {
-      const next = [...prev].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-      const idx = next.findIndex((p) => p.id === id)
-      if (idx < 0) return prev
-      const targetIdx = direction === 'up' ? idx - 1 : idx + 1
-      if (targetIdx < 0 || targetIdx >= next.length) return prev
-      const [item] = next.splice(idx, 1)
-      next.splice(targetIdx, 0, item)
-      return next.map((p, i) => ({ ...p, sort_order: i + 1 }))
+  function moveItem(id, kind, direction) {
+    const combined = [
+      ...products.map((p) => ({ id: p.id, kind: 'product', sort_order: p.sort_order || 0 })),
+      ...blocks.map((b) => ({ id: b.id, kind: 'block', sort_order: b.sort_order || 0 })),
+    ].sort((a, b) => a.sort_order - b.sort_order)
+
+    const idx = combined.findIndex((x) => x.id === id && x.kind === kind)
+    if (idx < 0) return
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (targetIdx < 0 || targetIdx >= combined.length) return
+
+    const next = [...combined]
+    const [moved] = next.splice(idx, 1)
+    next.splice(targetIdx, 0, moved)
+
+    const productOrder = new Map()
+    const blockOrder = new Map()
+    next.forEach((entry, i) => {
+      const sortOrder = i + 1
+      if (entry.kind === 'product') productOrder.set(entry.id, sortOrder)
+      else blockOrder.set(entry.id, sortOrder)
     })
+
+    setProducts((prev) => prev.map((p) => (productOrder.has(p.id) ? { ...p, sort_order: productOrder.get(p.id) } : p)))
+    setBlocks((prev) => prev.map((b) => (blockOrder.has(b.id) ? { ...b, sort_order: blockOrder.get(b.id) } : b)))
+  }
+
+  async function deleteBlock(id) {
+    const prevBlocks = blocks
+    setBlocks((prev) => prev.filter((b) => b.id !== id))
+    try {
+      const res = await fetch(`/api/admin/blocks?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Gagal menghapus block')
+      showToast('success', data.demo ? 'Block dihapus (mode demo).' : 'Block dihapus.')
+    } catch (e) {
+      setBlocks(prevBlocks)
+      showToast('error', e.message || 'Gagal menghapus block')
+    }
+  }
+
+  function handleBlockCreated(block) {
+    if (!block) return
+    setBlocks((prev) => [...prev, block])
   }
 
   async function patchProduct(id, patch) {
@@ -167,23 +223,42 @@ export default function ProductBuilder({ products: initialProducts, categories =
   async function handleSaveOrder() {
     setSaving(true)
     try {
-      const res = await fetch('/api/admin/products', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          products: products.map((p, i) => ({
-            id: p.id,
-            sort_order: i + 1,
-            is_active: !!p.is_active,
-            is_featured: !!p.is_featured,
-          })),
+      const requests = [
+        fetch('/api/admin/products', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            products: products.map((p) => ({
+              id: p.id,
+              sort_order: p.sort_order || 1,
+              is_active: !!p.is_active,
+              is_featured: !!p.is_featured,
+            })),
+          }),
         }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        showToast('error', data.error || 'Gagal menyimpan')
+      ]
+      if (blocks.length) {
+        requests.push(
+          fetch('/api/admin/blocks', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              blocks: blocks.map((b) => ({
+                id: b.id,
+                sort_order: b.sort_order || 1,
+                is_active: b.is_active !== false,
+              })),
+            }),
+          })
+        )
+      }
+      const results = await Promise.all(requests)
+      const payloads = await Promise.all(results.map((r) => r.json().catch(() => ({}))))
+      const failed = results.find((r) => !r.ok)
+      if (failed) {
+        showToast('error', payloads.find((p) => p.error)?.error || 'Gagal menyimpan')
       } else {
-        showToast('success', data.demo ? 'Mode demo — urutan tidak ke DB' : 'Urutan produk tersimpan!')
+        showToast('success', payloads[0]?.demo ? 'Mode demo — urutan tidak ke DB' : 'Urutan tersimpan!')
       }
     } catch (e) {
       showToast('error', e.message || 'Gagal menyimpan')
@@ -281,15 +356,30 @@ export default function ProductBuilder({ products: initialProducts, categories =
                   <div>
                     <p className="text-xs font-bold text-slate-600 mb-3">Basic</p>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      {[['image','Image','Add images','/admin/produk/baru'],['text','Text','Add headlines','/admin/produk/baru?block=text'],['link','Link','Add link shortcut','/admin/produk/baru?block=link'],['package','Digital Product','Sell files','/admin/produk/baru']].map(([icon, title, description, href]) => (
-                        <Link key={title} href={href} onClick={() => setShowBlockPicker(false)} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 hover:border-teal-300 hover:bg-teal-50 transition-colors">
-                          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-sm font-bold text-teal-600">{icon === 'image' ? '▧' : icon === 'text' ? 'T' : icon === 'link' ? '↗' : '▣'}</span>
+                      {[['image','Image','Add images'],['text','Text','Add headlines'],['link','Link','Add link shortcut']].map(([icon, title, description]) => (
+                        <button
+                          key={title}
+                          type="button"
+                          onClick={() => {
+                            setShowBlockPicker(false)
+                            setBlockModalType(icon)
+                          }}
+                          className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 text-left hover:border-teal-300 hover:bg-teal-50 transition-colors"
+                        >
+                          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-sm font-bold text-teal-600">{BLOCK_ICON[icon]}</span>
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-slate-900">{title}</p>
                             <p className="text-xs text-slate-500">{description}</p>
                           </div>
-                        </Link>
+                        </button>
                       ))}
+                      <Link href="/admin/produk/baru" onClick={() => setShowBlockPicker(false)} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 hover:border-teal-300 hover:bg-teal-50 transition-colors">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-sm font-bold text-teal-600">▣</span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-slate-900">Digital Product</p>
+                          <p className="text-xs text-slate-500">Sell files</p>
+                        </div>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
@@ -301,14 +391,68 @@ export default function ProductBuilder({ products: initialProducts, categories =
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <h2 className="text-sm font-bold">Block List</h2>
-              <span className="text-xs text-slate-500">{filtered.length} produk</span>
+              <span className="text-xs text-slate-500">{mergedList.length} item</span>
             </CardHeader>
-            <CardContent className="p-0">{filtered.length === 0 ? (
+            <CardContent className="p-0">{mergedList.length === 0 ? (
               <div className="px-4 py-12 text-center text-sm text-slate-500">
                 Belum ada produk. Klik <strong>Add new block</strong>.
               </div>
             ) : (
-              <div className="space-y-2 p-3">{filtered.map((p, idx) => {
+              <div className="space-y-2 p-3">{mergedList.map((item, idx) => {
+                  if (item._kind === 'block') {
+                    return (
+                      <ScrollReveal key={`block-${item.id}`} delay={idx * 50}>
+                        <div className="relative flex items-center gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+                          <div className="flex flex-col items-center shrink-0">
+                            <button
+                              type="button"
+                              disabled={idx === 0}
+                              onClick={() => moveItem(item.id, 'block', 'up')}
+                              aria-label="Pindah block ke atas"
+                              className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                            >
+                              ▲
+                            </button>
+                            <button
+                              type="button"
+                              disabled={idx === mergedList.length - 1}
+                              onClick={() => moveItem(item.id, 'block', 'down')}
+                              aria-label="Pindah block ke bawah"
+                              className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                            >
+                              ▼
+                            </button>
+                          </div>
+
+                          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-teal-50 ring-1 ring-black/5 flex items-center justify-center text-sm font-bold text-teal-600">
+                            {item.block_type === 'image' && item.image_path ? (
+                              <img src={item.image_path} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              BLOCK_ICON[item.block_type]
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-slate-900 truncate leading-snug">
+                              {item.title || (item.block_type === 'link' ? item.url : item.block_type === 'text' ? item.text_content?.slice(0, 40) : 'Image')}
+                            </p>
+                            <span className="text-[10px] text-slate-500 capitalize">{item.block_type} block</span>
+                          </div>
+
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => deleteBlock(item.id)}
+                          >
+                            Hapus
+                          </Button>
+                        </div>
+                      </ScrollReveal>
+                    )
+                  }
+
+                  const p = item
                   const active = selectedId === p.id
                   const isOver = overId === p.id && dragId !== p.id
                   const cat = p.category || categories.find((c) => c.id === p.category_id)
@@ -345,7 +489,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           disabled={idx === 0}
                           onClick={(e) => {
                             e.stopPropagation()
-                            moveProduct(p.id, 'up')
+                            moveItem(p.id, 'product', 'up')
                           }}
                           aria-label={`Pindah ${p.title} ke atas`}
                           className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
@@ -357,10 +501,10 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         </span>
                         <button
                           type="button"
-                          disabled={idx === filtered.length - 1}
+                          disabled={idx === mergedList.length - 1}
                           onClick={(e) => {
                             e.stopPropagation()
-                            moveProduct(p.id, 'down')
+                            moveItem(p.id, 'product', 'down')
                           }}
                           aria-label={`Pindah ${p.title} ke bawah`}
                           className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
@@ -597,6 +741,14 @@ export default function ProductBuilder({ products: initialProducts, categories =
           </div>
         </div>
       </div>
+
+      {blockModalType && (
+        <AddBlockModal
+          type={blockModalType}
+          onClose={() => setBlockModalType(null)}
+          onCreated={handleBlockCreated}
+        />
+      )}
     </div>
   )
 }
