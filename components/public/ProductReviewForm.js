@@ -5,7 +5,7 @@ import { useState } from 'react'
 export default function ProductReviewForm({ productId, orderId, onSuccess }) {
   const [rating, setRating] = useState(5)
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+  const [institution, setInstitution] = useState('')
   const [comment, setComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState(null)
@@ -23,7 +23,7 @@ export default function ProductReviewForm({ productId, orderId, onSuccess }) {
           product_id: productId,
           order_id: orderId,
           reviewer_name: name,
-          reviewer_email: email,
+          reviewer_institution: institution,
           rating: parseInt(rating),
           comment,
         }),
@@ -46,7 +46,7 @@ export default function ProductReviewForm({ productId, orderId, onSuccess }) {
 
       // Reset form
       setName('')
-      setEmail('')
+      setInstitution('')
       setComment('')
       setRating(5)
 
@@ -101,35 +101,35 @@ export default function ProductReviewForm({ productId, orderId, onSuccess }) {
         </div>
       </div>
 
-      {/* Name */}
       <div>
-        <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+        <label htmlFor="review-name" className="block text-sm font-semibold text-gray-700 mb-1">
           Nama
         </label>
+        <p className="mb-2 text-xs text-gray-500">Boleh nama samaran, misalnya "Bu Guru Kelas 3".</p>
         <input
           type="text"
-          id="name"
+          id="review-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Nama Anda"
-          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0ea5a0] focus:border-transparent"
+          placeholder="Nama atau nama samaran"
+          maxLength={100}
+          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-[#0ea5a0] focus:border-transparent"
           required
         />
       </div>
 
-      {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-          Email
+        <label htmlFor="review-institution" className="block text-sm font-semibold text-gray-700 mb-2">
+          Instansi / Sekolah <span className="font-normal text-gray-400">(opsional)</span>
         </label>
         <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="email@example.com"
-          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0ea5a0] focus:border-transparent"
-          required
+          type="text"
+          id="review-institution"
+          value={institution}
+          onChange={(e) => setInstitution(e.target.value)}
+          placeholder="Contoh: SDN 1 Mojokerto"
+          maxLength={120}
+          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-[#0ea5a0] focus:border-transparent"
         />
       </div>
 
@@ -155,8 +155,8 @@ export default function ProductReviewForm({ productId, orderId, onSuccess }) {
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={isSubmitting || !name || !email}
-        className="w-full rounded-lg bg-[#0ea5a0] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#0d7a8a] disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={isSubmitting || !name.trim()}
+        className="min-h-12 w-full rounded-xl bg-emerald-500 px-4 text-sm font-bold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? 'Mengirim...' : 'Kirim Review'}
       </button>

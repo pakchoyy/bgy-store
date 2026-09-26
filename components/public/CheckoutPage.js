@@ -23,6 +23,8 @@ const paymentLogos = [
   { name: 'Mastercard', src: '/logos/mastercard.svg' },
 ];
 
+const MIN_PAYMENT = 1000;
+
 function formatRupiah(value) {
   return `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
 }
@@ -36,6 +38,7 @@ export default function CheckoutPage({ product }) {
 
   const price = Number(product.sale_price || 0);
   const total = Math.max(0, price - voucherState.discount);
+  const tooSmall = total > 0 && total < MIN_PAYMENT;
 
   async function applyVoucher() {
     const code = voucherCode.trim().toUpperCase();
@@ -67,6 +70,10 @@ export default function CheckoutPage({ product }) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Pembayaran belum dapat diproses. Silakan coba lagi.');
+      if (typeof data.redirect_url === 'string' && data.redirect_url.startsWith('/')) {
+        window.location.assign(data.redirect_url);
+        return;
+      }
       if (!data.payment_url || new URL(data.payment_url).protocol !== 'https:') throw new Error('Tautan pembayaran tidak tersedia.');
       window.location.assign(data.payment_url);
     } catch (submitError) {
@@ -85,7 +92,6 @@ export default function CheckoutPage({ product }) {
         </div>
       </header>
 
-      {error && <div role="alert" className="mx-auto mt-3 flex w-[calc(100%-1.5rem)] max-w-5xl items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-center text-sm font-semibold text-red-700">{error}</div>}
 
       <form onSubmit={submitCheckout} aria-busy={busy} className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-3 px-3 pt-3 sm:px-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)]">
         <div className="space-y-3">
@@ -145,7 +151,9 @@ export default function CheckoutPage({ product }) {
             <label className="flex items-start gap-2 text-xs text-slate-700"><input required type="checkbox" className="mt-0.5 h-4 w-4 accent-emerald-600" /><span>Saya menyetujui <a href="/halaman/syarat-dan-ketentuan" target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 underline underline-offset-2">Syarat dan Ketentuan</a>.</span></label>
           </section>
 
-          <button disabled={busy} className="sticky bottom-2 z-10 h-12 w-full rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-600 px-4 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-wait disabled:opacity-70">{busy ? 'Menyiapkan pembayaran...' : `Beli sekarang - ${formatRupiah(total)}`}</button>
+          {tooSmall && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">Total pembayaran online minimal {formatRupiah(MIN_PAYMENT)}. {voucherState.discount > 0 ? 'Hapus atau ganti voucher.' : 'Hubungi admin untuk produk ini.'}</p>}
+          {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm font-semibold text-red-700">{error}</p>}
+          <button disabled={busy || tooSmall} className="sticky bottom-2 z-10 h-12 w-full rounded-xl bg-emerald-500 px-4 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60">{busy ? 'Memproses...' : total === 0 ? 'Ambil Gratis dengan Voucher' : `Beli sekarang - ${formatRupiah(total)}`}</button>
         </div>
       </form>
     </main>

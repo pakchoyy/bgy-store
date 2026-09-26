@@ -12,7 +12,8 @@ async function createVoucher(formData) {
   const discountValue = Number(formData.get('discount_value') || 0)
   const maxUses = formData.get('max_uses') ? Number(formData.get('max_uses')) : null
   const minOrderAmount = formData.get('min_order_amount') ? Number(formData.get('min_order_amount')) : 0
-  const endsAt = formData.get('ends_at') ? new Date(String(formData.get('ends_at'))).toISOString() : null
+  const rawEndsAt = String(formData.get('ends_at') || '')
+  const endsAt = rawEndsAt ? new Date(/[zZ]|[+-]\d\d:\d\d$/.test(rawEndsAt) ? rawEndsAt : `${rawEndsAt}:00+07:00`).toISOString() : null
 
   if (!code || !name || !discountValue) redirect('/admin/voucher?toast=error')
 
@@ -81,27 +82,59 @@ export default async function AdminVoucher({ searchParams }) {
       )}
 
       <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
-        <h2 className="text-lg font-extrabold text-slate-700">Create New Voucher</h2>
-        <form action={createVoucher} className="mt-4 grid gap-3 lg:grid-cols-[1fr_0.8fr_0.6fr_0.6fr]">
-          <input name="name" required placeholder="Nama promo" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
-          <input name="code" required placeholder="Kode, contoh BGYHEMAT" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold uppercase outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
-          <select name="discount_type" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100">
-            <option value="percent">Persen</option>
-            <option value="fixed">Nominal</option>
-          </select>
-          <input name="discount_value" required type="number" min="1" placeholder="Nilai" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
-          <input name="max_uses" type="number" min="1" placeholder="Limit pemakaian" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
-          <input name="min_order_amount" type="number" min="0" placeholder="Minimum belanja" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
-          <input name="ends_at" type="datetime-local" className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
-          <button className="rounded-xl bg-gradient-to-r from-[#25bd83] to-[#14b8a6] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-transform active:scale-[0.98]">
-            Create Voucher
+        <h2 className="text-lg font-extrabold text-slate-700">Buat Voucher Baru</h2>
+        <p className="mt-1 text-sm text-slate-500">Pembeli memasukkan kode voucher saat checkout produk berbayar.</p>
+        <form action={createVoucher} className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Nama promo</span>
+            <input name="name" required placeholder="Contoh: Promo Hari Guru" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
+            <span className="mt-1 block text-xs text-slate-500">Hanya untuk catatan kamu, tidak tampil ke pembeli.</span>
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Kode voucher</span>
+            <input name="code" required placeholder="Contoh: BGYHEMAT" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100 font-bold uppercase" />
+            <span className="mt-1 block text-xs text-slate-500">Yang diketik pembeli. Huruf besar, tanpa spasi.</span>
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Jenis diskon</span>
+            <select name="discount_type" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100">
+              <option value="percent">Persen (%)</option>
+              <option value="fixed">Nominal (Rp)</option>
+            </select>
+            <span className="mt-1 block text-xs text-slate-500">Persen = potongan % dari harga. Nominal = potongan rupiah tetap.</span>
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Besar diskon</span>
+            <input name="discount_value" required type="number" min="1" placeholder="Contoh: 20" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
+            <span className="mt-1 block text-xs text-slate-500">Isi 20 untuk 20% atau 5000 untuk Rp5.000. Isi 100 (persen) untuk gratis.</span>
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Batas pemakaian <span className="font-normal text-slate-400">(opsional)</span></span>
+            <input name="max_uses" type="number" min="1" placeholder="Contoh: 50" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
+            <span className="mt-1 block text-xs text-slate-500">Berapa kali kode bisa dipakai total. Kosongkan = tanpa batas.</span>
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Minimal belanja <span className="font-normal text-slate-400">(opsional)</span></span>
+            <input name="min_order_amount" type="number" min="0" placeholder="Contoh: 20000" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
+            <span className="mt-1 block text-xs text-slate-500">Voucher hanya berlaku kalau harga produk minimal segini (Rp).</span>
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">Berlaku sampai <span className="font-normal text-slate-400">(opsional)</span></span>
+            <input name="ends_at" type="datetime-local" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
+            <span className="mt-1 block text-xs text-slate-500">Setelah tanggal & jam ini voucher otomatis tidak berlaku. Kosongkan = selamanya.</span>
+          </label>
+          <p className="rounded-xl bg-amber-50 px-3 py-2.5 text-xs leading-relaxed text-amber-800 sm:col-span-2">
+            Catatan: total setelah diskon harus minimal <b>Rp1.000</b> (batas pembayaran online) atau tepat <b>Rp0</b> (gratis, file langsung didapat tanpa bayar).
+          </p>
+          <button className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-extrabold text-white shadow-sm transition-transform hover:bg-emerald-600 active:scale-[0.98] sm:col-span-2">
+            Buat Voucher
           </button>
         </form>
       </section>
 
       <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
         <div className="border-b border-slate-100 px-5 py-4">
-          <h2 className="text-lg font-extrabold text-slate-700">Voucher List</h2>
+          <h2 className="text-lg font-extrabold text-slate-700">Daftar Voucher</h2>
           <p className="mt-1 text-sm text-slate-500">Satu kode voucher bisa dipakai saat checkout sesuai batas yang kamu atur.</p>
         </div>
         <div className="divide-y divide-slate-100">
@@ -118,7 +151,7 @@ export default async function AdminVoucher({ searchParams }) {
                   <p className="font-bold text-slate-800">{voucher.name}</p>
                   <p className="text-xs text-slate-400"><span className="font-bold text-[#10946b]">{voucher.code}</span> - Diskon {formatDiscount(voucher)}</p>
                 </div>
-                <span className="text-sm text-slate-400">{remaining === null ? 'Unlimited' : `${remaining} left`}</span>
+                <span className="text-sm text-slate-400">{remaining === null ? 'Tanpa batas' : `Sisa ${remaining}`}{voucher.ends_at ? ` · s/d ${new Date(voucher.ends_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}` : ''}</span>
                 <form action={toggleVoucher}>
                   <input type="hidden" name="id" value={voucher.id} />
                   <input type="hidden" name="is_active" value={String(voucher.is_active)} />
@@ -128,7 +161,7 @@ export default async function AdminVoucher({ searchParams }) {
                 </form>
                 <form action={deleteVoucher}>
                   <input type="hidden" name="id" value={voucher.id} />
-                  <button className="rounded-xl border border-red-100 px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-50">Delete</button>
+                  <button className="rounded-xl border border-red-100 px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-50">Hapus</button>
                 </form>
               </div>
             )

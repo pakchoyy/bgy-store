@@ -386,6 +386,9 @@ export default function ProductForm({ initialData, categories = [] }) {
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
                 min="0"
               />
+              <p className={`mt-1 text-xs ${Number(form.sale_price) > 0 && Number(form.sale_price) < 1000 ? 'font-semibold text-red-600' : 'text-gray-500'}`}>
+                Minimal Rp1.000 — batas terkecil pembayaran online (QRIS/e-wallet).
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Harga Asli (Rp) — opsional</label>

@@ -66,8 +66,8 @@ export async function POST(request) {
     if (!hasMayarApiKey()) {
       return NextResponse.json({ error: 'Pembayaran belum dikonfigurasi. Hubungi admin.' }, { status: 500 })
     }
-    if (amount < 1000) {
-      return NextResponse.json({ error: 'Total pembayaran minimal Rp1.000' }, { status: 400 })
+    if (amount > 0 && amount < 1000) {
+      return NextResponse.json({ error: 'Total pembayaran online minimal Rp1.000. Voucher ini membuat total terlalu kecil.' }, { status: 400 })
     }
 
     const { data: order, error: orderError } = await supabase
@@ -89,6 +89,18 @@ export async function POST(request) {
     if (orderError || !order) {
       console.error('checkout order insert error:', orderError)
       return NextResponse.json({ error: 'Gagal membuat pesanan' }, { status: 500 })
+    }
+
+    if (amount === 0) {
+      const { data: fullOrder } = await supabase.from('orders').select('*, product:products(*)').eq('id', order.id).single()
+      const { markOrderPaid } = await import('@/lib/orders')
+      try {
+        await markOrderPaid(supabase, fullOrder, {})
+      } catch (e) {
+        console.error('free voucher order error:', e)
+        return NextResponse.json({ error: 'Gagal memproses voucher. Hubungi admin.' }, { status: 500 })
+      }
+      return NextResponse.json({ redirect_url: `/terima-kasih?order=${order.id}`, order_id: order.id })
     }
 
     try {

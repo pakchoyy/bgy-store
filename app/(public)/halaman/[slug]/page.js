@@ -3,8 +3,9 @@ import LynkShell from '@/components/public/LynkShell'
 import FAQAccordion from '@/components/public/FAQAccordion'
 import Link from 'next/link'
 import AboutPage from '@/components/public/AboutPage'
+import TermsPage from '@/components/public/TermsPage'
 import { demoNavItems, demoSettings, demoFooterConfig } from '@/lib/demo-data'
-import { getAppearance, settingsToMap } from '@/lib/utils'
+import { getAppearance, settingsToMap, parseSocialLinks } from '@/lib/utils'
 import { getAnnouncement, hasSupabase } from '@/lib/store-shell'
 
 const demoPages = {
@@ -127,6 +128,9 @@ export default async function HalamanPage({ params }) {
   const { slug } = params
   const { page, navItems, appearance, footerConfig, announcement } = await getData(slug)
   const isAbout = slug === 'tentang-kami' && page
+  const isTerms = slug === 'syarat-dan-ketentuan' && page
+  const wa = parseSocialLinks(appearance?.socialLinks || []).find((l) => l.platform === 'whatsapp')
+  const waUrl = wa?.url ? (wa.url.startsWith('http') ? wa.url : `https://wa.me/${wa.url.replace(/\D/g, '')}`) : null
 
   return (
     <LynkShell
@@ -137,7 +141,7 @@ export default async function HalamanPage({ params }) {
       topBarTitle={page?.title || 'Halaman'}
       pageHasHeading
     >
-      {isAbout ? <AboutPage /> : (
+      {isAbout ? <AboutPage /> : isTerms ? <TermsPage waUrl={waUrl} /> : (
       <div className="bg-white/95 rounded-2xl shadow-sm p-5">
         {!page ? (
           <div className="text-center py-8">

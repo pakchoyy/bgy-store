@@ -84,6 +84,7 @@ export default function ProductReviewList({ productId }) {
             <div className="flex items-start justify-between mb-2">
               <div>
                 <p className="font-semibold text-gray-900">{review.reviewer_name}</p>
+                {review.reviewer_institution && <p className="text-xs text-gray-500">{review.reviewer_institution}</p>}
                 <p className="text-xs text-gray-500">
                   {new Date(review.created_at).toLocaleDateString('id-ID', {
                     year: 'numeric',

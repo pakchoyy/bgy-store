@@ -320,7 +320,7 @@ export default function ReviewsManager({ initialReviews }) {
                           {review.reviewer_name}
                         </div>
                         <div className="text-xs text-slate-600">
-                          {review.reviewer_email}
+                          {[review.reviewer_institution, review.reviewer_email].filter(Boolean).join(' · ')}
                         </div>
                       </div>
                     </td>

@@ -20,7 +20,11 @@ export async function GET(request) {
 
     const rawDiscount = voucher.discount_type === 'fixed' ? Number(voucher.discount_value) : Math.floor(amount * Number(voucher.discount_value) / 100)
     const discount = Math.min(Math.max(0, rawDiscount), amount)
-    return NextResponse.json({ discount, code, message: `Voucher ${code} berhasil dipakai. Hemat Rp ${discount.toLocaleString('id-ID')}.` })
+    const total = amount - discount
+    if (total > 0 && total < 1000) {
+      return NextResponse.json({ error: `Voucher ${code} membuat total jadi Rp ${total.toLocaleString('id-ID')}, di bawah minimal pembayaran Rp1.000.` }, { status: 400 })
+    }
+    return NextResponse.json({ discount, code, message: total === 0 ? `Voucher ${code} berhasil dipakai. Produk ini jadi gratis!` : `Voucher ${code} berhasil dipakai. Hemat Rp ${discount.toLocaleString('id-ID')}.` })
   } catch (error) {
     console.error('voucher validation error:', error)
     return NextResponse.json({ error: 'Voucher belum dapat diperiksa.' }, { status: 500 })
