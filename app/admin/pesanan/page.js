@@ -70,7 +70,7 @@ const statusLabels = {
 
 const typeLabels = {
   produk: 'Produk',
-  donasi: '☕ Donasi',
+  donasi: '☕ Traktir',
 }
 
 const typeColors = {
@@ -191,7 +191,7 @@ export default async function AdminPesanan({ searchParams }) {
             </a>
           ))}
         </div>
-        <form method="GET" action="/admin/pesanan" className="flex-1 max-w-xs">
+        <form method="GET" action="/admin/pesanan" className="w-full sm:w-auto sm:flex-1 sm:max-w-xs">
           <input type="hidden" name="status" value={statusFilter} />
           <input type="hidden" name="type" value={typeFilter} />
           <input
