@@ -41,7 +41,7 @@ export default async function NotFound() {
           <h1 className="mt-2 text-xl font-bold text-slate-900">{title}</h1>
           <p className="mt-2 text-sm leading-relaxed text-slate-600">{description}</p>
           <div className="mt-5 grid gap-2">
-            <Link href={ctaUrl} className="flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-[background-color,transform] duration-150 hover:bg-emerald-600 active:scale-[0.97]">
+            <Link href={ctaUrl} className="flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-[background-color,transform] duration-150 hover:bg-emerald-800 active:scale-[0.97]">
               {ctaText}
             </Link>
             <Link href="/produk" className="flex min-h-11 items-center justify-center rounded-xl border border-[#0ea5a0] px-5 text-sm font-semibold text-[#0d7a8a] transition-colors hover:bg-teal-50">

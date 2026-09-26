@@ -57,7 +57,7 @@ export default function TermsPage({ waUrl }) {
             <ul className="mt-2 space-y-1.5">
               {allowed.map((item) => (
                 <li key={item} className="flex gap-2 text-emerald-900">
-                  <CircleCheck size={18} className="mt-0.5 shrink-0 text-emerald-600" aria-hidden="true" />
+                  <CircleCheck size={18} className="mt-0.5 shrink-0 text-emerald-700" aria-hidden="true" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -94,13 +94,13 @@ export default function TermsPage({ waUrl }) {
             href={waUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 text-sm font-bold text-white transition-colors hover:bg-emerald-600"
+            className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 text-sm font-bold text-white transition-colors hover:bg-emerald-800"
           >
             <BrandWhatsapp size={20} aria-hidden="true" />
             Hubungi via WhatsApp
           </a>
         ) : (
-          <Link href="/halaman/faq" className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-bold text-white transition-colors hover:bg-emerald-600">
+          <Link href="/halaman/faq" className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-bold text-white transition-colors hover:bg-emerald-800">
             Lihat FAQ
           </Link>
         )}

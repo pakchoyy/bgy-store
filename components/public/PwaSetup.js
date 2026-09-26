@@ -41,7 +41,7 @@ export default function PwaSetup() {
           await installEvent.userChoice.catch(() => null)
           dismiss()
         }}
-        className="rounded-lg bg-emerald-500 px-3 py-2 text-xs font-bold text-white"
+        className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white"
       >
         Pasang
       </button>

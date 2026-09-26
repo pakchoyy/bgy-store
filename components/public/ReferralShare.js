@@ -25,7 +25,7 @@ export default function ReferralShare({ code, percent, text }) {
         href={`https://wa.me/?text=${encodeURIComponent(message)}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 text-sm font-bold text-white hover:bg-emerald-600"
+        className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-bold text-white hover:bg-emerald-800"
       >
         Bagikan ke grup WhatsApp
       </a>

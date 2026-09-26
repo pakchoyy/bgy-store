@@ -197,7 +197,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                           aria-pressed={active}
                           onClick={() => { setCustomTip(''); setTipAmount(preset); }}
                           className={`rounded-lg border px-1 py-2 text-[11px] font-bold transition-colors ${
-                            active ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                            active ? 'border-emerald-500 bg-emerald-700 text-white' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                           }`}
                         >
                           {`${preset / 1000}rb`}
@@ -233,7 +233,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                 <button
                   type="submit"
                   disabled={tipBusy || tipAmount < MIN_TIP}
-                  className="mt-4 flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-500 px-6 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-[background-color,transform] duration-150 hover:bg-emerald-600 active:scale-[0.97] disabled:opacity-60"
+                  className="mt-4 flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-6 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-[background-color,transform] duration-150 hover:bg-emerald-800 active:scale-[0.97] disabled:opacity-60"
                 >
                   {redirecting ? 'Membuka QRIS...' : tipBusy ? 'Menyiapkan QRIS...' : `☕ Traktir ${formatTip(tipAmount)}`}
                 </button>
@@ -256,7 +256,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
             {(downloaded || downloadError) && (
               <CloseButton onClick={onClose} className="absolute right-4 top-4" />
             )}
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${downloaded ? 'bg-emerald-500' : 'bg-[#0ea5a0] animate-bounce'}`}>
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${downloaded ? 'bg-emerald-700' : 'bg-[#0ea5a0] animate-bounce'}`}>
               {downloaded ? (
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -334,7 +334,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full rounded-xl bg-emerald-500 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-600"
+                  className="w-full rounded-xl bg-emerald-700 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-800"
                 >
                   Selesai
                 </button>

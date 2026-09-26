@@ -131,7 +131,7 @@ export default function LynkShell({
               <button type="submit" className="rounded-xl bg-[#123b35] px-4 py-2 text-sm font-semibold text-white">Cari</button>
             </form>
           </details>
-          <button type="button" onClick={() => setCartOpen(open => !open)} aria-expanded={cartOpen} aria-label={`Keranjang berisi ${cartItems.length} produk`} className="relative flex h-10 min-w-12 items-center justify-center gap-1 rounded-full px-2 hover:bg-white/10">
+          <button type="button" onClick={() => setCartOpen(open => !open)} aria-expanded={cartOpen} aria-label={`Cart, ${cartItems.length} produk`} className="relative flex h-10 min-w-12 items-center justify-center gap-1 rounded-full px-2 hover:bg-white/10">
             <svg aria-hidden="true" className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M3 3h2l.5 3m0 0L7 15h10l3-9H5.5Zm3 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
             </svg>
@@ -166,7 +166,7 @@ export default function LynkShell({
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm font-semibold leading-snug text-slate-900 line-clamp-2">{item.title}</span>
-                          <span className="mt-1 block text-sm font-semibold text-emerald-600">{formatCartPrice(item.sale_price)}</span>
+                          <span className="mt-1 block text-sm font-semibold text-emerald-700">{formatCartPrice(item.sale_price)}</span>
                         </span>
                         <span className="shrink-0 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">Lihat</span>
                       </a>
@@ -188,7 +188,7 @@ export default function LynkShell({
                     <span className="font-semibold text-slate-500">Total ({cartItems.length} item)</span>
                     <span className="font-bold text-slate-900">{formatCartPrice(cartTotal)}</span>
                   </div>
-                  <a href={cartCheckoutHref} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-transform duration-150 hover:bg-emerald-600 active:scale-[0.96]">
+                  <a href={cartCheckoutHref} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-transform duration-150 hover:bg-emerald-800 active:scale-[0.96]">
                     {cartItems.length > 1 ? `Checkout Semua (${cartItems.length} produk)` : 'Beli Sekarang'}
                   </a>
                   <a href="/produk" className="flex min-h-12 w-full items-center justify-center rounded-xl border border-[#0ea5a0] px-4 py-3 text-sm font-semibold text-[#0d7a8a]">

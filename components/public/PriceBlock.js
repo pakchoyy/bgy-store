@@ -9,10 +9,10 @@ export default function PriceBlock({ salePrice, originalPrice }) {
     const percent = Math.round(((originalPrice - salePrice) / originalPrice) * 100);
     return (
       <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm line-through text-gray-400 font-semibold">
+                  <span className="text-sm line-through text-gray-500 font-semibold">
           {fmt(originalPrice)}
         </span>
-                  <span className="text-xl font-semibold text-emerald-600">
+                  <span className="text-xl font-semibold text-emerald-700">
           {fmt(salePrice)}
         </span>
         <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
@@ -23,7 +23,7 @@ export default function PriceBlock({ salePrice, originalPrice }) {
   }
 
   return (
-                  <span className="text-xl font-semibold text-emerald-600">
+                  <span className="text-xl font-semibold text-emerald-700">
       {fmt(salePrice)}
     </span>
   );

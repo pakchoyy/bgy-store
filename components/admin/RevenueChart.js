@@ -38,7 +38,7 @@ export default function RevenueChart({ days }) {
             className="group flex h-full min-w-0 flex-1 items-end focus:outline-none"
           >
             <span
-              className={`block w-full rounded-t-[4px] transition-colors ${active === index ? 'bg-emerald-600' : 'bg-emerald-400 group-hover:bg-emerald-500'} ${day.total === 0 ? 'bg-slate-200' : ''}`}
+              className={`block w-full rounded-t-[4px] transition-colors ${active === index ? 'bg-emerald-600' : 'bg-emerald-400 group-hover:bg-emerald-700'} ${day.total === 0 ? 'bg-slate-200' : ''}`}
               style={{ height: day.total ? `${Math.max(4, (day.total / max) * 100)}%` : '2px' }}
             />
           </button>

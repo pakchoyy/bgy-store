@@ -11,7 +11,7 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
         <span className="rounded-md bg-gradient-to-r from-amber-400 to-orange-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">⚡ Flash sale</span>
       )}
       {hasDiscount && !isSoldOut && (
-        <span className="font-numeric text-[10px] font-semibold text-gray-400 line-through">{fmt(product.original_price)}</span>
+        <span className="font-numeric text-[10px] font-semibold text-gray-500 line-through">{fmt(product.original_price)}</span>
       )}
       <span
         className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
@@ -19,7 +19,7 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
             ? 'bg-gray-400 text-white'
             : isFree
               ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-300'
-              : 'bg-emerald-500 text-white shadow-sm shadow-emerald-600/30'
+              : 'bg-emerald-700 text-white shadow-sm shadow-emerald-600/30'
         }`}
       >
         {isSoldOut ? 'Habis' : isFree ? 'Gratis' : fmt(product.sale_price)}

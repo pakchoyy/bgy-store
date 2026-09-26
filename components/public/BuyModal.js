@@ -144,7 +144,7 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
             <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80">
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between gap-4"><span className="text-slate-500">Subtotal</span><span>{formatRupiah(price)}</span></div>
-                <div className="flex justify-between gap-4 text-emerald-600"><span>Diskon</span><span>- {formatRupiah(voucherState.discount)}</span></div>
+                <div className="flex justify-between gap-4 text-emerald-700"><span>Diskon</span><span>- {formatRupiah(voucherState.discount)}</span></div>
                 <div className="flex justify-between gap-4 border-t border-slate-200 pt-2 text-base font-bold"><span>Total</span><span>{formatRupiah(total)}</span></div>
               </div>
               <input type="hidden" name="voucher_code" value={voucherCode} />
@@ -191,7 +191,7 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
               </p>
             )}
 
-            <button disabled={busy || tooSmall} className="h-12 w-full rounded-xl bg-emerald-500 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60">
+            <button disabled={busy || tooSmall} className="h-12 w-full rounded-xl bg-emerald-700 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60">
               {busy ? 'Memproses...' : total === 0 ? 'Ambil Gratis dengan Voucher' : `Beli sekarang - ${formatRupiah(total)}`}
             </button>
             <WhatsAppBuyButton waUrl={waUrl} product={product} className="pt-1 pb-[env(safe-area-inset-bottom)]" />

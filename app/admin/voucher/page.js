@@ -126,7 +126,7 @@ export default async function AdminVoucher({ searchParams }) {
           <p className="rounded-xl bg-amber-50 px-3 py-2.5 text-xs leading-relaxed text-amber-800 sm:col-span-2">
             Catatan: total setelah diskon harus minimal <b>Rp1.000</b> (batas pembayaran online) atau tepat <b>Rp0</b> (gratis, file langsung didapat tanpa bayar).
           </p>
-          <button className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-extrabold text-white shadow-sm transition-transform hover:bg-emerald-600 active:scale-[0.98] sm:col-span-2">
+          <button className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-extrabold text-white shadow-sm transition-transform hover:bg-emerald-800 active:scale-[0.98] sm:col-span-2">
             Buat Voucher
           </button>
         </form>

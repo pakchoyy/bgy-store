@@ -47,7 +47,7 @@ export default function OrderLookup({ waUrl }) {
             <input name="whatsapp" type="tel" required inputMode="tel" autoComplete="tel" placeholder="08xxxxxxxxxx" className={input} />
           </label>
           {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{error}</p>}
-          <button disabled={busy} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-500 text-sm font-bold text-white shadow-md shadow-emerald-600/25 hover:bg-emerald-600 disabled:opacity-60">
+          <button disabled={busy} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 text-sm font-bold text-white shadow-md shadow-emerald-600/25 hover:bg-emerald-800 disabled:opacity-60">
             {busy ? 'Mencari...' : 'Cek Pesanan'}
           </button>
         </form>
@@ -77,7 +77,7 @@ export default function OrderLookup({ waUrl }) {
                         {new Date(order.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })} · Rp{Number(order.amount || 0).toLocaleString('id-ID')}
                       </p>
                     </div>
-                    <a href={order.link} className="shrink-0 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-600">Download</a>
+                    <a href={order.link} className="shrink-0 rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-800">Download</a>
                   </li>
                 ))}
               </ul>

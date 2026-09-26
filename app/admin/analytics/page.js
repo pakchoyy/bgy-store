@@ -162,7 +162,7 @@ export default async function AdminAnalytics() {
           Laporan bulanan
           <input type="month" name="month" required defaultValue={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' }).slice(0, 7)} className="mt-1 block rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm" />
         </label>
-        <button type="submit" className="rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-600">
+        <button type="submit" className="rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-800">
           ⬇ Download Laporan (Excel)
         </button>
         <p className="w-full text-xs text-gray-500">Berisi ringkasan pemasukan, produk terlaris, dan semua transaksi. Buka dengan Excel atau Google Sheets.</p>
@@ -226,7 +226,7 @@ export default async function AdminAnalytics() {
                     <td className="px-2 py-2 text-right font-semibold text-gray-900">{p.views}</td>
                     <td className="px-2 py-2 text-right text-gray-700">{p.clicks}</td>
                     <td className="px-2 py-2 text-right text-gray-700">{p.type === 'paid' ? p.sold : '–'}</td>
-                    <td className={`py-2 pl-2 text-right font-semibold ${p.conversion === null ? 'text-gray-300' : p.conversion >= 2 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                    <td className={`py-2 pl-2 text-right font-semibold ${p.conversion === null ? 'text-gray-300' : p.conversion >= 2 ? 'text-emerald-700' : 'text-amber-600'}`}>
                       {p.conversion === null ? '–' : `${p.conversion}%`}
                     </td>
                   </tr>

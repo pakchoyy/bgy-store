@@ -121,7 +121,7 @@ export default function CheckoutPage({ products, waUrl }) {
                     <p className="line-clamp-2 text-sm font-semibold leading-snug sm:text-base">{item.title}</p>
                     <p className="text-xs text-slate-500">1x produk digital</p>
                   </div>
-                  <p className="shrink-0 text-sm font-bold text-emerald-600">{formatRupiah(item.sale_price)}</p>
+                  <p className="shrink-0 text-sm font-bold text-emerald-700">{formatRupiah(item.sale_price)}</p>
                 </li>
               ))}
             </ul>
@@ -145,7 +145,7 @@ export default function CheckoutPage({ products, waUrl }) {
           <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80 sm:p-4">
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between gap-4"><span className="text-slate-500">Subtotal</span><span>{formatRupiah(price)}</span></div>
-              <div className="flex justify-between gap-4 text-emerald-600"><span>Diskon</span><span>- {formatRupiah(voucherState.discount)}</span></div>
+              <div className="flex justify-between gap-4 text-emerald-700"><span>Diskon</span><span>- {formatRupiah(voucherState.discount)}</span></div>
               <div className="flex justify-between gap-4 border-t border-slate-200 pt-2 text-base font-bold"><span>Total</span><span>{formatRupiah(total)}</span></div>
             </div>
             <input type="hidden" name="voucher_code" value={voucherCode} />
@@ -172,7 +172,7 @@ export default function CheckoutPage({ products, waUrl }) {
 
           {tooSmall && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">Total pembayaran online minimal {formatRupiah(MIN_PAYMENT)}. {voucherState.discount > 0 ? 'Hapus atau ganti voucher.' : 'Hubungi admin untuk produk ini.'}</p>}
           {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm font-semibold text-red-700">{error}</p>}
-          <button disabled={busy || tooSmall} className="sticky bottom-2 z-10 h-12 w-full rounded-xl bg-emerald-500 px-4 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60">{busy ? 'Memproses...' : total === 0 ? 'Ambil Gratis dengan Voucher' : `Beli sekarang - ${formatRupiah(total)}`}</button>
+          <button disabled={busy || tooSmall} className="sticky bottom-2 z-10 h-12 w-full rounded-xl bg-emerald-700 px-4 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60">{busy ? 'Memproses...' : total === 0 ? 'Ambil Gratis dengan Voucher' : `Beli sekarang - ${formatRupiah(total)}`}</button>
           <WhatsAppBuyButton waUrl={waUrl} product={isCart ? { title: products.map((p) => p.title).join(', '), sale_price: price } : product} />
         </div>
       </form>

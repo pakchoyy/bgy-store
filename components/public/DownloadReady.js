@@ -72,7 +72,7 @@ export default function DownloadReady({ token, itemId, freeProductId, title, isL
     <>
       <div className={`${compact ? 'mt-3' : 'mt-4'} rounded-2xl border p-4 text-left ${done ? 'border-emerald-200 bg-emerald-50' : 'border-teal-200 bg-teal-50/60'}`}>
         <div className="flex items-start gap-3">
-          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white ${done ? 'bg-emerald-500' : 'bg-[#0ea5a0]'}`} aria-hidden="true">
+          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white ${done ? 'bg-emerald-700' : 'bg-[#0ea5a0]'}`} aria-hidden="true">
             {done ? (
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
             ) : isLink ? (
@@ -112,7 +112,7 @@ export default function DownloadReady({ token, itemId, freeProductId, title, isL
             type="button"
             onClick={start}
             disabled={state === 'downloading'}
-            className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-[background-color,transform] duration-150 hover:bg-emerald-600 active:scale-[0.97] disabled:opacity-70"
+            className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-[background-color,transform] duration-150 hover:bg-emerald-800 active:scale-[0.97] disabled:opacity-70"
           >
             {state === 'downloading' ? 'Memproses...' : isLink ? 'Buka Link Produk' : 'Download Sekarang'}
           </button>
@@ -125,7 +125,7 @@ export default function DownloadReady({ token, itemId, freeProductId, title, isL
             <div className="mt-3 rounded-xl bg-white p-3 text-xs text-gray-700 ring-1 ring-gray-200">
               <p>{isLink ? 'Buka link produk lagi?' : 'File mungkin sudah ada di HP kamu. Tetap download lagi?'}</p>
               <div className="mt-2 flex gap-2">
-                <button type="button" onClick={start} className="flex-1 rounded-lg bg-emerald-500 px-3 py-2 font-bold text-white">Ya, {isLink ? 'buka' : 'download'} lagi</button>
+                <button type="button" onClick={start} className="flex-1 rounded-lg bg-emerald-700 px-3 py-2 font-bold text-white">Ya, {isLink ? 'buka' : 'download'} lagi</button>
                 <button type="button" onClick={() => setConfirmAgain(false)} className="flex-1 rounded-lg bg-gray-100 px-3 py-2 font-semibold text-gray-700">Batal</button>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function DownloadReady({ token, itemId, freeProductId, title, isL
 
       {toast && (
         <div role="status" className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-[#123b35] px-4 py-3 text-sm text-white shadow-2xl">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500" aria-hidden="true">✓</span>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-700" aria-hidden="true">✓</span>
           <span className="min-w-0 flex-1">
             <strong className="block">{isLink ? 'Link dibuka di tab baru' : 'Download dimulai'}</strong>
             <span className="text-white/80">{isLink ? 'Cek tab browser kamu.' : 'Cek notifikasi atau folder Download.'}</span>

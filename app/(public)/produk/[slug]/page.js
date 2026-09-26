@@ -206,7 +206,7 @@ export default async function ProdukDetailPage({ params }) {
               <ul className="mt-3 space-y-2">
                 {bundleItems.map((item) => (
                   <li key={item.id} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 text-sm ring-1 ring-emerald-100">
-                    <span className="text-emerald-600" aria-hidden="true">✓</span>
+                    <span className="text-emerald-700" aria-hidden="true">✓</span>
                     <Link href={`/produk/${item.slug}`} className="min-w-0 flex-1 truncate font-medium text-gray-800 hover:text-emerald-700">{item.title}</Link>
                     <span className="shrink-0 text-xs text-gray-400 line-through">{item.type === 'free' ? '' : formatRupiah(item.sale_price)}</span>
                   </li>

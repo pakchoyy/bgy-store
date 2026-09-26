@@ -156,7 +156,7 @@ export default function ProductReviewForm({ productId, orderId, onSuccess }) {
       <button
         type="submit"
         disabled={isSubmitting || !name.trim()}
-        className="min-h-12 w-full rounded-xl bg-emerald-500 px-4 text-sm font-bold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-12 w-full rounded-xl bg-emerald-700 px-4 text-sm font-bold text-white transition-colors hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? 'Mengirim...' : 'Kirim Review'}
       </button>

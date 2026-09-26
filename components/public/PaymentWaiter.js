@@ -69,7 +69,7 @@ export default function PaymentWaiter({ orderId }) {
           }
         }}
         disabled={checking}
-        className="flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-[background-color,transform] duration-150 hover:bg-emerald-600 active:scale-[0.97] disabled:opacity-70"
+        className="flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-[background-color,transform] duration-150 hover:bg-emerald-800 active:scale-[0.97] disabled:opacity-70"
       >
         {checking ? 'Mengecek...' : 'Saya sudah bayar, cek sekarang'}
       </button>

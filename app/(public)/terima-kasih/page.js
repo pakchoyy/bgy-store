@@ -85,7 +85,7 @@ function getWhatsAppUrl(appearance) {
 }
 
 function StatusIcon({ tone, children }) {
-  const tones = { green: 'bg-emerald-100 text-emerald-600', amber: 'bg-amber-100 text-amber-600', red: 'bg-red-100 text-red-600' }
+  const tones = { green: 'bg-emerald-100 text-emerald-700', amber: 'bg-amber-100 text-amber-800', red: 'bg-red-100 text-red-600' }
   return (
     <div className={`mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full ${tones[tone]}`} aria-hidden="true">
       <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">{children}</svg>
@@ -97,7 +97,7 @@ const checkPath = <path strokeLinecap="round" strokeLinejoin="round" strokeWidth
 const clockPath = <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
 const alertPath = <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
 
-const waButton = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 text-sm font-bold text-white'
+const waButton = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 text-sm font-bold text-white'
 
 export default async function TerimaKasihPage({ searchParams }) {
   const token = searchParams?.token || ''
