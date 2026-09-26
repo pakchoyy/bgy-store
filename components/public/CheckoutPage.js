@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { readRememberedVoucher } from '@/lib/voucher-memory';
 import { BackButton } from '@/components/ui/back-button';
 import WhatsAppBuyButton from '@/components/public/WhatsAppBuyButton';
 
@@ -44,8 +45,17 @@ export default function CheckoutPage({ products, waUrl }) {
   const total = Math.max(0, price - voucherState.discount);
   const tooSmall = total > 0 && total < MIN_PAYMENT;
 
-  async function applyVoucher() {
-    const code = voucherCode.trim().toUpperCase();
+  useEffect(() => {
+    const remembered = readRememberedVoucher();
+    if (!remembered) return;
+    setVoucherCode(remembered);
+    setVoucherOpen(true);
+    applyVoucher(remembered);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function applyVoucher(codeOverride) {
+    const code = String(typeof codeOverride === 'string' ? codeOverride : voucherCode).trim().toUpperCase();
     if (!code) {
       setVoucherState({ status: 'error', message: 'Masukkan kode voucher terlebih dahulu.', discount: 0 });
       return;
@@ -140,7 +150,7 @@ export default function CheckoutPage({ products, waUrl }) {
             </div>
             <input type="hidden" name="voucher_code" value={voucherCode} />
             <button type="button" onClick={() => setVoucherOpen((value) => !value)} aria-expanded={voucherOpen} className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-emerald-500 px-4 text-xs font-bold text-emerald-700 transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-200"><span aria-hidden="true">%</span>{voucherState.status === 'success' ? 'Ubah voucher' : 'Tambah voucher'}</button>
-            {voucherOpen && <div className="mt-2 rounded-xl bg-emerald-50 p-2.5"><div className="flex gap-2"><input id="voucher-code" value={voucherCode} onChange={(event) => setVoucherCode(event.target.value.toUpperCase())} autoComplete="off" placeholder="Kode voucher" className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold uppercase outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" /><button type="button" onClick={applyVoucher} disabled={voucherState.status === 'loading'} className="h-9 rounded-lg bg-emerald-600 px-3 text-xs font-bold text-white disabled:opacity-60">{voucherState.status === 'loading' ? 'Cek...' : 'Pakai'}</button></div>{voucherState.message && <p role={voucherState.status === 'error' ? 'alert' : 'status'} className={`mt-1.5 text-xs font-semibold ${voucherState.status === 'error' ? 'text-red-600' : 'text-emerald-700'}`}>{voucherState.message}</p>}</div>}
+            {voucherOpen && <div className="mt-2 rounded-xl bg-emerald-50 p-2.5"><div className="flex gap-2"><input id="voucher-code" value={voucherCode} onChange={(event) => setVoucherCode(event.target.value.toUpperCase())} autoComplete="off" placeholder="Kode voucher" className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold uppercase outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" /><button type="button" onClick={() => applyVoucher()} disabled={voucherState.status === 'loading'} className="h-9 rounded-lg bg-emerald-600 px-3 text-xs font-bold text-white disabled:opacity-60">{voucherState.status === 'loading' ? 'Cek...' : 'Pakai'}</button></div>{voucherState.message && <p role={voucherState.status === 'error' ? 'alert' : 'status'} className={`mt-1.5 text-xs font-semibold ${voucherState.status === 'error' ? 'text-red-600' : 'text-emerald-700'}`}>{voucherState.message}</p>}</div>}
           </section>
         </div>
 

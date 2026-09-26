@@ -115,6 +115,16 @@ export default async function AdminSettings({ searchParams }) {
                 <input name="promo_after_download_text" defaultValue={settings.promo_after_download_text || ''} placeholder="Contoh: Diskon 20% untuk semua produk premium" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
               </label>
             </div>
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <h2 className="text-sm font-bold text-gray-900">🤝 Referral pembeli</h2>
+              <p className="mt-1 text-xs text-gray-600">Setiap pembeli produk berbayar otomatis dapat kode pribadi (contoh REFBUDI1A2B) di halaman Terima Kasih untuk dibagikan. Temannya dapat diskon. Lihat siapa yang paling sering mengajak di menu Voucher (&ldquo;Dipakai X×&rdquo;), lalu beri hadiah. Isi 0 untuk menonaktifkan.</p>
+              <label className="mt-3 block text-sm font-medium text-gray-700">Diskon untuk teman (%)
+                <input name="referral_discount_percent" type="number" min="0" max="90" defaultValue={settings.referral_discount_percent || ''} placeholder="Contoh: 10" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
+              </label>
+              <label className="mt-3 block text-sm font-medium text-gray-700">Teks ajakan <span className="font-normal text-gray-400">(opsional)</span>
+                <input name="referral_share_text" defaultValue={settings.referral_share_text || ''} placeholder="Contoh: Aku langganan bahan ajar di Bantu Guru Yuk, praktis!" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
+              </label>
+            </div>
           </div>
           <div className="flex justify-end">
             <button type="submit" className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">

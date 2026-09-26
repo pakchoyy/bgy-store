@@ -8,6 +8,7 @@ import Link from 'next/link'
 import PaymentWaiter from '@/components/public/PaymentWaiter'
 import DownloadReady from '@/components/public/DownloadReady'
 import ClearPurchasedCart from '@/components/public/ClearPurchasedCart'
+import ReferralShare from '@/components/public/ReferralShare'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,7 +64,14 @@ async function getOrder({ token, orderId }) {
     items = (await getOrderDownloads(supabase, order)).map((d) => ({ product_id: d.product_id, title: d.title, product: d }))
   }
 
-  return { ...shell, order: order || null, items }
+  let referralCode = null
+  const referralPercent = Number(shell.settings?.referral_discount_percent || 0)
+  if (order?.status === 'paid' && order.product_id && referralPercent > 0 && referralPercent <= 90 && hasServiceRole()) {
+    const { ensureReferralVoucher } = await import('@/lib/referral')
+    referralCode = await ensureReferralVoucher(supabase, order, referralPercent).catch(() => null)
+  }
+
+  return { ...shell, order: order || null, items, referralCode }
 }
 
 function getWhatsAppUrl(appearance) {
@@ -216,6 +224,14 @@ export default async function TerimaKasihPage({ searchParams }) {
             </>
           )}
         </div>
+
+        {isPaid && data.referralCode && (
+          <ReferralShare
+            code={data.referralCode}
+            percent={Number(data.settings?.referral_discount_percent || 0)}
+            text={data.settings?.referral_share_text}
+          />
+        )}
 
         {isPaid && order?.product && (
           <div>

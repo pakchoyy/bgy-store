@@ -151,7 +151,7 @@ export default async function AdminVoucher({ searchParams }) {
                   <p className="font-bold text-slate-800">{voucher.name}</p>
                   <p className="text-xs text-slate-400"><span className="font-bold text-[#10946b]">{voucher.code}</span> - Diskon {formatDiscount(voucher)}</p>
                 </div>
-                <span className="text-sm text-slate-400">{remaining === null ? 'Tanpa batas' : `Sisa ${remaining}`}{voucher.ends_at ? ` · s/d ${new Date(voucher.ends_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}` : ''}</span>
+                <span className="text-sm text-slate-400">{`Dipakai ${voucher.used_count || 0}×`} · {remaining === null ? 'Tanpa batas' : `Sisa ${remaining}`}{voucher.ends_at ? ` · s/d ${new Date(voucher.ends_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}` : ''}</span>
                 <form action={toggleVoucher}>
                   <input type="hidden" name="id" value={voucher.id} />
                   <input type="hidden" name="is_active" value={String(voucher.is_active)} />
