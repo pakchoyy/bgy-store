@@ -11,12 +11,14 @@ import ProductReviewList from '@/components/public/ProductReviewList'
 import { demoProducts } from '@/lib/demo-data'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import Link from 'next/link'
-import { whatsappUrl } from '@/lib/utils'
+import { whatsappUrl, parsePreviewImages, formatRupiah } from '@/lib/utils'
+import ProductStack from '@/components/public/ProductStack'
 
 async function getProduct(slug) {
   if (!hasSupabase()) {
     const product = demoProducts.find((p) => p.slug === slug && p.is_active)
-    return { ...demoShellData(), product: product || null, faqs: [] }
+    const related = demoProducts.filter((p) => p.is_active && p.id !== product?.id).slice(0, 4)
+    return { ...demoShellData(), product: product || null, faqs: [], bundleItems: [], related, promo: {} }
   }
 
   const shell = await fetchStoreShell()
@@ -35,14 +37,29 @@ async function getProduct(slug) {
   }
 
   let delivery = { is_link: false, file_name: null }
+  let bundleIds = []
+  let promo = {}
   if (product?.id) {
     const { createTrustedServerClient } = await import('@/lib/supabase-server')
     const trusted = await createTrustedServerClient()
-    const { data: fileInfo } = await trusted.from('products').select('file_url, file_name').eq('id', product.id).maybeSingle()
+    let { data: fileInfo, error: fileError } = await trusted.from('products').select('file_url, file_name, bundle_product_ids').eq('id', product.id).maybeSingle()
+    if (fileError) ({ data: fileInfo } = await trusted.from('products').select('file_url, file_name').eq('id', product.id).maybeSingle())
     delivery = { is_link: !!fileInfo?.file_url, file_name: fileInfo?.file_url ? null : fileInfo?.file_name || null }
+    bundleIds = Array.isArray(fileInfo?.bundle_product_ids) ? fileInfo.bundle_product_ids : []
+    const { data: promoRows } = await supabase.from('settings').select('key,value').like('key', 'promo_after_download_%')
+    promo = Object.fromEntries((promoRows || []).map((row) => [row.key, row.value]))
   }
 
-  return { ...shell, product: product ? { ...product, ...delivery } : null, faqs }
+  const all = shell.products || []
+  const bundleItems = bundleIds.map((id) => all.find((p) => p.id === id)).filter(Boolean)
+  const related = product
+    ? all
+        .filter((p) => p.id !== product.id && !bundleIds.includes(p.id) && p.category_id && p.category_id === product.category_id)
+        .concat(all.filter((p) => p.id !== product.id && !bundleIds.includes(p.id) && p.category_id !== product.category_id))
+        .slice(0, 4)
+    : []
+
+  return { ...shell, product: product ? { ...product, ...delivery } : null, faqs, bundleItems, related, promo }
 }
 
 export async function generateMetadata({ params }) {
@@ -67,7 +84,9 @@ export async function generateMetadata({ params }) {
 export default async function ProdukDetailPage({ params }) {
   const { slug } = params
   const data = await getProduct(slug)
-  const { product, navItems, appearance, footerConfig, announcement, faqs } = data
+  const { product, navItems, appearance, footerConfig, announcement, faqs, bundleItems = [], related = [], promo = {} } = data
+  const previewImages = parsePreviewImages(product?.preview_path)
+  const bundleWorth = bundleItems.reduce((sum, p) => sum + Number(p.sale_price || 0), 0)
 
   if (!product) {
     return (
@@ -134,6 +153,40 @@ export default async function ProdukDetailPage({ params }) {
             </section>
           )}
 
+          {previewImages.length > 0 && (
+            <section aria-labelledby="preview-title" className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h2 id="preview-title" className="text-xl font-semibold text-gray-950">Intip Isinya</h2>
+              <p className="mt-1 text-xs text-gray-500">Geser untuk melihat, ketuk untuk memperbesar.</p>
+              <div className="-mx-1 mt-3 flex snap-x gap-3 overflow-x-auto px-1 pb-2">
+                {previewImages.map((url, index) => (
+                  <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="block w-40 shrink-0 snap-start overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm">
+                    <img src={url} alt={`Pratinjau halaman ${index + 1} ${product.title}`} loading="lazy" className="aspect-[3/4] w-full object-cover" />
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {bundleItems.length > 0 && (
+            <section aria-labelledby="bundle-title" className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
+              <h2 id="bundle-title" className="text-xl font-semibold text-gray-950">Isi Paket ({bundleItems.length} produk)</h2>
+              {bundleWorth > Number(product.sale_price || 0) && (
+                <p className="mt-1 text-sm font-semibold text-emerald-700">
+                  Harga satuan {formatRupiah(bundleWorth)} → hemat {formatRupiah(bundleWorth - Number(product.sale_price || 0))}
+                </p>
+              )}
+              <ul className="mt-3 space-y-2">
+                {bundleItems.map((item) => (
+                  <li key={item.id} className="flex items-center gap-2 rounded-xl bg-white px-3 py-2.5 text-sm ring-1 ring-emerald-100">
+                    <span className="text-emerald-600" aria-hidden="true">✓</span>
+                    <Link href={`/produk/${item.slug}`} className="min-w-0 flex-1 truncate font-medium text-gray-800 hover:text-emerald-700">{item.title}</Link>
+                    <span className="shrink-0 text-xs text-gray-400 line-through">{item.type === 'free' ? '' : formatRupiah(item.sale_price)}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <ProductFAQ faqs={faqs} />
 
           {product.type !== 'free' && (
@@ -162,10 +215,19 @@ export default async function ProdukDetailPage({ params }) {
               file_name: product.file_name,
             }}
             waUrl={waUrl}
-            settings={{}}
+            settings={promo}
           />
         </div>
       </article>
+
+      {related.length > 0 && (
+        <section aria-labelledby="related-title" className="-mt-16 mb-20">
+          <h2 id="related-title" className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+            Guru lain juga melihat
+          </h2>
+          <ProductStack products={related} />
+        </section>
+      )}
     </LynkShell>
   )
 }

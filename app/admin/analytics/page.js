@@ -157,6 +157,17 @@ export default async function AdminAnalytics() {
         <p className="text-sm text-gray-500 mt-0.5">Ringkasan pengunjung dan penjualan</p>
       </div>
 
+      <form method="GET" action="/api/admin/report" className="flex flex-wrap items-end gap-3 rounded-xl bg-white p-4 shadow-card">
+        <label className="text-sm font-semibold text-gray-700">
+          Laporan bulanan
+          <input type="month" name="month" required defaultValue={new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' }).slice(0, 7)} className="mt-1 block rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm" />
+        </label>
+        <button type="submit" className="rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-600">
+          ⬇ Download Laporan (Excel)
+        </button>
+        <p className="w-full text-xs text-gray-500">Berisi ringkasan pemasukan, produk terlaris, dan semua transaksi. Buka dengan Excel atau Google Sheets.</p>
+      </form>
+
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Views 30 Hari" value={stats.views.toLocaleString('id-ID')} sub="halaman dibuka" />
         <StatCard label="Clicks 30 Hari" value={stats.clicks.toLocaleString('id-ID')} sub="klik produk & tombol" />

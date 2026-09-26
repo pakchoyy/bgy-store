@@ -11,6 +11,15 @@ async function getCategories() {
   return []
 }
 
+async function getProductOptions() {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase.from('products').select('id, title, type, sale_price').is('deleted_at', null).order('title')
+    if (data) return data
+  } catch {}
+  return []
+}
+
 export default async function AdminProdukBaru() {
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
   if (!isDemo) {
@@ -21,6 +30,8 @@ export default async function AdminProdukBaru() {
 
   const categories = await getCategories()
 
+  const productOptions = await getProductOptions()
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -29,7 +40,7 @@ export default async function AdminProdukBaru() {
           <p className="text-sm text-gray-500 mt-0.5">Lengkapi informasi produk di bawah ini</p>
         </div>
       </div>
-      <ProductForm categories={categories} />
+      <ProductForm categories={categories} productOptions={productOptions} />
     </div>
   )
 }

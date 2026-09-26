@@ -45,14 +45,12 @@ export async function GET(request) {
     let target = order.product;
     if (itemId && itemId !== order.product_id) {
       if (!/^[0-9a-f-]{36}$/i.test(itemId)) return fail('Item tidak valid', 400);
-      const { data: item } = await supabase
-        .from('order_items')
-        .select('product:products(file_url, file_path, file_name)')
-        .eq('order_id', order.id)
-        .eq('product_id', itemId)
-        .maybeSingle();
-      if (!item?.product) return fail('Produk tidak ada di pesanan ini', 403);
-      target = item.product;
+      const { getOrderDownloads } = await import('@/lib/orders');
+      const allowed = await getOrderDownloads(supabase, order);
+      if (!allowed.some((entry) => entry.product_id === itemId)) return fail('Produk tidak ada di pesanan ini', 403);
+      const { data: product } = await supabase.from('products').select('file_url, file_path, file_name').eq('id', itemId).maybeSingle();
+      if (!product) return fail('Produk tidak ditemukan', 404);
+      target = product;
     }
 
     const downloadUrl = await resolveProductDownloadUrl(supabase, target);

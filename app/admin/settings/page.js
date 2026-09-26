@@ -9,7 +9,8 @@ async function saveSettings(formData) {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/settings?tab=${raw._tab || 'umum'}&toast=demo`)
   const keys = Object.keys(raw).filter(k => k !== '_tab')
   for (const key of keys) {
-    const { error } = await supabase.from('settings').upsert({ key, value: raw[key] }, { onConflict: 'key' })
+    const value = key === 'promo_after_download_code' ? String(raw[key]).trim().toUpperCase() : raw[key]
+    const { error } = await supabase.from('settings').upsert({ key, value }, { onConflict: 'key' })
     if (error) redirect(`/admin/settings?tab=${raw._tab || 'umum'}&toast=error`)
   }
   redirect(`/admin/settings?tab=${raw._tab || 'umum'}&toast=success`)
@@ -104,28 +105,15 @@ export default async function AdminSettings({ searchParams }) {
         <form action={saveSettings} className="max-w-2xl space-y-6">
           <input type="hidden" name="_tab" value="download" />
           <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Traktir URL</label>
-              <input name="traktir_url" defaultValue={settings.traktir_url || settings.announcement_url || ''} className="border border-gray-200 rounded-lg px-4 py-2.5 bg-gray-50 w-full text-sm" />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Promo Text</label>
-              <input name="promo_text" defaultValue={settings.promo_text || ''} className="border border-gray-200 rounded-lg px-4 py-2.5 bg-gray-50 w-full text-sm" />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Promo CTA Text</label>
-              <input name="promo_cta_text" defaultValue={settings.promo_cta_text || ''} className="border border-gray-200 rounded-lg px-4 py-2.5 bg-gray-50 w-full text-sm" />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Promo CTA URL</label>
-              <input name="promo_cta_url" defaultValue={settings.promo_cta_url || ''} className="border border-gray-200 rounded-lg px-4 py-2.5 bg-gray-50 w-full text-sm" />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Countdown Duration (detik)</label>
-              <div className="flex items-center gap-3">
-                <input type="range" name="countdown_duration" min="3" max="10" defaultValue={settings.countdown_duration || '5'} className="flex-1 accent-[#0ea5a0]" />
-                <span className="text-sm font-medium text-gray-700 w-8 text-center">{settings.countdown_duration || '5'}</span>
-              </div>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <h2 className="text-sm font-bold text-gray-900">🎁 Kupon setelah download gratis</h2>
+              <p className="mt-1 text-xs text-gray-600">Muncul setelah pengunjung berhasil download produk gratis, untuk mengajak mereka membeli produk premium. Buat dulu kodenya di menu Voucher. Kosongkan kode untuk menonaktifkan.</p>
+              <label className="mt-3 block text-sm font-medium text-gray-700">Kode voucher
+                <input name="promo_after_download_code" defaultValue={settings.promo_after_download_code || ''} placeholder="Contoh: GURUHEBAT" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm font-bold uppercase" />
+              </label>
+              <label className="mt-3 block text-sm font-medium text-gray-700">Teks penawaran
+                <input name="promo_after_download_text" defaultValue={settings.promo_after_download_text || ''} placeholder="Contoh: Diskon 20% untuk semua produk premium" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
+              </label>
             </div>
           </div>
           <div className="flex justify-end">

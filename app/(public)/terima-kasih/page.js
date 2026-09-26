@@ -58,13 +58,9 @@ async function getOrder({ token, orderId }) {
   }
 
   let items = []
-  if (order?.product_id) {
-    const { data: rows, error: itemsError } = await supabase
-      .from('order_items')
-      .select('product_id, title, product:products(file_url, file_name)')
-      .eq('order_id', order.id)
-      .order('id')
-    if (!itemsError) items = rows || []
+  if (order?.product_id && order.status === 'paid') {
+    const { getOrderDownloads } = await import('@/lib/orders')
+    items = (await getOrderDownloads(supabase, order)).map((d) => ({ product_id: d.product_id, title: d.title, product: d }))
   }
 
   return { ...shell, order: order || null, items }
@@ -149,7 +145,7 @@ export default async function TerimaKasihPage({ searchParams }) {
               <p className="mt-1 text-sm text-gray-600">
                 Terima kasih, <span className="font-semibold">{order.buyer_name}</span>!
               </p>
-              {items.length > 1 ? (
+              {items.length > 1 || (items.length === 1 && items[0].product_id !== order.product_id) ? (
                 <>
                   <p className="mt-3 text-sm font-semibold text-gray-700">{items.length} produk siap diunduh:</p>
                   {items.map((item) => (
@@ -167,7 +163,7 @@ export default async function TerimaKasihPage({ searchParams }) {
               ) : (
                 <DownloadReady token={order.download_token} title={order.product?.title} storageKey={`dl-${order.id}`} {...deliveryOf(order.product)} />
               )}
-              <ClearPurchasedCart productIds={items.length ? items.map((i) => i.product_id) : [order.product_id]} />
+              <ClearPurchasedCart productIds={[order.product_id, ...items.map((i) => i.product_id)]} />
             </>
           ) : isPending ? (
             <>

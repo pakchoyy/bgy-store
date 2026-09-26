@@ -42,7 +42,20 @@ function sanitizeProduct(body) {
     is_active: body.is_active !== false,
     published_at: body.is_active ? new Date().toISOString() : null,
     deleted_at: null,
+    ...(Array.isArray(body.bundle_product_ids)
+      ? { bundle_product_ids: body.type === 'paid' ? [...new Set(body.bundle_product_ids.filter((id) => typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id)))].slice(0, 30) : [] }
+      : {}),
   }
+}
+
+async function withoutMissingBundleColumn(run, product) {
+  let result = await run(product)
+  if (result.error && /bundle_product_ids/.test(result.error.message || '')) {
+    const { bundle_product_ids, ...rest } = product
+    result = await run(rest)
+    if (!result.error && bundle_product_ids?.length) result.warning = 'Isi paket belum tersimpan: jalankan SQL 016 dulu.'
+  }
+  return result
 }
 
 export async function POST(request) {
@@ -65,13 +78,13 @@ export async function POST(request) {
       return Response.json({ error: 'title is required' }, { status: 400 })
     }
 
-    const { data, error } = await supabase.from('products').insert(product).select().single()
+    const { data, error, warning } = await withoutMissingBundleColumn((row) => supabase.from('products').insert(row).select().single(), product)
     if (error) {
       console.error('POST /api/admin/products insert error:', error)
       return Response.json({ error: error.message }, { status: 500 })
     }
 
-    return Response.json({ success: true, product: data })
+    return Response.json({ success: true, product: data, warning })
   } catch (e) {
     console.error('POST /api/admin/products unexpected error:', e)
     return Response.json({ error: e.message || 'Internal error' }, { status: 500 })
@@ -97,13 +110,14 @@ export async function PUT(request) {
     if (auth.error) return auth.error
 
     const product = sanitizeProduct(rest)
-    const { data, error } = await supabase.from('products').update(product).eq('id', id).select().single()
+    if (product.bundle_product_ids) product.bundle_product_ids = product.bundle_product_ids.filter((pid) => pid !== id)
+    const { data, error, warning } = await withoutMissingBundleColumn((row) => supabase.from('products').update(row).eq('id', id).select().single(), product)
     if (error) {
       console.error('PUT /api/admin/products update error:', error)
       return Response.json({ error: error.message }, { status: 500 })
     }
 
-    return Response.json({ success: true, product: data })
+    return Response.json({ success: true, product: data, warning })
   } catch (e) {
     console.error('PUT /api/admin/products unexpected error:', e)
     return Response.json({ error: e.message || 'Internal error' }, { status: 500 })

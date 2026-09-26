@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import useUnsavedChanges from '@/lib/use-unsaved-changes'
 import { useRouter } from 'next/navigation'
-import { generateSlug, formatRupiah, calcDiscount, CARD_LAYOUTS } from '@/lib/utils'
+import { generateSlug, formatRupiah, calcDiscount, CARD_LAYOUTS, parsePreviewImages } from '@/lib/utils'
 import { uploadMedia } from '@/lib/upload-media'
 import FAQEditor from '@/components/admin/FAQEditor'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,7 @@ const BADGE_OPTIONS = [
   { value: 'custom', label: 'Kustom' },
 ]
 
-export default function ProductForm({ initialData, categories = [] }) {
+export default function ProductForm({ initialData, categories = [], productOptions = [] }) {
   const router = useRouter()
   const { addToast } = useToast()
   const isEditing = !!initialData
@@ -63,6 +63,8 @@ export default function ProductForm({ initialData, categories = [] }) {
     original_price: initialData?.original_price ?? '',
     stock_qty: initialData?.stock_qty ?? 1,
     card_layout: initialData?.card_layout || 'landscape',
+    preview_images: parsePreviewImages(initialData?.preview_path),
+    bundle_product_ids: Array.isArray(initialData?.bundle_product_ids) ? initialData.bundle_product_ids : [],
   })
 
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
@@ -162,7 +164,8 @@ export default function ProductForm({ initialData, categories = [] }) {
       badge_custom: form.badge_custom || null,
       is_featured: form.is_featured,
       cover_path: form.cover_path || null,
-      preview_path: form.preview_path || null,
+      preview_path: form.preview_images?.length ? JSON.stringify(form.preview_images) : null,
+      bundle_product_ids: form.type === 'paid' ? form.bundle_product_ids || [] : [],
       file_path: deliveryMode === 'upload' ? form.file_path || null : null,
       file_url: deliveryMode === 'link' ? form.file_url || null : null,
       file_name: form.file_name || null,
@@ -185,6 +188,7 @@ export default function ProductForm({ initialData, categories = [] }) {
         addToast((data.error || 'Gagal menyimpan').replace(/[{}"]/g, ''), 'error')
       } else {
         addToast(isEditing ? 'Produk diperbarui!' : 'Produk berhasil disimpan!', 'success')
+        if (data.warning) addToast(data.warning, 'error')
         if (isDemo && typeof window !== 'undefined') {
           const existing = JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]')
           const next = isEditing
@@ -217,8 +221,9 @@ export default function ProductForm({ initialData, categories = [] }) {
     if (!file || uploadingRef.current) return
     uploadingRef.current = true; setUploading(true)
     try {
-      const media = await uploadMedia(file, kind)
+      const media = await uploadMedia(file, kind === 'preview' ? 'cover' : kind)
       if (kind === 'cover') { setCoverPreview(media.url); updateField('cover_path', media.url) }
+      else if (kind === 'preview') { updateField('preview_images', [...(form.preview_images || []), media.url].slice(0, 6)) }
       else { updateField('file_path', media.path); updateField('file_url', ''); updateField('file_size', (media.size / 1024 / 1024).toFixed(1) + ' MB') }
       setToast({ type: 'success', message: 'File berhasil diunggah. Simpan produk untuk menerapkan perubahan.' })
     } catch (error) { setToast({ type: 'error', message: error?.message || 'Unggahan gagal. Coba lagi.' }) }
@@ -417,6 +422,45 @@ export default function ProductForm({ initialData, categories = [] }) {
         </CardSection>
       )}
 
+      {form.type === 'paid' && (
+        <CardSection title="Isi Paket / Bundle (opsional)">
+          <p className="text-xs leading-relaxed text-gray-500">
+            Centang produk lain yang ikut didapat pembeli saat membeli produk ini. Cocok untuk paket hemat, misalnya &ldquo;Paket Kelas 4 Lengkap&rdquo;. Pembeli akan mendapat tombol download untuk setiap produk yang dicentang.
+          </p>
+          {(() => {
+            const options = productOptions.filter((p) => p.id !== initialData?.id)
+            const picked = form.bundle_product_ids || []
+            const worth = options.filter((p) => picked.includes(p.id)).reduce((sum, p) => sum + Number(p.sale_price || 0), 0)
+            return options.length === 0 ? (
+              <p className="mt-3 text-sm text-gray-400">Belum ada produk lain.</p>
+            ) : (
+              <>
+                <div className="mt-3 max-h-64 space-y-1 overflow-y-auto rounded-xl border border-gray-200 p-2">
+                  {options.map((p) => (
+                    <label key={p.id} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-gray-50">
+                      <input
+                        type="checkbox"
+                        checked={picked.includes(p.id)}
+                        onChange={(e) => updateField('bundle_product_ids', e.target.checked ? [...picked, p.id] : picked.filter((id) => id !== p.id))}
+                        className="h-4 w-4 accent-emerald-600"
+                      />
+                      <span className="min-w-0 flex-1 truncate text-sm text-gray-800">{p.title}</span>
+                      <span className="shrink-0 text-xs text-gray-500">{p.type === 'free' ? 'Gratis' : formatRupiah(p.sale_price)}</span>
+                    </label>
+                  ))}
+                </div>
+                {picked.length > 0 && (
+                  <p className="mt-2 text-xs font-semibold text-emerald-700">
+                    {picked.length} produk dalam paket · total harga satuan {formatRupiah(worth)}
+                    {worth > Number(form.sale_price || 0) && ` · pembeli hemat ${formatRupiah(worth - Number(form.sale_price || 0))}`}
+                  </p>
+                )}
+              </>
+            )
+          })()}
+        </CardSection>
+      )}
+
       {/* Stok */}
       <CardSection title="Stok">
         <div className="flex gap-4 mb-3">
@@ -572,6 +616,33 @@ export default function ProductForm({ initialData, categories = [] }) {
           <button type="button" onClick={() => { setCoverPreview(null); updateField('cover_path', '') }} className="min-h-10 text-sm font-semibold text-red-600 hover:text-red-700">
             Hapus cover
           </button>
+        )}
+      </CardSection>
+
+      <CardSection title="Pratinjau Isi (opsional)">
+        <p className="text-xs leading-relaxed text-gray-500">Upload 2–6 screenshot halaman isi file. Pembeli bisa melihatnya sebelum membeli.</p>
+        {form.preview_images?.length > 0 && (
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {form.preview_images.map((url, index) => (
+              <div key={url} className="relative aspect-[3/4] overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                <img src={url} alt={`Pratinjau ${index + 1}`} className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  aria-label={`Hapus pratinjau ${index + 1}`}
+                  onClick={() => updateField('preview_images', form.preview_images.filter((u) => u !== url))}
+                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {(form.preview_images?.length || 0) < 6 && (
+          <label className="mt-3 flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 px-3 text-sm font-semibold text-[#0d7a8a] hover:border-[#0ea5a0]">
+            + Tambah gambar pratinjau
+            <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={e => handleUpload(e, 'preview')} className="sr-only" />
+          </label>
         )}
       </CardSection>
 

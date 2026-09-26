@@ -21,6 +21,15 @@ async function getCategories() {
   return []
 }
 
+async function getProductOptions() {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase.from('products').select('id, title, type, sale_price').is('deleted_at', null).order('title')
+    if (data) return data
+  } catch {}
+  return []
+}
+
 export default async function AdminProdukEdit({ params }) {
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
   if (!isDemo) {
@@ -32,6 +41,7 @@ export default async function AdminProdukEdit({ params }) {
   const { id } = await params
   const product = await getProduct(id)
   const categories = await getCategories()
+  const productOptions = await getProductOptions()
 
   if (!product) {
     return (
@@ -50,7 +60,7 @@ export default async function AdminProdukEdit({ params }) {
           <p className="text-sm text-gray-500 mt-0.5">{product.title}</p>
         </div>
       </div>
-      <ProductForm initialData={product} categories={categories} />
+      <ProductForm initialData={product} categories={categories} productOptions={productOptions} />
     </div>
   )
 }
