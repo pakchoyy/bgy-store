@@ -13,16 +13,22 @@ const siteDescription = 'Download modul ajar, ATP, media pembelajaran, tools gur
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'Bantu Guru Yuk — Toko Digital untuk Guru SD',
+  title: 'Bantu Guru Yuk — Teman Praktis Guru dan Pendidik',
   description: siteDescription,
   openGraph: {
     type: 'website',
     locale: 'id_ID',
     siteName: 'Bantu Guru Yuk',
-    title: 'Bantu Guru Yuk — Toko Digital untuk Guru SD',
+    title: 'Bantu Guru Yuk — Teman Praktis Guru dan Pendidik',
     description: siteDescription,
   },
   twitter: { card: 'summary_large_image' },
+  appleWebApp: { capable: true, title: 'Bantu Guru Yuk', statusBarStyle: 'default' },
+  icons: { apple: '/pwa-icon?size=180' },
+}
+
+export const viewport = {
+  themeColor: '#123b35',
 }
 
 export default function RootLayout({ children }) {

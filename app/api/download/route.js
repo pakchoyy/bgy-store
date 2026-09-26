@@ -7,6 +7,30 @@ function fail(message, status) {
   return NextResponse.json({ error: message }, { status, headers: { 'Cache-Control': 'no-store' } });
 }
 
+async function tryWatermarkedPdf(supabase, product, order) {
+  if (!product?.file_path || product.file_url || !/\.pdf$/i.test(product.file_name || product.file_path)) return null;
+  try {
+    const { data: setting } = await supabase.from('settings').select('value').eq('key', 'pdf_watermark_enabled').maybeSingle();
+    if (setting?.value !== 'true') return null;
+    const { data: blob, error } = await supabase.storage.from('product-files').download(product.file_path);
+    if (error || !blob) return null;
+    const { watermarkPdf, MAX_WATERMARK_BYTES } = await import('@/lib/pdf-watermark');
+    if (blob.size > MAX_WATERMARK_BYTES) return null;
+    const bytes = await watermarkPdf(new Uint8Array(await blob.arrayBuffer()), { name: order.buyer_name, email: order.buyer_email });
+    const fileName = (product.file_name || 'file.pdf').replace(/[^\w.\- ]+/g, '_');
+    return new Response(bytes, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Cache-Control': 'no-store',
+      },
+    });
+  } catch (err) {
+    console.error('watermark failed, falling back to original file:', err);
+    return null;
+  }
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -32,7 +56,7 @@ export async function GET(request) {
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('id, status, token_expires_at, product_id, product:products(file_url, file_path, file_name)')
+      .select('id, status, token_expires_at, product_id, buyer_name, buyer_email, product:products(file_url, file_path, file_name)')
       .eq('download_token', token)
       .maybeSingle();
 
@@ -52,6 +76,9 @@ export async function GET(request) {
       if (!product) return fail('Produk tidak ditemukan', 404);
       target = product;
     }
+
+    const watermarked = await tryWatermarkedPdf(supabase, target, order);
+    if (watermarked) return watermarked;
 
     const downloadUrl = await resolveProductDownloadUrl(supabase, target);
     if (!downloadUrl) return fail('File tidak tersedia', 404);

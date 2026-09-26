@@ -115,6 +115,16 @@ export default async function AdminSettings({ searchParams }) {
                 <input name="promo_after_download_text" defaultValue={settings.promo_after_download_text || ''} placeholder="Contoh: Diskon 20% untuk semua produk premium" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
               </label>
             </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <label className="flex items-start justify-between gap-4">
+                <span>
+                  <span className="block text-sm font-bold text-gray-900">🔒 Watermark nama pembeli di PDF</span>
+                  <span className="mt-1 block text-xs text-gray-600">File PDF produk berbayar otomatis diberi tulisan &ldquo;Lisensi pribadi: nama – email&rdquo; di setiap halaman saat diunduh. Berlaku untuk PDF yang di-upload (bukan link) dengan ukuran maksimal 4 MB; file lebih besar dikirim tanpa watermark.</span>
+                </span>
+                <input type="hidden" name="pdf_watermark_enabled" value="false" />
+                <input type="checkbox" name="pdf_watermark_enabled" value="true" defaultChecked={settings.pdf_watermark_enabled === 'true'} className="mt-1 h-5 w-5 shrink-0 accent-emerald-600" />
+              </label>
+            </div>
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
               <h2 className="text-sm font-bold text-gray-900">🤝 Referral pembeli</h2>
               <p className="mt-1 text-xs text-gray-600">Setiap pembeli produk berbayar otomatis dapat kode pribadi (contoh REFBUDI1A2B) di halaman Terima Kasih untuk dibagikan. Temannya dapat diskon. Lihat siapa yang paling sering mengajak di menu Voucher (&ldquo;Dipakai X×&rdquo;), lalu beri hadiah. Isi 0 untuk menonaktifkan.</p>

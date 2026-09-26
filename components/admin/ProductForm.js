@@ -650,7 +650,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2 1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <span className="mt-2 text-sm font-semibold text-[#0d7a8a]">Tambah foto produk</span>
-              <span className="mt-1 text-xs text-gray-500">JPG, PNG, WebP · maks. 5 MB</span>
+              <span className="mt-1 text-xs text-gray-500">JPG, PNG, WebP · otomatis dikompres</span>
             </div>
           )}
           <input aria-label="Unggah atau ganti foto produk" type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={e => handleUpload(e, 'cover')} className="sr-only" />
