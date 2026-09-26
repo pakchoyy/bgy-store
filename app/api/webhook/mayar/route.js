@@ -166,6 +166,22 @@ export async function POST(request) {
       if (notifError) {
         console.error('[Mayar Webhook] Failed to create notification:', notifError)
       }
+
+      if (order.status !== 'paid' && order.product_id) {
+        try {
+          const { sendDownloadEmail } = await import('@/lib/email')
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
+          await sendDownloadEmail({
+            to: order.buyer_email,
+            buyerName: order.buyer_name,
+            productTitle: order.product?.title,
+            downloadUrl: `${siteUrl}/terima-kasih?token=${encodeURIComponent(downloadToken)}`,
+            expiresAt,
+          })
+        } catch (emailError) {
+          console.error('[Mayar Webhook] Failed to send download email:', emailError)
+        }
+      }
     } else if (normalized.isFailed) {
       await supabase
         .from('orders')
