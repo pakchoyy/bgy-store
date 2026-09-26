@@ -59,7 +59,15 @@ async function getProduct(slug) {
         .slice(0, 4)
     : []
 
-  return { ...shell, product: product ? { ...product, ...delivery } : null, faqs, bundleItems, related, promo }
+  let rating = { count: 0, average: 0 }
+  if (product?.id) {
+    const { createTrustedServerClient } = await import('@/lib/supabase-server')
+    const trusted = await createTrustedServerClient()
+    const { data: ratings } = await trusted.from('product_reviews').select('rating').eq('product_id', product.id).eq('is_approved', true).limit(500)
+    if (ratings?.length) rating = { count: ratings.length, average: Math.round((ratings.reduce((sum, r) => sum + Number(r.rating || 0), 0) / ratings.length) * 10) / 10 }
+  }
+
+  return { ...shell, product: product ? { ...product, ...delivery } : null, faqs, bundleItems, related, promo, rating }
 }
 
 export async function generateMetadata({ params }) {
@@ -76,7 +84,6 @@ export async function generateMetadata({ params }) {
       title,
       description,
       url: `/produk/${product.slug}`,
-      ...(product.cover_path ? { images: [{ url: product.cover_path }] } : {}),
     },
   }
 }
@@ -84,7 +91,7 @@ export async function generateMetadata({ params }) {
 export default async function ProdukDetailPage({ params }) {
   const { slug } = params
   const data = await getProduct(slug)
-  const { product, navItems, appearance, footerConfig, announcement, faqs, bundleItems = [], related = [], promo = {} } = data
+  const { product, navItems, appearance, footerConfig, announcement, faqs, bundleItems = [], related = [], promo = {}, rating = { count: 0, average: 0 } } = data
   const previewImages = parsePreviewImages(product?.preview_path)
   const bundleWorth = bundleItems.reduce((sum, p) => sum + Number(p.sale_price || 0), 0)
 
@@ -103,11 +110,29 @@ export default async function ProdukDetailPage({ params }) {
   }
 
   const isSoldOut = product.stock_type === 'limited' && product.stock_qty <= 0
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.title,
+    description: (product.meta_description || product.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300) || product.title,
+    image: product.cover_path ? [product.cover_path] : [`${siteUrl}/produk/${product.slug}/opengraph-image`],
+    brand: { '@type': 'Brand', name: 'Bantu Guru Yuk' },
+    offers: {
+      '@type': 'Offer',
+      url: `${siteUrl}/produk/${product.slug}`,
+      priceCurrency: 'IDR',
+      price: Number(product.sale_price || 0),
+      availability: isSoldOut ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+    },
+    ...(rating.count > 0 ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: rating.average, reviewCount: rating.count } } : {}),
+  }
   const waUrl = whatsappUrl(appearance?.socialLinks)
   const productUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bantuguruyuk.web.id'}/produk/${product.slug}`
 
   return (
     <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement} pageHasHeading topBarTitle={product.title}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
       <article className="bg-white/95 rounded-[1.6rem] shadow-sm overflow-hidden mb-20 ring-1 ring-white/60">
         <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
           {product.cover_path ? (

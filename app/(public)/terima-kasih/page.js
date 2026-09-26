@@ -202,8 +202,9 @@ export default async function TerimaKasihPage({ searchParams }) {
               <StatusIcon tone="red">{alertPath}</StatusIcon>
               <h1 className="text-lg font-bold text-gray-900">Tautan Tidak Valid</h1>
               <p className="mt-1 mb-4 text-sm text-gray-600">
-                Tautan tidak valid atau kedaluwarsa. Hubungi kami jika sudah bayar.
+                Tautan tidak valid atau kedaluwarsa. Sudah pernah bayar? Download ulang lewat Cek Pesanan.
               </p>
+              <Link href="/cek-pesanan" className={`${waButton} mb-2 w-full`}>Cek Pesanan</Link>
               <a
                 href={`${waUrl}?text=${encodeURIComponent('Halo, saya butuh bantuan download produk')}`}
                 target="_blank"

@@ -66,6 +66,7 @@ export default function LynkShell({
     ...(navItems || []).filter((item) => item.is_visible !== false),
     { id: 'fallback-about', label: 'Tentang', target_url: '/halaman/tentang-kami', is_visible: true },
     { id: 'fallback-faq', label: 'FAQ', target_url: '/halaman/faq', is_visible: true },
+    { id: 'fallback-orders', label: 'Cek Pesanan', target_url: '/cek-pesanan', is_visible: true },
   ]
   const rawMenuItems = [
     { key: 'home', label: 'Home', href: '/' },

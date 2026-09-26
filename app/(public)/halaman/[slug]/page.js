@@ -77,7 +77,7 @@ const faqItems = [
   },
   {
     question: 'Berapa lama link download berlaku?',
-    answer: '7 hari sejak pembayaran berhasil. Simpan file di HP atau laptop setelah diunduh. Kalau link kedaluwarsa, hubungi admin untuk dibuatkan link baru.',
+    answer: '7 hari sejak pembayaran berhasil. Kalau sudah kedaluwarsa atau file hilang, buka menu Cek Pesanan, masukkan email dan nomor WhatsApp saat membeli, lalu download ulang.',
   },
   {
     question: 'Cara pakai kode voucher?',
