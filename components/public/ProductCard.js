@@ -11,8 +11,12 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
         <span className="font-numeric text-[10px] font-semibold text-gray-400 line-through">{fmt(product.original_price)}</span>
       )}
       <span
-        className={`rounded-lg px-3 py-1.5 text-xs font-bold text-white shadow-sm ${
-          isSoldOut ? 'bg-gray-400' : isFree ? 'bg-emerald-500' : 'bg-rose-500'
+        className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
+          isSoldOut
+            ? 'bg-gray-400 text-white'
+            : isFree
+              ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-300'
+              : 'bg-emerald-500 text-white shadow-sm shadow-emerald-600/30'
         }`}
       >
         {isSoldOut ? 'Habis' : isFree ? 'Gratis' : fmt(product.sale_price)}
@@ -24,7 +28,7 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
 function Thumb({ product, isFree, className }) {
   return (
     <span className={`flex shrink-0 items-center justify-center overflow-hidden text-[10px] font-bold text-white ${className} ${
-      product.cover_path ? 'bg-gray-100' : isFree ? 'bg-gradient-to-br from-emerald-400 to-emerald-600' : 'bg-gradient-to-br from-rose-400 to-rose-600'
+      product.cover_path ? 'bg-gray-100' : isFree ? 'bg-gradient-to-br from-emerald-300 to-emerald-500' : 'bg-gradient-to-br from-teal-500 to-emerald-700'
     }`}>
       {product.cover_path ? (
         <img src={product.cover_path} alt="" loading="lazy" className="h-full w-full object-cover" />
@@ -68,14 +72,14 @@ export default function ProductCard({ product, onSelect, className = '' }) {
 
   if (onSelect) {
     return (
-      <button type="button" onClick={() => onSelect(product)} className={`${base} ${shape}`}>
+      <button type="button" onClick={() => onSelect(product)} data-track-click data-product-id={product.id} className={`${base} ${shape}`}>
         {content}
       </button>
     )
   }
 
   return (
-    <Link href={`/produk/${product.slug}`} className={`${base} ${shape}`}>
+    <Link href={`/produk/${product.slug}`} data-track-click data-product-id={product.id} className={`${base} ${shape}`}>
       {content}
     </Link>
   )

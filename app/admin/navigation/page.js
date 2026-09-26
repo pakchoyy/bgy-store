@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/ui/back-button'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { demoNavItems } from '@/lib/demo-data'
@@ -77,7 +78,7 @@ export default async function AdminNavigation({ searchParams }) {
   return (
     <div id="navigasi">
       <div className="flex items-center justify-between mb-6">
-        <div><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Halaman & Navigasi</p><h1 className="text-lg font-extrabold text-gray-900">Menu navigasi</h1><a href="/admin/halaman" className="mt-1 inline-block text-sm text-teal-700 hover:underline">Kembali ke halaman</a></div>
+        <div><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Halaman & Navigasi</p><h1 className="text-lg font-extrabold text-gray-900">Menu navigasi</h1><BackButton href="/admin/halaman" label="Kembali ke halaman" showLabel className="mt-2" /></div>
         <details className="group relative">
           <summary className="list-none bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer">
             + Tambah Menu

@@ -22,6 +22,7 @@ export default function LynkShell({
   children,
   activeTabLabel,
   topBarTitle = 'Home',
+  pageHasHeading = false,
 }) {
   const {
     profileName,
@@ -164,9 +165,9 @@ export default function LynkShell({
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm font-semibold leading-snug text-slate-900 line-clamp-2">{item.title}</span>
-                          <span className="mt-1 block text-sm font-semibold text-rose-600">{formatCartPrice(item.sale_price)}</span>
+                          <span className="mt-1 block text-sm font-semibold text-emerald-600">{formatCartPrice(item.sale_price)}</span>
                         </span>
-                        <span className="shrink-0 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-bold text-white">Beli</span>
+                        <span className="shrink-0 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white">Beli</span>
                       </a>
                       <button
                         type="button"
@@ -186,7 +187,7 @@ export default function LynkShell({
                     <span className="font-semibold text-slate-500">Total ({cartItems.length} item)</span>
                     <span className="font-bold text-slate-900">{formatCartPrice(cartTotal)}</span>
                   </div>
-                  <a href={primaryCartItem?.slug ? `/produk/${primaryCartItem.slug}` : '/produk'} className="flex min-h-12 w-full items-center justify-center rounded-2xl bg-rose-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-rose-500/30 transition-transform duration-150 hover:bg-rose-600 active:scale-[0.96]">
+                  <a href={primaryCartItem?.slug ? `/produk/${primaryCartItem.slug}` : '/produk'} className="flex min-h-12 w-full items-center justify-center rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-transform duration-150 hover:bg-emerald-600 active:scale-[0.96]">
                     Beli Sekarang
                   </a>
                   <a href="/produk" className="flex min-h-12 w-full items-center justify-center rounded-2xl border border-[#0ea5a0] px-4 py-3 text-sm font-semibold text-[#0d7a8a]">
@@ -215,7 +216,11 @@ export default function LynkShell({
               </div>
             )}
           </div>
-          <h1 className="text-lg font-semibold drop-shadow-sm">{profileName}</h1>
+          {pageHasHeading ? (
+            <p className="text-lg font-semibold drop-shadow-sm">{profileName}</p>
+          ) : (
+            <h1 className="text-lg font-semibold drop-shadow-sm">{profileName}</h1>
+          )}
           {profileHandle && (
             <p className="text-sm text-white/85 font-semibold mt-0.5">{profileHandle}</p>
           )}

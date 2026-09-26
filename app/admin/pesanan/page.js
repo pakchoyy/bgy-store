@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import crypto from 'crypto'
 import { formatRupiah } from '@/lib/utils'
 import AdminToast from '@/components/admin/AdminToast'
-import { PrintButton, FollowUpButton, CopyLinkButton } from '@/components/admin/OrderActions'
+import { PrintButton, FollowUpButton, CopyLinkButton, ConfirmSubmitButton } from '@/components/admin/OrderActions'
 
 async function generateLink(formData) {
   'use server'
@@ -34,6 +34,25 @@ async function markRead(formData) {
   params.set('toast', error ? 'error' : 'read')
   redirect(`/admin/pesanan?${params.toString()}`)
 }
+
+async function deleteOrder(formData) {
+  'use server'
+  const id = formData.get('id')
+  const back = formData.get('back') || ''
+  if (!id || !process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/pesanan?${back}`)
+  const supabase = await createClient()
+  const { error } = await supabase.from('orders').delete().eq('id', id)
+  const params = new URLSearchParams(back)
+  params.delete('selected')
+  params.set('toast', error ? 'error' : 'deleted')
+  redirect(`/admin/pesanan?${params.toString()}`)
+}
+
+const trashIcon = (
+  <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M10 11v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+  </svg>
+)
 
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -148,7 +167,7 @@ export default async function AdminPesanan({ searchParams }) {
         </form>
         </div>
       </div>
-      <AdminToast toast={toast === 'read' ? 'success' : toast} message={toast === 'read' ? 'Pesanan ditandai sudah dibaca' : toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
+      <AdminToast toast={toast === 'read' || toast === 'deleted' ? 'success' : toast} message={toast === 'read' ? 'Pesanan ditandai sudah dibaca' : toast === 'deleted' ? 'Pesanan dihapus' : toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex max-w-full gap-1 overflow-x-auto bg-gray-100 rounded-lg p-1">
           {statuses.map(s => (
@@ -244,6 +263,17 @@ export default async function AdminPesanan({ searchParams }) {
                       >
                         Detail
                       </a>
+                      <form action={deleteOrder}>
+                        <input type="hidden" name="id" value={order.id} />
+                        <input type="hidden" name="back" value={baseQuery({ toast: '' })} />
+                        <ConfirmSubmitButton
+                          message={`Hapus pesanan ${order.buyer_name}? Tindakan ini tidak bisa dibatalkan.`}
+                          aria-label={`Hapus pesanan ${order.buyer_name}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                        >
+                          {trashIcon}
+                        </ConfirmSubmitButton>
+                      </form>
                     </div>
                   </td>
                 </tr>
@@ -284,6 +314,17 @@ export default async function AdminPesanan({ searchParams }) {
                 <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] px-4 py-2.5 text-sm font-bold text-white">
                   Generate Ulang Link
                 </button>
+              </form>
+              <form action={deleteOrder}>
+                <input type="hidden" name="id" value={selectedOrder.id} />
+                <input type="hidden" name="back" value={baseQuery({ toast: '' })} />
+                <ConfirmSubmitButton
+                  message={`Hapus pesanan ${selectedOrder.buyer_name}? Tindakan ini tidak bisa dibatalkan.`}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600 transition-colors hover:bg-red-50"
+                >
+                  {trashIcon}
+                  Hapus Pesanan
+                </ConfirmSubmitButton>
               </form>
             </div>
           ) : (
@@ -353,6 +394,17 @@ export default async function AdminPesanan({ searchParams }) {
               </button>
             </form>
             <CopyLinkButton downloadToken={selectedOrder.download_token} className="bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors" />
+            <form action={deleteOrder}>
+              <input type="hidden" name="id" value={selectedOrder.id} />
+              <input type="hidden" name="back" value={baseQuery({ toast: '' })} />
+              <ConfirmSubmitButton
+                message={`Hapus pesanan ${selectedOrder.buyer_name}? Tindakan ini tidak bisa dibatalkan.`}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+              >
+                {trashIcon}
+                Hapus Pesanan
+              </ConfirmSubmitButton>
+            </form>
           </div>
         </div>
       )}

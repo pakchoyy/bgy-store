@@ -4,14 +4,16 @@ import Link from 'next/link'
 import { formatRupiah } from '@/lib/utils'
 
 async function getDashboardData() {
-  const empty = { products: [], orders: [] }
+  const empty = { products: [], orders: [], events: [] }
   try {
     const supabase = await createClient()
-    const [{ data: products }, { data: orders }] = await Promise.all([
+    const since = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+    const [{ data: products }, { data: orders }, { data: events }] = await Promise.all([
       supabase.from('products').select('*, category:categories(*)').is('deleted_at', null),
       supabase.from('orders').select('*').order('created_at', { ascending: false }),
+      supabase.from('analytics_events').select('event_type, created_at').gte('created_at', since).limit(50000),
     ])
-    return { products: products || [], orders: orders || [] }
+    return { products: products || [], orders: orders || [], events: events || [] }
   } catch {}
   return empty
 }
@@ -24,7 +26,14 @@ export default async function AdminDashboard() {
     if (!session) redirect('/login')
   }
 
-  const { products, orders } = await getDashboardData()
+  const { products, orders, events } = await getDashboardData()
+  const dayKey = (value) => new Date(value).toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' })
+  const eventsByDay = {}
+  for (const event of events) {
+    const key = dayKey(event.created_at)
+    eventsByDay[key] ||= { view: 0, click: 0 }
+    eventsByDay[key][event.event_type] = (eventsByDay[key][event.event_type] || 0) + 1
+  }
   const today = new Date().toISOString().slice(0, 10)
   const monthKey = new Date().toISOString().slice(0, 7)
 
@@ -41,17 +50,17 @@ export default async function AdminDashboard() {
   const chartDays = Array.from({ length: 14 }, (_, i) => {
     const date = new Date()
     date.setDate(date.getDate() - (13 - i))
-    const key = date.toISOString().slice(0, 10)
-    const orderCount = orders.filter(o => String(o.created_at || '').startsWith(key)).length
+    const key = dayKey(date)
     return {
       key,
-      label: date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
-      views: 0,
-      clicks: orderCount,
+      label: date.toLocaleDateString('id-ID', { day: 'numeric', timeZone: 'Asia/Jakarta' }),
+      fullLabel: date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', timeZone: 'Asia/Jakarta' }),
+      views: eventsByDay[key]?.view || 0,
+      clicks: eventsByDay[key]?.click || 0,
     }
   })
   const totalViews = chartDays.reduce((sum, day) => sum + day.views, 0)
-  const totalClicks = totalDownloads
+  const totalClicks = chartDays.reduce((sum, day) => sum + day.clicks, 0)
   const maxChartValue = Math.max(1, ...chartDays.map(day => Math.max(day.views, day.clicks)))
 
   const summaryCards = [
@@ -145,9 +154,9 @@ export default async function AdminDashboard() {
           </div>
           <span className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-400">14 hari</span>
         </div>
-        <div className="mt-5 flex h-40 items-end gap-2 overflow-hidden px-2">
+        <div className="mt-5 flex h-40 items-end gap-1 px-1">
           {chartDays.map((day) => (
-            <div key={day.key} className="flex min-w-8 flex-1 flex-col items-center justify-end gap-1">
+            <div key={day.key} title={`${day.fullLabel}: ${day.views} views, ${day.clicks} clicks`} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1">
               <div className="flex h-32 w-full items-end justify-center gap-0.5">
                 <span className="w-1.5 rounded-t bg-amber-300" style={{ height: `${Math.max(3, (day.views / maxChartValue) * 100)}%` }} />
                 <span className="w-1.5 rounded-t bg-emerald-400" style={{ height: `${Math.max(3, (day.clicks / maxChartValue) * 100)}%` }} />

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { BackButton } from '@/components/ui/back-button'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -181,11 +181,7 @@ export default function ReviewsManager({ initialReviews }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-900">Review Produk</h1>
-        <Button variant="link" asChild>
-          <Link href="/admin">
-            ← Kembali
-          </Link>
-        </Button>
+        <BackButton href="/admin" label="Kembali" showLabel />
       </div>
 
       {/* Stats */}

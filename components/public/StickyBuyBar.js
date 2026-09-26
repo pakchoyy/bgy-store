@@ -37,12 +37,12 @@ export default function StickyBuyBar({ product, onAddToCart }) {
           {product.original_price && product.original_price > product.sale_price ? (
             <div className="flex flex-wrap items-baseline gap-x-2">
               <span className="font-numeric text-xs line-through text-gray-400">{fmt(product.original_price)}</span>
-              <span className="font-numeric text-base font-semibold text-rose-600">{fmt(product.sale_price)}</span>
+              <span className="font-numeric text-base font-semibold text-emerald-600">{fmt(product.sale_price)}</span>
             </div>
-          ) : product.sale_price === 0 ? (
+          ) : isFree || !Number(product.sale_price) ? (
             <span className="text-base font-semibold text-[#0ea5a0]">Gratis</span>
           ) : (
-            <span className="font-numeric text-base font-semibold text-gray-900">{fmt(product.sale_price)}</span>
+            <span className="font-numeric text-base font-semibold text-emerald-600">{fmt(product.sale_price)}</span>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -61,15 +61,13 @@ export default function StickyBuyBar({ product, onAddToCart }) {
           <button
             onClick={() => btnRef.current?.click()}
             disabled={isSoldOut}
-            className={`min-h-12 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 ${
+            className={`min-h-12 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 ${
               isSoldOut
                 ? 'bg-gray-300 cursor-not-allowed'
-                : product.type === 'free'
-                  ? 'bg-emerald-500 hover:bg-emerald-600 shadow-sm active:scale-[0.96]'
-                  : 'bg-rose-500 hover:bg-rose-600 shadow-md shadow-rose-500/30 active:scale-[0.96]'
+                : 'bg-emerald-500 hover:bg-emerald-600 shadow-md shadow-emerald-600/25 active:scale-[0.96]'
             }`}
           >
-            {isSoldOut ? 'Stok Habis' : product.purchase_button_label || 'Beli Sekarang'}
+            {isSoldOut ? 'Stok Habis' : isFree ? 'Download Gratis' : product.purchase_button_label || 'Beli Sekarang'}
           </button>
         </div>
       </div>

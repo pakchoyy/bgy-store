@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/ui/back-button'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import ProductForm from '@/components/admin/ProductForm'
@@ -36,7 +37,7 @@ export default async function AdminProdukEdit({ params }) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Produk tidak ditemukan</p>
-        <a href="/admin/produk" className="text-[#0ea5a0] hover:text-[#0d7a8a] text-sm font-semibold mt-2 inline-block">Kembali ke Produk</a>
+        <BackButton href="/admin/produk" label="Kembali ke Produk" showLabel className="mt-2" />
       </div>
     )
   }

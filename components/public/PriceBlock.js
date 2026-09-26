@@ -12,10 +12,10 @@ export default function PriceBlock({ salePrice, originalPrice }) {
                   <span className="text-sm line-through text-gray-400 font-semibold">
           {fmt(originalPrice)}
         </span>
-                  <span className="text-xl font-semibold text-red-500">
+                  <span className="text-xl font-semibold text-emerald-600">
           {fmt(salePrice)}
         </span>
-        <span className="inline-flex items-center gap-1 bg-red-50 text-red-500 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
           Hemat {percent}%
         </span>
       </div>
@@ -23,7 +23,7 @@ export default function PriceBlock({ salePrice, originalPrice }) {
   }
 
   return (
-                  <span className="text-xl font-semibold text-gray-900">
+                  <span className="text-xl font-semibold text-emerald-600">
       {fmt(salePrice)}
     </span>
   );

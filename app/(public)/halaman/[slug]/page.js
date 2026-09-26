@@ -2,6 +2,7 @@ import { sanitizeHtml } from '@/lib/sanitize-html'
 import LynkShell from '@/components/public/LynkShell'
 import FAQAccordion from '@/components/public/FAQAccordion'
 import Link from 'next/link'
+import AboutPage from '@/components/public/AboutPage'
 import { demoNavItems, demoSettings, demoFooterConfig } from '@/lib/demo-data'
 import { getAppearance, settingsToMap } from '@/lib/utils'
 import { getAnnouncement, hasSupabase } from '@/lib/store-shell'
@@ -10,8 +11,8 @@ const demoPages = {
   'tentang-kami': {
     slug: 'tentang-kami',
     title: 'Tentang Bantu Guru Yuk',
-    content: `<h2>Teman Praktis Guru SD</h2>
-<p>Bantu Guru Yuk menyediakan materi ajar digital untuk membantu guru menyiapkan pembelajaran dengan lebih cepat, rapi, dan mudah digunakan di kelas.</p>
+    content: `<h2>Teman Praktis untuk Guru dan Pendidik</h2>
+<p>Bantu Guru Yuk hadir untuk membantu guru menyelesaikan berbagai kebutuhan pembelajaran dan administrasi dengan cara yang lebih praktis, sederhana, dan siap digunakan.</p>
 <h2>Apa yang Tersedia?</h2>
 <p>Guru dapat menemukan modul ajar, ATP, media pembelajaran, administrasi kelas, dan file pendukung lain dalam format digital. Sebagian materi tersedia gratis, sebagian lain berbayar untuk mendukung pengembangan konten yang lebih lengkap.</p>
 <h2>Untuk Siapa?</h2>
@@ -96,17 +97,21 @@ async function getData(slug) {
 }
 
 export async function generateMetadata({ params }) {
-  const { page } = await getData(params.slug)
+  const { slug } = params
+  const { page } = await getData(slug)
   if (!page) return { title: 'Halaman tidak ditemukan | Bantu Guru Yuk', robots: { index: false } }
   return {
     title: `${page.title} | Bantu Guru Yuk`,
-    description: (page.content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160),
+    description: slug === 'tentang-kami'
+      ? 'Bantu Guru Yuk adalah teman praktis untuk guru dan pendidik: bahan pembelajaran, tools guru, dan kebutuhan administrasi kelas yang siap digunakan.'
+      : (page.content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160),
   }
 }
 
 export default async function HalamanPage({ params }) {
   const { slug } = params
   const { page, navItems, appearance, footerConfig, announcement } = await getData(slug)
+  const isAbout = slug === 'tentang-kami' && page
 
   return (
     <LynkShell
@@ -115,8 +120,9 @@ export default async function HalamanPage({ params }) {
       footerConfig={footerConfig}
       announcement={announcement}
       topBarTitle={page?.title || 'Halaman'}
-      activeTabLabel={page?.title}
+      pageHasHeading
     >
+      {isAbout ? <AboutPage /> : (
       <div className="bg-white/95 rounded-2xl shadow-sm p-5">
         {!page ? (
           <div className="text-center py-8">
@@ -139,6 +145,7 @@ export default async function HalamanPage({ params }) {
           </>
         )}
       </div>
+      )}
     </LynkShell>
   )
 }

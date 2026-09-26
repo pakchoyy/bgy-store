@@ -62,7 +62,7 @@ export default async function ProdukDetailPage({ params }) {
 
   if (!product) {
     return (
-      <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement} topBarTitle="Produk">
+      <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement} pageHasHeading topBarTitle="Produk">
         <div className="bg-white/95 rounded-2xl p-8 text-center shadow-sm">
           <h1 className="text-lg font-semibold text-gray-900 mb-2">Produk Tidak Ditemukan</h1>
           <p className="text-sm text-gray-500 mb-4">Produk tidak tersedia atau telah dihapus.</p>
@@ -78,7 +78,7 @@ export default async function ProdukDetailPage({ params }) {
   const productUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bantuguruyuk.web.id'}/produk/${product.slug}`
 
   return (
-    <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement} topBarTitle={product.title}>
+    <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement} pageHasHeading topBarTitle={product.title}>
       <article className="bg-white/95 rounded-[1.6rem] shadow-sm overflow-hidden mb-20 ring-1 ring-white/60">
         <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
           {product.cover_path ? (
@@ -120,20 +120,14 @@ export default async function ProdukDetailPage({ params }) {
             </section>
           )}
 
-          <section className="rounded-2xl bg-slate-950 px-5 py-6 text-center text-white">
-            <h2 className="text-xl font-semibold">Tingkatkan Sekarang</h2>
-            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/80">
-              Nikmati akses file digital Bantu Guru Yuk dengan proses pembayaran cepat dan tautan unduhan otomatis.
-            </p>
-          </section>
-
           <ProductFAQ faqs={faqs} />
 
-          {/* Reviews Section */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h2 className="mb-4 text-xl font-semibold text-gray-950">Review dari Pembeli</h2>
-            <ProductReviewList productId={product.id} />
-          </section>
+          {product.type !== 'free' && (
+            <section className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h2 className="mb-4 text-xl font-semibold text-gray-950">Review dari Pembeli</h2>
+              <ProductReviewList productId={product.id} />
+            </section>
+          )}
 
           <ShareButtons productUrl={productUrl} title={product.title} />
           <ProductActions

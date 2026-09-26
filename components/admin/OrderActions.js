@@ -45,3 +45,18 @@ export function CopyLinkButton({ downloadToken }) {
     </Button>
   )
 }
+
+export function ConfirmSubmitButton({ message, children, className = '', ...props }) {
+  return (
+    <button
+      type="submit"
+      onClick={(event) => {
+        if (!window.confirm(message)) event.preventDefault()
+      }}
+      className={className}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}

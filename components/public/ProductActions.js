@@ -20,7 +20,7 @@ export default function ProductActions({ product, settings }) {
   };
   return <>
     <div className={!isFree && !soldOut ? 'grid gap-3 sm:grid-cols-[1fr_auto]' : ''}>
-      <button type="button" id="main-buy-button" disabled={soldOut} onClick={openOrder} className={`relative z-10 w-full min-h-12 px-6 py-3 rounded-xl text-sm font-bold text-white shadow-lg transition-transform duration-150 active:scale-[0.96] disabled:bg-gray-400 disabled:shadow-none ${isFree ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-900/10' : 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/30'}`}>{soldOut ? 'Stok Habis' : isFree ? 'Download Gratis' : product.purchase_button_label || 'Beli Sekarang'}</button>
+      <button type="button" id="main-buy-button" data-track-click data-product-id={product.id} disabled={soldOut} onClick={openOrder} className={`relative z-10 w-full min-h-12 px-6 py-3 rounded-xl text-sm font-bold text-white shadow-lg transition-transform duration-150 active:scale-[0.96] disabled:bg-gray-400 disabled:shadow-none bg-emerald-500 hover:bg-emerald-600 shadow-emerald-600/25`}>{soldOut ? 'Stok Habis' : isFree ? 'Download Gratis' : product.purchase_button_label || 'Beli Sekarang'}</button>
       {!isFree && !soldOut && (
           <button type="button" onClick={addToCart} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-brand-dark/20 bg-white px-5 py-3 text-sm font-semibold text-brand-dark shadow-sm transition-[background-color,transform] duration-150 hover:bg-teal-50 active:scale-[0.96]" aria-label={`Tambah ${product.title} ke keranjang`}>
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

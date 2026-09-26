@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/ui/back-button'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import PageForm from '@/components/admin/PageForm'
@@ -27,7 +28,7 @@ export default async function AdminHalamanEdit({ params }) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Halaman tidak ditemukan</p>
-        <a href="/admin/halaman" className="text-[#0ea5a0] hover:text-[#0d7a8a] text-sm font-semibold mt-2 inline-block">Kembali ke Halaman</a>
+        <BackButton href="/admin/halaman" label="Kembali ke Halaman" showLabel className="mt-2" />
       </div>
     )
   }

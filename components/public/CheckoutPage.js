@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { BackButton } from '@/components/ui/back-button';
 
 const paymentLogos = [
   { name: 'QRIS', src: '/logos/qris.svg' },
@@ -75,18 +76,18 @@ export default function CheckoutPage({ product }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#eef7f5] pb-4 text-slate-900">
+    <main className="min-h-screen overflow-x-clip bg-[#eef7f5] pb-4 text-slate-900">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-12 w-full max-w-5xl items-center justify-between px-3 sm:px-6">
-          <Link href={`/produk/${product.slug}`} aria-label="Kembali ke produk" className="flex h-9 w-9 items-center justify-center rounded-full text-lg text-slate-600 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">←</Link>
+          <BackButton href={`/produk/${product.slug}`} label="Kembali ke produk" />
           <h1 className="text-base font-bold tracking-tight sm:text-lg">Checkout</h1>
-          <Link href={`/produk/${product.slug}`} aria-label="Tutup checkout" className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-lg font-semibold text-red-500 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-400">×</Link>
+          <Link href={`/produk/${product.slug}`} aria-label="Tutup checkout" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500 text-white shadow-md shadow-red-500/30 ring-2 ring-red-100 transition hover:bg-red-600 active:scale-95"><svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg></Link>
         </div>
       </header>
 
       {error && <div role="alert" className="mx-auto mt-3 flex w-[calc(100%-1.5rem)] max-w-5xl items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-center text-sm font-semibold text-red-700">{error}</div>}
 
-      <form onSubmit={submitCheckout} aria-busy={busy} className="mx-auto grid w-full max-w-5xl gap-3 px-3 pt-3 sm:px-6 lg:grid-cols-[1.08fr_.92fr]">
+      <form onSubmit={submitCheckout} aria-busy={busy} className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-3 px-3 pt-3 sm:px-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)]">
         <div className="space-y-3">
           <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80 sm:p-4">
             <div className="flex items-center gap-3">
@@ -94,10 +95,10 @@ export default function CheckoutPage({ product }) {
                 {product.cover_path ? <img src={product.cover_path} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs font-black text-emerald-700">BGY</div>}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="line-clamp-1 text-sm font-semibold leading-snug sm:text-base">{product.title}</p>
+                <p className="line-clamp-2 text-sm font-semibold leading-snug sm:text-base">{product.title}</p>
                 <p className="text-xs text-slate-500">1x produk digital</p>
               </div>
-              <p className="shrink-0 text-sm font-bold">{formatRupiah(price)}</p>
+              <p className="shrink-0 text-sm font-bold text-emerald-600">{formatRupiah(price)}</p>
             </div>
           </section>
 
