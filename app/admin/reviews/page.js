@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import ReviewsManager from '@/components/admin/ReviewsManager'
+import AdminTabs, { ACTIVITY_TABS } from '@/components/admin/AdminTabs'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,5 +30,10 @@ export default async function AdminReviews() {
 
   const { reviews } = await getReviews()
 
-  return <ReviewsManager initialReviews={reviews} />
+  return (
+    <>
+      <AdminTabs tabs={ACTIVITY_TABS} active="reviews" />
+      <ReviewsManager initialReviews={reviews} />
+    </>
+  )
 }

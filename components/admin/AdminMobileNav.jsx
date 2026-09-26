@@ -37,9 +37,9 @@ export function Icon({ name, className = 'h-5 w-5' }) {
   );
 }
 
-export function isActive(pathname, href) {
+export function isActive(pathname, href, also = []) {
   if (href === '/admin') return pathname === '/admin';
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return [href, ...also].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
 export default function AdminMobileNav({ menuGroups, counts = {} }) {
@@ -49,10 +49,10 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
     { href: '/admin', label: 'Home', icon: 'layout-dashboard' },
     { href: '/admin/produk', label: 'Produk', icon: 'package' },
     { href: '/admin/pesanan', label: 'Pesanan', icon: 'shopping-cart', count: counts.orders },
-    { href: '/admin/homepage', label: 'Tampilan', icon: 'home' },
+    { href: '/admin/homepage', label: 'Tampilan', icon: 'home', also: ['/admin/theme'] },
   ];
-  const activeBottom = bottomItems.find((item) => isActive(pathname, item.href));
-  const title = activeBottom?.label || menuGroups.flatMap((group) => group.items).find((item) => isActive(pathname, item.href))?.label || 'Admin';
+  const activeBottom = bottomItems.find((item) => isActive(pathname, item.href, item.also));
+  const title = activeBottom?.label || menuGroups.flatMap((group) => group.items).find((item) => isActive(pathname, item.href, item.also))?.label || 'Admin';
   const allGroups = useMemo(() => [
     { label: 'Utama', items: [{ href: '/admin', label: 'Dashboard', icon: 'layout-dashboard' }] },
     ...menuGroups,
@@ -94,7 +94,8 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
                     {group.label}
                   </div>
                   {group.items.map((item) => {
-                    const active = isActive(pathname, item.href);
+                    const active = isActive(pathname, item.href, item.also);
+                    const count = item.countKey ? counts[item.countKey] : item.count;
                     return (
                       <Link
                         key={item.href}
@@ -104,9 +105,9 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
                       >
                         <Icon name={item.icon} />
                         <span>{item.label}</span>
-                        {item.count > 0 && (
-                          <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold ${active ? 'bg-red-500 text-white' : 'bg-red-500 text-white'}`}>
-                            {item.count}
+                        {count > 0 && (
+                          <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                            {count}
                           </span>
                         )}
                       </Link>
@@ -122,7 +123,7 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
       <nav aria-label="Menu cepat admin" className="fixed inset-x-0 bottom-0 z-40 border-t border-emerald-100 bg-white/95 px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-12px_30px_rgba(15,23,42,0.10)] backdrop-blur">
         <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
           {bottomItems.map((item) => {
-            const active = isActive(pathname, item.href);
+            const active = isActive(pathname, item.href, item.also);
             return (
               <Link key={item.href} href={item.href} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-bold transition-colors ${active ? 'bg-[#0ea5a0] text-white shadow-sm' : 'text-slate-500 hover:bg-emerald-50 hover:text-[#0d7a8a]'}`}>
                 <span className="relative">

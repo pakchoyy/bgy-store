@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import NotificationList from '@/components/admin/NotificationList'
+import AdminTabs, { ACTIVITY_TABS } from '@/components/admin/AdminTabs'
 
 async function getData() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -17,11 +18,9 @@ export default async function AdminNotifikasi() {
   const notifications = await getData()
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-bold text-gray-900">Notifikasi</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Aktivitas terbaru di toko kamu</p>
-      </div>
+    <div>
+      <AdminTabs tabs={ACTIVITY_TABS} active="notifikasi" />
+      <p className="mb-4 text-sm text-gray-500">Aktivitas terbaru di toko kamu</p>
       <NotificationList notifications={notifications} />
     </div>
   )

@@ -7,6 +7,7 @@ import {
 } from '@/lib/demo-data'
 import { getAppearance, settingsToMap } from '@/lib/utils'
 import AppearanceBuilder from '@/components/admin/AppearanceBuilder'
+import AdminTabs, { APPEARANCE_TABS } from '@/components/admin/AdminTabs'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,11 +46,14 @@ export default async function AdminAppearance() {
   }
 
   return (
+    <>
+    <AdminTabs tabs={APPEARANCE_TABS} active="appearance" />
     <AppearanceBuilder
       initialAppearance={getAppearance(settings)}
       navItems={navItems}
       products={products}
       siteName={settings.site_name || 'BGY'}
     />
+    </>
   )
 }

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { formatRupiah } from '@/lib/utils'
 import AdminToast from '@/components/admin/AdminToast'
+import AdminTabs, { VOUCHER_TABS } from '@/components/admin/AdminTabs'
 
 async function createVoucher(formData) {
   'use server'
@@ -48,6 +49,23 @@ async function deleteVoucher(formData) {
   redirect(`/admin/voucher?toast=${error ? 'error' : 'success'}`)
 }
 
+async function saveKupon(formData) {
+  'use server'
+  const supabase = await createClient()
+  const rows = [
+    { key: 'promo_after_download_code', value: String(formData.get('code') || '').trim().toUpperCase() },
+    { key: 'promo_after_download_text', value: String(formData.get('text') || '').trim() },
+  ]
+  const { error } = await supabase.from('settings').upsert(rows, { onConflict: 'key' })
+  redirect(`/admin/voucher?tab=kupon&toast=${error ? 'error' : 'success'}`)
+}
+
+function voucherKind(voucher, kuponCode) {
+  if (kuponCode && voucher.code === kuponCode) return { label: '🎁 Kupon download', cls: 'bg-amber-100 text-amber-800' }
+  if (String(voucher.name || '').startsWith('Referral:')) return { label: '🤝 Referral', cls: 'bg-sky-100 text-sky-800' }
+  return { label: '🎟️ Voucher', cls: 'bg-emerald-100 text-emerald-800' }
+}
+
 function formatDiscount(voucher) {
   if (voucher.discount_type === 'fixed') return formatRupiah(voucher.discount_value)
   return `${voucher.discount_value}%`
@@ -56,16 +74,69 @@ function formatDiscount(voucher) {
 export default async function AdminVoucher({ searchParams }) {
   const supabase = await createClient()
   const toast = searchParams?.toast
-  const { data, error } = await supabase
-    .from('vouchers')
-    .select('*')
-    .order('created_at', { ascending: false })
+  const tab = searchParams?.tab === 'kupon' ? 'kupon' : 'voucher'
+  const [{ data, error }, { data: promoRows }] = await Promise.all([
+    supabase.from('vouchers').select('*').order('created_at', { ascending: false }),
+    supabase.from('settings').select('key, value').in('key', ['promo_after_download_code', 'promo_after_download_text']),
+  ])
 
   const vouchers = data || []
+  const promo = Object.fromEntries((promoRows || []).map((row) => [row.key, row.value]))
+  const kuponCode = promo.promo_after_download_code || ''
+  const kuponVoucher = vouchers.find((voucher) => voucher.code === kuponCode)
+  const kuponChoices = vouchers.filter((voucher) => voucher.is_active && !String(voucher.name || '').startsWith('Referral:'))
+
+  if (tab === 'kupon') {
+    return (
+      <div className="mx-auto max-w-3xl space-y-5">
+        <AdminToast toast={toast} message={toast === 'success' ? 'Kupon berhasil disimpan' : undefined} />
+        <AdminTabs tabs={VOUCHER_TABS} active="kupon" />
+
+        <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          <h1 className="text-lg font-extrabold text-slate-700">Kupon Download Gratis</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Muncul otomatis setelah pengunjung download produk <b>gratis</b>, untuk mengajak mereka membeli produk premium.
+            Bedanya dengan voucher biasa: voucher dibagikan manual oleh kamu, kupon ini ditampilkan otomatis oleh website.
+          </p>
+
+          <div className={`mt-4 rounded-xl px-4 py-3 text-sm font-semibold ${kuponCode && kuponVoucher?.is_active ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>
+            {!kuponCode
+              ? 'Status: nonaktif — belum ada kupon yang dipilih.'
+              : !kuponVoucher
+                ? `Status: kode ${kuponCode} tidak ditemukan di daftar voucher. Pilih ulang di bawah.`
+                : kuponVoucher.is_active
+                  ? `Status: aktif — ${kuponCode} (diskon ${formatDiscount(kuponVoucher)}, sudah dipakai ${kuponVoucher.used_count || 0}×)`
+                  : `Status: voucher ${kuponCode} sedang Off, kupon tidak berguna. Aktifkan di tab Voucher.`}
+          </div>
+
+          <form action={saveKupon} className="mt-4 space-y-4">
+            <label className="block">
+              <span className="text-sm font-semibold text-slate-700">Pakai kode voucher</span>
+              <select name="code" defaultValue={kuponVoucher ? kuponCode : ''} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100">
+                <option value="">— Nonaktifkan kupon —</option>
+                {kuponChoices.map((voucher) => (
+                  <option key={voucher.id} value={voucher.code}>{voucher.code} · diskon {formatDiscount(voucher)} · {voucher.name}</option>
+                ))}
+              </select>
+              <span className="mt-1 block text-xs text-slate-500">Belum ada pilihan? Buat dulu kodenya di tab <a href="/admin/voucher" className="font-bold underline">Voucher</a>.</span>
+            </label>
+            <label className="block">
+              <span className="text-sm font-semibold text-slate-700">Teks penawaran</span>
+              <input name="text" defaultValue={promo.promo_after_download_text || ''} placeholder="Contoh: Diskon 20% untuk semua produk premium" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
+            </label>
+            <button className="w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-extrabold text-white shadow-sm transition-transform hover:bg-emerald-800 active:scale-[0.98]">
+              Simpan Kupon
+            </button>
+          </form>
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
       <AdminToast toast={toast} message={toast === 'success' ? 'Voucher berhasil diperbarui' : undefined} />
+      <AdminTabs tabs={VOUCHER_TABS} active="voucher" />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -140,6 +211,7 @@ export default async function AdminVoucher({ searchParams }) {
         <div className="divide-y divide-slate-100">
           {vouchers.map((voucher) => {
             const remaining = voucher.max_uses ? Math.max(0, voucher.max_uses - (voucher.used_count || 0)) : null
+            const kind = voucherKind(voucher, kuponCode)
             return (
               <div key={voucher.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-[#10946b]">
@@ -148,7 +220,10 @@ export default async function AdminVoucher({ searchParams }) {
                   </svg>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-bold text-slate-800">{voucher.name}</p>
+                  <p className="flex flex-wrap items-center gap-2 font-bold text-slate-800">
+                    <span className="min-w-0 break-words">{voucher.name}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${kind.cls}`}>{kind.label}</span>
+                  </p>
                   <p className="text-xs text-slate-400"><span className="font-bold text-[#10946b]">{voucher.code}</span> - Diskon {formatDiscount(voucher)}</p>
                 </div>
                 <span className="text-sm text-slate-400">{`Dipakai ${voucher.used_count || 0}×`} · {remaining === null ? 'Tanpa batas' : `Sisa ${remaining}`}{voucher.ends_at ? ` · s/d ${new Date(voucher.ends_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}` : ''}</span>

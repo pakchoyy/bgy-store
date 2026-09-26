@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
+import AdminTabs, { PAGE_404_TABS } from '@/components/admin/AdminTabs'
 
 const typeColors = {
   api: 'bg-red-100 text-red-700',
@@ -26,11 +27,9 @@ export default async function AdminErrorLog() {
   const logs = await getData()
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-bold text-gray-900">Error Log</h1>
-        <p className="text-sm text-gray-500 mt-0.5">200 log terakhir dari sistem</p>
-      </div>
+    <div>
+      <AdminTabs tabs={PAGE_404_TABS} active="error-log" />
+      <p className="mb-4 text-sm text-gray-500">200 log terakhir dari sistem</p>
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         {logs.length === 0 ? (
           <div className="p-12 text-center text-sm text-gray-400">Tidak ada error tercatat — bagus!</div>

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { demoSettings } from '@/lib/demo-data'
+import AdminTabs, { APPEARANCE_TABS } from '@/components/admin/AdminTabs'
 
 async function saveTheme(formData) {
   'use server'
@@ -66,9 +67,7 @@ export default async function AdminTheme({ searchParams }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-extrabold text-gray-900">Theme Manager</h1>
-      </div>
+      <AdminTabs tabs={APPEARANCE_TABS} active="theme" />
       {isDemo && <DemoBadge />}
       <ToastBar toast={toast} />
       <form action={saveTheme} className="max-w-2xl space-y-6">

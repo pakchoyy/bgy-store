@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon, isActive } from './AdminMobileNav';
 
-function SidebarLink({ href, icon, children, count }) {
+function SidebarLink({ href, also, icon, children, count }) {
   const pathname = usePathname();
-  const active = isActive(pathname, href);
+  const active = isActive(pathname, href, also);
   return (
     <Link
       href={href}
@@ -47,7 +47,7 @@ export default function AdminDesktopSidebar({ menuGroups, counts = {} }) {
               {group.label}
             </div>
             {group.items.map((item) => (
-              <SidebarLink key={item.href} href={item.href} icon={item.icon} count={item.countKey ? counts[item.countKey] : item.count}>
+              <SidebarLink key={item.href} href={item.href} also={item.also} icon={item.icon} count={item.countKey ? counts[item.countKey] : item.count}>
                 {item.label}
               </SidebarLink>
             ))}

@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { demoSettings } from '@/lib/demo-data'
+import SiteHealth from '@/components/admin/SiteHealth'
+
+export const dynamic = 'force-dynamic'
 
 async function saveSettings(formData) {
   'use server'
@@ -9,8 +12,7 @@ async function saveSettings(formData) {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/settings?tab=${raw._tab || 'umum'}&toast=demo`)
   const keys = Object.keys(raw).filter(k => k !== '_tab')
   for (const key of keys) {
-    const value = key === 'promo_after_download_code' ? String(raw[key]).trim().toUpperCase() : raw[key]
-    const { error } = await supabase.from('settings').upsert({ key, value }, { onConflict: 'key' })
+    const { error } = await supabase.from('settings').upsert({ key, value: raw[key] }, { onConflict: 'key' })
     if (error) redirect(`/admin/settings?tab=${raw._tab || 'umum'}&toast=error`)
   }
   redirect(`/admin/settings?tab=${raw._tab || 'umum'}&toast=success`)
@@ -61,6 +63,7 @@ export default async function AdminSettings({ searchParams }) {
     { id: 'umum', label: 'Umum' },
     { id: 'download', label: 'Download' },
     { id: 'maintenance', label: 'Maintenance' },
+    { id: 'sistem', label: 'Cek Sistem' },
   ]
 
   return (
@@ -70,12 +73,12 @@ export default async function AdminSettings({ searchParams }) {
       </div>
       {isDemo && <DemoBadge />}
       <ToastBar toast={toast} />
-      <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-fit">
+      <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-full overflow-x-auto sm:w-fit">
         {tabs.map(tab => (
           <a
             key={tab.id}
             href={`/admin/settings?tab=${tab.id}`}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === tab.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`shrink-0 whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === tab.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
           >
             {tab.label}
           </a>
@@ -105,16 +108,7 @@ export default async function AdminSettings({ searchParams }) {
         <form action={saveSettings} className="max-w-2xl space-y-6">
           <input type="hidden" name="_tab" value="download" />
           <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <h2 className="text-sm font-bold text-gray-900">🎁 Kupon setelah download gratis</h2>
-              <p className="mt-1 text-xs text-gray-600">Muncul setelah pengunjung berhasil download produk gratis, untuk mengajak mereka membeli produk premium. Buat dulu kodenya di menu Voucher. Kosongkan kode untuk menonaktifkan.</p>
-              <label className="mt-3 block text-sm font-medium text-gray-700">Kode voucher
-                <input name="promo_after_download_code" defaultValue={settings.promo_after_download_code || ''} placeholder="Contoh: GURUHEBAT" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm font-bold uppercase" />
-              </label>
-              <label className="mt-3 block text-sm font-medium text-gray-700">Teks penawaran
-                <input name="promo_after_download_text" defaultValue={settings.promo_after_download_text || ''} placeholder="Contoh: Diskon 20% untuk semua produk premium" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
-              </label>
-            </div>
+            <p className="rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-900">🎁 Kupon setelah download gratis sekarang diatur di menu <a href="/admin/voucher?tab=kupon" className="font-bold underline">Voucher & Kupon → Kupon Download</a>.</p>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <label className="flex items-start justify-between gap-4">
                 <span>
@@ -143,6 +137,7 @@ export default async function AdminSettings({ searchParams }) {
           </div>
         </form>
       )}
+      {activeTab === 'sistem' && <SiteHealth />}
       {activeTab === 'maintenance' && (
         <form action={saveSettings} className="max-w-2xl space-y-6">
           <input type="hidden" name="_tab" value="maintenance" />

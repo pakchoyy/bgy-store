@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { demoProducts } from '@/lib/demo-data'
+import AdminTabs, { PAGE_404_TABS } from '@/components/admin/AdminTabs'
 
 async function saveCustom404(formData) {
   'use server'
@@ -76,9 +77,7 @@ export default async function AdminCustom404({ searchParams }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-extrabold text-gray-900">Custom 404 Manager</h1>
-      </div>
+      <AdminTabs tabs={PAGE_404_TABS} active="404" />
       {isDemo && <DemoBadge />}
       <ToastBar toast={toast} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
