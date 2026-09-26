@@ -25,6 +25,12 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
   )
 }
 
+function DownloadCount({ product, isFree }) {
+  const count = Number(product.download_count || 0)
+  if (!isFree || count < 1) return null
+  return <span className="block text-[11px] font-medium text-gray-500">{count.toLocaleString('id-ID')}× diunduh</span>
+}
+
 function Thumb({ product, isFree, className }) {
   return (
     <span className={`flex shrink-0 items-center justify-center overflow-hidden text-[10px] font-bold text-white ${className} ${
@@ -49,8 +55,9 @@ export default function ProductCard({ product, onSelect, className = '' }) {
   const content = isRow ? (
     <span className={`flex items-center ${layout.value === 'compact' ? 'gap-2.5' : 'gap-3'}`}>
       <Thumb product={product} isFree={isFree} className={layout.value === 'compact' ? 'h-11 w-11 rounded-lg' : 'h-14 w-14 rounded-xl'} />
-      <span className="min-w-0 flex-1 text-sm font-semibold leading-snug text-gray-900 line-clamp-2">
-        {product.title}
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
+        <DownloadCount product={product} isFree={isFree} />
       </span>
       <PricePill product={product} isFree={isFree} isSoldOut={isSoldOut} />
     </span>
@@ -60,8 +67,9 @@ export default function ProductCard({ product, onSelect, className = '' }) {
         <Thumb product={product} isFree={isFree} className="h-full w-full" />
       </span>
       <span className={`flex flex-1 gap-2 p-2.5 ${layout.value === 'wide' ? 'items-center' : 'flex-col'}`}>
-        <span className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-gray-900 line-clamp-2">
-          {product.title}
+        <span className="min-w-0 flex-1">
+          <span className="block text-[13px] font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
+          <DownloadCount product={product} isFree={isFree} />
         </span>
         <PricePill product={product} isFree={isFree} isSoldOut={isSoldOut} className={layout.value === 'wide' ? '' : 'items-start'} />
       </span>

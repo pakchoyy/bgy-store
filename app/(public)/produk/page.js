@@ -5,7 +5,7 @@ import { demoProducts, demoCategories } from '@/lib/demo-data'
 
 export const metadata = {
   title: 'Produk | Bantu Guru Yuk',
-  description: 'Produk digital berbayar untuk guru SD: modul ajar, media pembelajaran, dan administrasi.',
+  description: 'Produk digital berbayar untuk guru dan pendidik: modul ajar, media pembelajaran, dan administrasi.',
 }
 
 async function getData() {

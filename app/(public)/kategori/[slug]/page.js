@@ -31,7 +31,7 @@ export async function generateMetadata({ params }) {
   if (!category) return { title: 'Kategori tidak ditemukan | Bantu Guru Yuk', robots: { index: false } }
   return {
     title: `${category.name} | Bantu Guru Yuk`,
-    description: `Kumpulan produk digital ${category.name} untuk guru SD.`,
+    description: `Kumpulan produk digital ${category.name} untuk guru dan pendidik.`,
   }
 }
 

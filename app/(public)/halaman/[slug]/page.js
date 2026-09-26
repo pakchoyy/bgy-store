@@ -16,7 +16,22 @@ const demoPages = {
 <h2>Apa yang Tersedia?</h2>
 <p>Guru dapat menemukan modul ajar, ATP, media pembelajaran, administrasi kelas, dan file pendukung lain dalam format digital. Sebagian materi tersedia gratis, sebagian lain berbayar untuk mendukung pengembangan konten yang lebih lengkap.</p>
 <h2>Untuk Siapa?</h2>
-<p>Platform ini dibuat untuk guru SD, wali kelas, operator sekolah, dan pendidik yang membutuhkan bahan siap pakai namun tetap mudah disesuaikan dengan kebutuhan kelas masing-masing.</p>`,
+<p>Platform ini dibuat untuk guru, wali kelas, operator sekolah, dan pendidik yang membutuhkan bahan siap pakai namun tetap mudah disesuaikan dengan kebutuhan kelas masing-masing.</p>`,
+    is_active: true,
+  },
+  'syarat-dan-ketentuan': {
+    slug: 'syarat-dan-ketentuan',
+    title: 'Syarat & Ketentuan',
+    content: `<h2>Produk Digital</h2>
+<p>Semua produk Bantu Guru Yuk berupa file digital. Tautan unduhan dikirim otomatis setelah pembayaran berhasil dikonfirmasi.</p>
+<h2>Penggunaan</h2>
+<p>File boleh digunakan dan disesuaikan untuk kebutuhan pembelajaran dan administrasi pribadi atau sekolah Anda. File tidak boleh dijual ulang, dibagikan secara massal, atau diakui sebagai karya sendiri.</p>
+<h2>Pembayaran</h2>
+<p>Pembayaran diproses melalui Mayar. Pastikan email dan nomor WhatsApp yang diisi benar agar tautan unduhan bisa diterima.</p>
+<h2>Pengembalian Dana</h2>
+<p>Karena produk bersifat digital, pembelian yang sudah berhasil tidak dapat dibatalkan. Jika file rusak atau tidak bisa dibuka, hubungi admin dan kami akan membantu mengganti file.</p>
+<h2>Kontak</h2>
+<p>Pertanyaan dan kendala dapat disampaikan melalui kontak resmi yang tercantum di halaman ini.</p>`,
     is_active: true,
   },
   faq: {

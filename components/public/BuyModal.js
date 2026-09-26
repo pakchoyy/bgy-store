@@ -165,7 +165,7 @@ export default function BuyModal({ product, isOpen, onClose }) {
 
             <label className="flex items-start gap-2 text-xs text-slate-700">
               <input required type="checkbox" className="mt-0.5 h-4 w-4 accent-emerald-600" />
-              <span>Saya menyetujui <span className="font-bold text-emerald-700">Syarat dan Ketentuan</span>.</span>
+              <span>Saya menyetujui <a href="/halaman/syarat-dan-ketentuan" target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 underline underline-offset-2">Syarat dan Ketentuan</a>.</span>
             </label>
 
             <button disabled={busy} className="h-12 w-full rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-600 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-wait disabled:opacity-70">

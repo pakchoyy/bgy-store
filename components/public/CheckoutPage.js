@@ -142,7 +142,7 @@ export default function CheckoutPage({ product }) {
           </section>
 
           <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80 sm:p-4">
-            <label className="flex items-start gap-2 text-xs text-slate-700"><input required type="checkbox" className="mt-0.5 h-4 w-4 accent-emerald-600" /><span>Saya menyetujui <span className="font-bold text-emerald-700">Syarat dan Ketentuan</span>.</span></label>
+            <label className="flex items-start gap-2 text-xs text-slate-700"><input required type="checkbox" className="mt-0.5 h-4 w-4 accent-emerald-600" /><span>Saya menyetujui <a href="/halaman/syarat-dan-ketentuan" target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 underline underline-offset-2">Syarat dan Ketentuan</a>.</span></label>
           </section>
 
           <button disabled={busy} className="sticky bottom-2 z-10 h-12 w-full rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-600 px-4 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 transition hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-wait disabled:opacity-70">{busy ? 'Menyiapkan pembayaran...' : `Beli sekarang - ${formatRupiah(total)}`}</button>

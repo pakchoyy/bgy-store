@@ -57,7 +57,7 @@ export default async function AdminSEO({ searchParams }) {
   if (!settings.seo_meta_title) {
     settings = {
       seo_meta_title: 'Bantu Guru Yuk - Toko Digital untuk Guru SD',
-      seo_meta_description: 'Download modul ajar, ATP, media pembelajaran, dan administrasi sekolah untuk guru SD Indonesia. Gratis dan berbayar.',
+      seo_meta_description: 'Download modul ajar, ATP, media pembelajaran, dan administrasi sekolah untuk guru dan pendidik. Gratis dan berbayar.',
       seo_template_product: '{judul_produk} - {nama_website}',
       seo_template_category: 'Kategori {nama_kategori} - {nama_website}',
       seo_template_page: '{judul_halaman} - {nama_website}',

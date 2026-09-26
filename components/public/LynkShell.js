@@ -187,10 +187,14 @@ export default function LynkShell({
                     <span className="font-semibold text-slate-500">Total ({cartItems.length} item)</span>
                     <span className="font-bold text-slate-900">{formatCartPrice(cartTotal)}</span>
                   </div>
-                  <a href={primaryCartItem?.slug ? `/produk/${primaryCartItem.slug}` : '/produk'} className="flex min-h-12 w-full items-center justify-center rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-transform duration-150 hover:bg-emerald-600 active:scale-[0.96]">
+                  {cartItems.length === 1 ? (
+                  <a href={primaryCartItem?.slug ? `/produk/${primaryCartItem.slug}` : '/produk'} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-transform duration-150 hover:bg-emerald-600 active:scale-[0.96]">
                     Beli Sekarang
                   </a>
-                  <a href="/produk" className="flex min-h-12 w-full items-center justify-center rounded-2xl border border-[#0ea5a0] px-4 py-3 text-sm font-semibold text-[#0d7a8a]">
+                  ) : (
+                    <p className="rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-xs font-medium text-emerald-800">Pembayaran dilakukan per produk. Tekan <b>Beli</b> pada produk yang ingin dibayar.</p>
+                  )}
+                  <a href="/produk" className="flex min-h-12 w-full items-center justify-center rounded-xl border border-[#0ea5a0] px-4 py-3 text-sm font-semibold text-[#0d7a8a]">
                     Lanjut Belanja
                   </a>
                 </div>
@@ -198,7 +202,7 @@ export default function LynkShell({
             ) : (
               <div className="px-5 py-8 text-center">
                 <p className="text-sm font-semibold text-slate-700">Keranjang masih kosong</p>
-                <a href="/produk" className="mt-4 inline-flex min-h-11 items-center justify-center rounded-2xl bg-[#0ea5a0] px-5 text-sm font-semibold text-white">Lihat Produk</a>
+                <a href="/produk" className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#0ea5a0] px-5 text-sm font-semibold text-white">Lihat Produk</a>
               </div>
             )}
           </section>

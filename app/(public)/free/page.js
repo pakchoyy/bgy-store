@@ -6,7 +6,7 @@ import { demoProducts, demoCategories } from '@/lib/demo-data'
 
 export const metadata = {
   title: 'Produk Gratis | Bantu Guru Yuk',
-  description: 'Download gratis modul ajar, ATP, dan media pembelajaran untuk guru SD.',
+  description: 'Download gratis modul ajar, ATP, dan media pembelajaran untuk guru dan pendidik.',
 }
 
 async function getData() {

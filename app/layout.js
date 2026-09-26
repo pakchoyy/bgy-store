@@ -9,7 +9,7 @@ const outfit = Outfit({
 })
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
-const siteDescription = 'Download modul ajar, ATP, media pembelajaran, dan administrasi untuk guru SD Indonesia.'
+const siteDescription = 'Download modul ajar, ATP, media pembelajaran, tools guru, dan administrasi untuk guru dan pendidik.'
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
