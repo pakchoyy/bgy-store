@@ -3,14 +3,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CloseButton } from '@/components/ui/close-button';
 
-const TIP_PRESETS = [5000, 10000, 20000];
+const TIP_PRESETS = [5000, 10000, 20000, 50000];
+const MIN_TIP = 1000;
+const formatTip = (value) => `Rp${Number(value || 0).toLocaleString('id-ID')}`;
 
 export default function DownloadModal({ product, isOpen, onClose, settings }) {
   const [phase, setPhase] = useState(1);
   const [countdown, setCountdown] = useState(5);
   const [downloading, setDownloading] = useState(false);
   const [showTraktirForm, setShowTraktirForm] = useState(false);
-  const [tipAmount, setTipAmount] = useState(10000);
+  const [tipAmount, setTipAmount] = useState(5000);
+  const [customTip, setCustomTip] = useState('');
+  const [redirecting, setRedirecting] = useState(false);
   const [tipBusy, setTipBusy] = useState(false);
   const [tipError, setTipError] = useState('');
   const [downloadError, setDownloadError] = useState('');
@@ -22,13 +26,26 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
       setCountdown(5);
       setDownloading(false);
       setShowTraktirForm(false);
-      setTipAmount(10000);
+      setTipAmount(5000);
+      setCustomTip('');
+      setRedirecting(false);
       setTipBusy(false);
       setTipError('');
       setDownloadError('');
       setDownloaded(false);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const onPageShow = (event) => {
+      if (event.persisted) {
+        setTipBusy(false);
+        setRedirecting(false);
+      }
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
 
   const triggerDownload = useCallback(async () => {
     setDownloading(true);
@@ -71,19 +88,18 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
       const response = await fetch('/api/traktir', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: tipAmount }),
+        body: JSON.stringify({ amount: tipAmount, product_id: product.id }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Gagal menyiapkan pembayaran. Coba lagi ya.');
       if (!data.payment_url || new URL(data.payment_url).protocol !== 'https:') throw new Error('Tautan pembayaran tidak tersedia.');
-      window.open(data.payment_url, '_blank', 'noopener,noreferrer');
-      setPhase(2);
+      setRedirecting(true);
+      window.location.assign(data.payment_url);
     } catch (submitError) {
       setTipError(submitError.message);
-    } finally {
       setTipBusy(false);
     }
-  }, [tipAmount]);
+  }, [tipAmount, product]);
 
   const handleBackdropClick = useCallback((e) => {
     if (e.target === e.currentTarget && (phase === 1 || downloaded)) {
@@ -155,56 +171,79 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
             )}
 
             {showTraktirForm && (
-              <form onSubmit={submitTraktir} aria-busy={tipBusy} className="space-y-3">
+              <form onSubmit={submitTraktir} aria-busy={tipBusy} aria-labelledby="traktir-title" className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+                <div className="text-center">
+                  <span className="text-3xl" aria-hidden="true">☕</span>
+                  <h4 id="traktir-title" className="mt-1 text-base font-bold text-gray-900">Traktir Kopi untuk Pak Choy</h4>
+                  <p className="mt-1 text-xs leading-relaxed text-gray-600">Pilih nominal atau isi sendiri. Setelah QRIS berhasil, file langsung bisa diunduh.</p>
+                </div>
+
                 {tipError && (
-                  <p role="alert" className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs font-semibold text-red-700">
+                  <p role="alert" className="mt-3 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs font-semibold text-red-700">
                     {tipError}
                   </p>
                 )}
 
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 mb-1.5">Nominal traktir</p>
-                  <div className="flex gap-1.5">
-                    {TIP_PRESETS.map((preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => setTipAmount(preset)}
-                        className={`flex-1 rounded-lg border px-2 py-2 text-xs font-bold transition-colors ${
-                          tipAmount === preset ? 'border-[#0ea5a0] bg-[#0ea5a0]/10 text-[#0d7a8a]' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                        }`}
-                      >
-                        {`Rp${preset.toLocaleString('id-ID')}`}
-                      </button>
-                    ))}
+                <fieldset className="mt-4">
+                  <legend className="mb-1.5 text-xs font-semibold text-gray-600">Pilih nominal</legend>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {TIP_PRESETS.map((preset) => {
+                      const active = !customTip && tipAmount === preset;
+                      return (
+                        <button
+                          key={preset}
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() => { setCustomTip(''); setTipAmount(preset); }}
+                          className={`rounded-lg border px-1 py-2 text-[11px] font-bold transition-colors ${
+                            active ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {`${preset / 1000}rb`}
+                        </button>
+                      );
+                    })}
                   </div>
-                  <input
-                    type="number"
-                    aria-label="Nominal traktir lainnya"
-                    min={1000}
-                    step={1000}
-                    value={tipAmount}
-                    onChange={(e) => setTipAmount(Math.max(0, Number(e.target.value)))}
-                    className="mt-2 h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20"
-                    placeholder="Nominal lainnya"
-                  />
-                </div>
+                </fieldset>
+
+                <label className="mt-3 block text-xs font-semibold text-gray-600">
+                  Atau isi nominal sendiri
+                  <span className="mt-1.5 flex h-11 items-center rounded-xl border border-gray-200 bg-white px-3 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100">
+                    <span className="mr-1.5 text-sm font-semibold text-gray-400">Rp</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      value={customTip}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+                        setCustomTip(digits ? Number(digits).toLocaleString('id-ID') : '');
+                        setTipAmount(Number(digits || 0));
+                      }}
+                      placeholder="contoh: 15.000"
+                      className="h-full min-w-0 flex-1 bg-transparent text-base font-semibold text-gray-900 outline-none"
+                    />
+                  </span>
+                  {customTip && tipAmount < MIN_TIP && (
+                    <span className="mt-1 block text-[11px] font-medium text-red-600">Minimal {formatTip(MIN_TIP)}</span>
+                  )}
+                </label>
 
                 <button
                   type="submit"
-                  disabled={tipBusy || tipAmount < 1000}
-                  className="w-full bg-gradient-to-r from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] text-white font-bold px-6 py-3 rounded-xl hover:shadow-md active:scale-[0.98] transition-all duration-200 disabled:opacity-60"
+                  disabled={tipBusy || tipAmount < MIN_TIP}
+                  className="mt-4 flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-500 px-6 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-[background-color,transform] duration-150 hover:bg-emerald-600 active:scale-[0.97] disabled:opacity-60"
                 >
-                  {tipBusy ? 'Menyiapkan pembayaran...' : `Bayar Rp${tipAmount.toLocaleString('id-ID')}`}
+                  {redirecting ? 'Membuka QRIS...' : tipBusy ? 'Menyiapkan QRIS...' : `☕ Traktir ${formatTip(tipAmount)}`}
                 </button>
 
                 <button
                   type="button"
-                  onClick={handleSkipTraktir}
+                  onClick={() => setShowTraktirForm(false)}
                   disabled={tipBusy}
-                  className="w-full rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 font-semibold py-2.5 transition-colors disabled:opacity-60"
+                  className="mt-2 w-full py-2 text-xs font-semibold text-gray-500 hover:text-gray-700 disabled:opacity-60"
                 >
-                  Kapan-kapan ya Pak, langsung download 😅
+                  Kembali
                 </button>
               </form>
             )}

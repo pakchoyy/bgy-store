@@ -6,6 +6,7 @@ export async function POST(request) {
     const cleanAmount = Math.floor(Number(body.amount) || 0)
     const buyerName = String(body.buyer_name || '').trim().slice(0, 120) || 'Pendukung BGY'
     const buyerEmail = String(body.buyer_email || '').trim().slice(0, 254) || process.env.TRAKTIR_DEFAULT_EMAIL || 'traktir@bantuguruyuk.web.id'
+    const fileId = /^[0-9a-f-]{36}$/i.test(String(body.product_id || '')) ? String(body.product_id) : ''
     const cleanWhatsapp = String(body.buyer_whatsapp || '').replace(/[^\d+]/g, '') || process.env.TRAKTIR_DEFAULT_PHONE || '081200000000'
 
     if (cleanAmount < 1000) return NextResponse.json({ error: 'Nominal minimal Rp1.000' }, { status: 400 })
@@ -49,11 +50,11 @@ export async function POST(request) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
 
     try {
-      const redirectUrl = `${siteUrl}/terima-kasih?order=${order.id}`
+      const redirectUrl = `${siteUrl}/terima-kasih?order=${order.id}${fileId ? `&file=${fileId}` : ''}`
       const mayarResponse = await createPaymentLink({
         amount: cleanAmount,
         name: 'Traktir Kopi',
-        description: 'Traktir Kopi - Bantu Guru Yuk',
+        description: 'Traktir Kopi untuk Pak Choy - Bantu Guru Yuk',
         redirectUrl,
         customer: { name: buyerName, email: buyerEmail, phone: cleanWhatsapp },
       })

@@ -5,6 +5,8 @@ import { demoProducts } from '@/lib/demo-data'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import { parseSocialLinks } from '@/lib/utils'
 import Link from 'next/link'
+import PaymentWaiter from '@/components/public/PaymentWaiter'
+import DownloadReady from '@/components/public/DownloadReady'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,6 +22,7 @@ async function getOrder({ token, orderId }) {
         status: 'paid',
         download_token: 'demo-download-token-abc123',
         token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        product_id: demoProducts[0].id,
         product: demoProducts[0],
       },
     }
@@ -34,7 +37,7 @@ async function getOrder({ token, orderId }) {
 
   let query = supabase
     .from('orders')
-    .select('id, buyer_name, status, download_token, token_expires_at, product:products(id, title, slug)')
+    .select('id, buyer_name, status, amount, product_id, download_token, token_expires_at, product:products(id, title, slug)')
 
   query = token ? query.eq('download_token', token) : query.eq('id', orderId)
 
@@ -53,16 +56,37 @@ function getWhatsAppUrl(appearance) {
   return 'https://wa.me/6281234567890'
 }
 
+function StatusIcon({ tone, children }) {
+  const tones = { green: 'bg-emerald-100 text-emerald-600', amber: 'bg-amber-100 text-amber-600', red: 'bg-red-100 text-red-600' }
+  return (
+    <div className={`mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full ${tones[tone]}`} aria-hidden="true">
+      <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">{children}</svg>
+    </div>
+  )
+}
+
+const checkPath = <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+const clockPath = <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+const alertPath = <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
+
+const waButton = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 text-sm font-bold text-white'
+
 export default async function TerimaKasihPage({ searchParams }) {
   const token = searchParams?.token || ''
   const orderId = searchParams?.order || ''
+  const fileId = searchParams?.file || ''
   const data = await getOrder({ token, orderId })
   const { order, navItems, appearance, footerConfig, announcement, products } = data
+  const isDonation = order && !order.product_id
+  const freeFile = isDonation && fileId
+    ? (products || []).find((p) => p.id === fileId && p.type === 'free') || null
+    : null
   const recommended = (products || [])
-    .filter((p) => p.is_active && p.id !== order?.product?.id)
+    .filter((p) => p.is_active && p.id !== order?.product?.id && p.id !== freeFile?.id)
     .slice(0, 3)
-  const isPaid = order && order.status === 'paid' && order.download_token
-  const isPending = order && order.status === 'pending'
+  const isPaid = order?.status === 'paid' && (isDonation || order.download_token)
+  const isPending = order?.status === 'pending'
+  const isFailed = order && ['failed', 'expired'].includes(order.status)
   const waUrl = getWhatsAppUrl(appearance)
 
   return (
@@ -76,55 +100,68 @@ export default async function TerimaKasihPage({ searchParams }) {
     >
       <div className="space-y-4">
         <div className="bg-white/95 rounded-2xl shadow-sm p-6 text-center">
-          {isPaid ? (
+          {isPaid && isDonation ? (
             <>
-              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h1 className="text-lg font-extrabold text-gray-900 mb-2">Pembayaran Berhasil!</h1>
-              <p className="text-sm text-gray-600 mb-4">
+              <StatusIcon tone="green">{checkPath}</StatusIcon>
+              <h1 className="text-lg font-bold text-gray-900">Terima kasih sudah traktir kopi! ☕</h1>
+              <p className="mt-1 text-sm text-gray-600">
+                Dukunganmu bikin Pak Choy makin semangat berkarya{order.buyer_name && order.buyer_name !== 'Pendukung BGY' ? `, ${order.buyer_name}` : ''}.
+              </p>
+              {freeFile && <DownloadReady freeProductId={freeFile.id} title={freeFile.title} />}
+            </>
+          ) : isPaid ? (
+            <>
+              <StatusIcon tone="green">{checkPath}</StatusIcon>
+              <h1 className="text-lg font-bold text-gray-900">Pembayaran Berhasil!</h1>
+              <p className="mt-1 text-sm text-gray-600">
                 Terima kasih, <span className="font-semibold">{order.buyer_name}</span>!
               </p>
-              <a
-                href={`/api/download?token=${encodeURIComponent(order.download_token)}`}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white font-bold px-5 py-2.5 rounded-xl text-sm"
-              >
-                Download Sekarang
-              </a>
+              <DownloadReady token={order.download_token} title={order.product?.title} />
             </>
           ) : isPending ? (
             <>
-              <div className="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-7 h-7 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h1 className="text-lg font-extrabold text-gray-900 mb-2">Menunggu Pembayaran</h1>
-              <p className="text-sm text-gray-600 mb-4">
-                Pesanan kamu sudah tercatat. Setelah pembayaran Mayar sukses, link download akan muncul di halaman ini.
+              <StatusIcon tone="amber">{clockPath}</StatusIcon>
+              <h1 className="text-lg font-bold text-gray-900">Menunggu Pembayaran</h1>
+              <p className="mt-1 text-sm text-gray-600">
+                {isDonation
+                  ? 'Selesaikan pembayaran QRIS. Setelah berhasil, file langsung bisa diunduh di halaman ini.'
+                  : 'Selesaikan pembayaran di Mayar. Setelah berhasil, tombol download muncul otomatis di halaman ini.'}
               </p>
-              <a
-                href={`${waUrl}?text=${encodeURIComponent(`Halo, saya butuh bantuan cek pembayaran order ${order.id}`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-green-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm"
-              >
-                Hubungi WhatsApp
-              </a>
+              <PaymentWaiter orderId={order.id} />
+              <div className="mt-4">
+                <a
+                  href={`${waUrl}?text=${encodeURIComponent(`Halo, saya butuh bantuan cek pembayaran order ${order.id}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-semibold text-[#0d7a8a] underline underline-offset-2"
+                >
+                  Sudah bayar tapi belum berubah? Hubungi WhatsApp
+                </a>
+              </div>
+            </>
+          ) : isFailed ? (
+            <>
+              <StatusIcon tone="red">{alertPath}</StatusIcon>
+              <h1 className="text-lg font-bold text-gray-900">Pembayaran Tidak Berhasil</h1>
+              <p className="mt-1 mb-4 text-sm text-gray-600">
+                Pembayaran gagal atau sudah kedaluwarsa. Silakan ulangi dari halaman produk.
+              </p>
+              <Link href={order.product?.slug ? `/produk/${order.product.slug}` : '/produk'} className={waButton}>
+                Coba Lagi
+              </Link>
             </>
           ) : (
             <>
-              <h1 className="text-lg font-extrabold text-gray-900 mb-2">Token Tidak Valid</h1>
-              <p className="text-sm text-gray-600 mb-4">
+              <StatusIcon tone="red">{alertPath}</StatusIcon>
+              <h1 className="text-lg font-bold text-gray-900">Tautan Tidak Valid</h1>
+              <p className="mt-1 mb-4 text-sm text-gray-600">
                 Tautan tidak valid atau kedaluwarsa. Hubungi kami jika sudah bayar.
               </p>
               <a
                 href={`${waUrl}?text=${encodeURIComponent('Halo, saya butuh bantuan download produk')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-green-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm"
+                className={waButton}
               >
                 Hubungi WhatsApp
               </a>
@@ -134,7 +171,7 @@ export default async function TerimaKasihPage({ searchParams }) {
 
         {isPaid && order?.product && (
           <div>
-            <p className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 px-1">
+            <p className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
               Bagikan Pengalaman
             </p>
             <ProductReviewForm
@@ -146,7 +183,7 @@ export default async function TerimaKasihPage({ searchParams }) {
 
         {recommended.length > 0 && (
           <div>
-            <p className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 px-1">
+            <p className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
               Produk Lainnya
             </p>
             <ProductStack products={recommended} />
