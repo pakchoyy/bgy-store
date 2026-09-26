@@ -33,6 +33,12 @@ export const ACTIVITY_TABS = [
   { id: 'notifikasi', label: 'Notifikasi', href: '/admin/notifikasi' },
 ];
 
+export const STRUCTURE_TABS = [
+  { id: 'halaman', label: 'Halaman', href: '/admin/halaman' },
+  { id: 'navigasi', label: 'Menu Navigasi', href: '/admin/navigation' },
+  { id: 'kategori', label: 'Kategori', href: '/admin/kategori' },
+];
+
 export const PAGE_404_TABS = [
   { id: '404', label: 'Custom 404', href: '/admin/custom-404' },
   { id: 'error-log', label: 'Error Log', href: '/admin/error-log' },

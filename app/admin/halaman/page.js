@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import PageTableClient from '@/components/admin/PageTableClient'
+import AdminTabs, { STRUCTURE_TABS } from '@/components/admin/AdminTabs'
 
 export const demoPages = [
   { id: 'page-1', title: 'Tentang Kami', slug: 'tentang-kami', content: '<h1>Tentang Bantu Guru Yuk</h1>', is_active: true, created_at: '2026-01-15', updated_at: '2026-06-20' },
@@ -30,14 +31,8 @@ export default async function AdminHalaman() {
   const pages = await getData()
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-gray-900">Halaman & Navigasi</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Kelola halaman toko dan menu navigasinya.</p>
-        </div>
-        <a href="/admin/navigation#navigasi" className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Kelola menu</a>
-      </div>
+    <div>
+      <AdminTabs tabs={STRUCTURE_TABS} active="halaman" />
       <PageTableClient pages={pages} />
     </div>
   )

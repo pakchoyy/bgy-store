@@ -70,8 +70,7 @@ function Sidebar({ counts }) {
         { href: '/admin/pesanan', label: 'Pesanan', icon: 'shopping-cart', countKey: 'orders' },
         { href: '/admin/analytics', label: 'Analytics', icon: 'chart' },
         { href: '/admin/reviews', label: 'Review & Notifikasi', icon: 'star', countKey: 'reviews', also: ['/admin/notifikasi'] },
-        { href: '/admin/kategori', label: 'Kategori', icon: 'tags' },
-        { href: '/admin/halaman', label: 'Halaman & Navigasi', icon: 'file-text' },
+        { href: '/admin/halaman', label: 'Halaman, Menu, Kategori', icon: 'file-text', also: ['/admin/navigation', '/admin/kategori'] },
       ],
     },
     {

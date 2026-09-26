@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import KategoriManager from '@/components/admin/KategoriManager'
+import AdminTabs, { STRUCTURE_TABS } from '@/components/admin/AdminTabs'
 
 async function getData() {
   try {
@@ -32,13 +33,8 @@ export default async function AdminKategori() {
   const categories = await getData()
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-gray-900">Kelola Kategori</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Atur kategori produk</p>
-        </div>
-      </div>
+    <div>
+      <AdminTabs tabs={STRUCTURE_TABS} active="kategori" />
       <KategoriManager categories={categories} />
     </div>
   )

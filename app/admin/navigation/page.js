@@ -1,4 +1,4 @@
-import { BackButton } from '@/components/ui/back-button'
+import AdminTabs, { STRUCTURE_TABS } from '@/components/admin/AdminTabs'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { demoNavItems } from '@/lib/demo-data'
@@ -77,10 +77,11 @@ export default async function AdminNavigation({ searchParams }) {
 
   return (
     <div id="navigasi">
-      <div className="flex items-center justify-between mb-6">
-        <div><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Halaman & Navigasi</p><h1 className="text-lg font-extrabold text-gray-900">Menu navigasi</h1><BackButton href="/admin/halaman" label="Kembali ke halaman" showLabel className="mt-2" /></div>
+      <AdminTabs tabs={STRUCTURE_TABS} active="navigasi" />
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <p className="text-sm text-gray-500">Menu yang tampil di header website.</p>
         <details className="group relative">
-          <summary className="list-none bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer">
+          <summary className="list-none whitespace-nowrap bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer">
             + Tambah Menu
           </summary>
           <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-card border border-gray-100 p-4 z-50">
