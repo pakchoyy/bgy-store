@@ -268,13 +268,6 @@ export default function AppearanceBuilder({
                 <ColorField value={form.theme_secondary_color} onChange={(value) => update('theme_secondary_color', value)} />
               </Field>
             </div>
-            <Field label="Gaya tombol beli">
-              <div className="grid grid-cols-3 gap-2">
-                {[['solid', 'Penuh'], ['outline', 'Outline'], ['soft', 'Lembut']].map(([value, label]) => (
-                  <button key={value} type="button" aria-pressed={form.theme_button_style === value} onClick={() => update('theme_button_style', value)} className={`min-h-11 rounded-lg border px-3 text-sm font-semibold ${form.theme_button_style === value ? 'border-teal-600 bg-teal-50 text-teal-800' : 'border-gray-200 text-gray-600'}`}>{label}</button>
-                ))}
-              </div>
-            </Field>
           </section>
 
           <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">

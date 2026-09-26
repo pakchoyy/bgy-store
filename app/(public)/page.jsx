@@ -7,20 +7,13 @@ async function getData() {
   if (!hasSupabase()) {
     const saved = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]') : []
     const allProducts = saved.length ? saved : demoProducts
-    const featured = allProducts.filter((p) => p.is_active && (p.is_featured || p.type === 'paid'))
-    const rest = allProducts.filter((p) => p.is_active && !featured.find((f) => f.id === p.id))
     return demoShellData({
-      products: [...featured, ...rest].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
+      products: allProducts.filter((p) => p.is_active).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
     })
   }
 
   const shell = await fetchStoreShell()
-  const products = (shell.products || [])
-    .slice()
-    .sort((a, b) => {
-      if (!!b.is_featured !== !!a.is_featured) return b.is_featured ? 1 : -1
-      return (a.sort_order || 0) - (b.sort_order || 0)
-    })
+  const products = (shell.products || []).slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
 
   return { ...shell, products }
 }

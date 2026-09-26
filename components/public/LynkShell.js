@@ -6,7 +6,8 @@ import Footer from '@/components/public/Footer'
 import PageTabs from '@/components/public/PageTabs'
 import SocialIcons from '@/components/public/SocialIcons'
 import { navigationHref, uniqueNavigationItems } from '@/lib/navigation'
-import { CART_UPDATED_EVENT, getCartItems } from '@/lib/cart'
+import { CART_UPDATED_EVENT, getCartItems, removeCartItem } from '@/lib/cart'
+import { CloseButton } from '@/components/ui/close-button'
 
 function formatCartPrice(value) {
   const amount = Number(value || 0)
@@ -146,25 +147,38 @@ export default function LynkShell({
               <svg aria-hidden="true" className="h-8 w-8 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.1} d="M3 3h2l.5 3m0 0L7 15h10l3-9H5.5Zm3 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
               </svg>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-xl font-semibold">Cart ({cartItems.length})</p>
                 <p className="text-xs text-slate-500">Pilih produk, lalu lanjut beli.</p>
               </div>
+              <CloseButton label="Tutup keranjang" onClick={() => setCartOpen(false)} />
             </div>
             {cartItems.length ? (
               <>
                 <div className="max-h-72 overflow-y-auto px-5 py-4">
                   {cartItems.map((item) => (
-                    <a key={item.id} href={item.slug ? `/produk/${item.slug}` : '/produk'} className="flex gap-3 rounded-xl border border-slate-200 p-3 transition-colors hover:bg-slate-50">
-                      <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-teal-50 text-[10px] font-bold text-[#0d7a8a]">
-                        {item.cover_path ? <img src={item.cover_path} alt="" className="h-full w-full object-cover" /> : 'BGY'}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold leading-snug text-slate-900">{item.title}</span>
-                        <span className="mt-1 block text-sm font-semibold text-[#0ea5a0]">{formatCartPrice(item.sale_price)}</span>
-                      </span>
-                      <span className="self-center text-sm font-semibold text-[#0ea5a0]">Beli</span>
-                    </a>
+                    <div key={item.id} className="mb-2 flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 last:mb-0">
+                      <a href={item.slug ? `/produk/${item.slug}` : '/produk'} className="flex min-w-0 flex-1 items-center gap-3 rounded-lg transition-colors hover:bg-slate-50">
+                        <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-teal-50 text-[10px] font-bold text-[#0d7a8a]">
+                          {item.cover_path ? <img src={item.cover_path} alt="" className="h-full w-full object-cover" /> : 'BGY'}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold leading-snug text-slate-900 line-clamp-2">{item.title}</span>
+                          <span className="mt-1 block text-sm font-semibold text-rose-600">{formatCartPrice(item.sale_price)}</span>
+                        </span>
+                        <span className="shrink-0 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-bold text-white">Beli</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => removeCartItem(item.id)}
+                        aria-label={`Hapus ${item.title} dari keranjang`}
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                      >
+                        <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M10 11v6m4-6v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+                        </svg>
+                      </button>
+                    </div>
                   ))}
                 </div>
                 <div className="space-y-3 border-t border-slate-100 px-5 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
@@ -172,7 +186,7 @@ export default function LynkShell({
                     <span className="font-semibold text-slate-500">Total ({cartItems.length} item)</span>
                     <span className="font-bold text-slate-900">{formatCartPrice(cartTotal)}</span>
                   </div>
-                  <a href={primaryCartItem?.slug ? `/produk/${primaryCartItem.slug}` : '/produk'} className="store-buy-button flex min-h-12 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#0ea5a0] to-[#16c784] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-transform duration-150 active:scale-[0.96]">
+                  <a href={primaryCartItem?.slug ? `/produk/${primaryCartItem.slug}` : '/produk'} className="flex min-h-12 w-full items-center justify-center rounded-2xl bg-rose-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-rose-500/30 transition-transform duration-150 hover:bg-rose-600 active:scale-[0.96]">
                     Beli Sekarang
                   </a>
                   <a href="/produk" className="flex min-h-12 w-full items-center justify-center rounded-2xl border border-[#0ea5a0] px-4 py-3 text-sm font-semibold text-[#0d7a8a]">

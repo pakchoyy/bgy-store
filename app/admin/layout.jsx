@@ -9,16 +9,22 @@ import { AdminProvider } from '@/components/admin/AdminProvider';
 async function getAdminCounts(supabase, isDemo) {
   if (isDemo) return { orders: 0, reviews: 0 };
   try {
-    const [ordersResult, reviewsResult] = await Promise.all([
+    let [ordersResult, reviewsResult] = await Promise.all([
       supabase
         .from('orders')
         .select('id', { count: 'exact', head: true })
-        .in('status', ['pending', 'paid']),
+        .is('admin_read_at', null),
       supabase
         .from('product_reviews')
         .select('id', { count: 'exact', head: true })
         .eq('is_approved', false),
     ]);
+    if (ordersResult.error) {
+      ordersResult = await supabase
+        .from('orders')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['pending', 'paid']);
+    }
     return {
       orders: ordersResult.count || 0,
       reviews: reviewsResult.count || 0,
@@ -71,7 +77,6 @@ function Sidebar({ counts }) {
       label: 'Tampilan',
       items: [
         { href: '/admin/homepage', label: 'Appearance', icon: 'home' },
-        { href: '/admin/homepage-sections', label: 'Homepage Sections', icon: 'rectangle' },
         { href: '/admin/footer', label: 'Footer', icon: 'rectangle' },
         { href: '/admin/announcement', label: 'Announcement', icon: 'megaphone' },
       ],

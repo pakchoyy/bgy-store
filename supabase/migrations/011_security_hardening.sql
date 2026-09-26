@@ -48,12 +48,14 @@ DROP POLICY IF EXISTS "user_read_own_review" ON product_reviews;
 -- 6. Products: RLS filters rows, not columns. Anonymous visitors must not be
 --    able to read file_url / file_path of paid products through the public
 --    REST API, so anon only gets the columns the storefront renders.
+ALTER TABLE products ADD COLUMN IF NOT EXISTS meta_description text;
+
 REVOKE SELECT ON products FROM anon;
 GRANT SELECT (
   id, title, slug, description, category_id, type, purchase_button_label,
   sale_price, original_price, stock_type, stock_qty, badge, badge_custom,
   is_featured, cover_path, preview_path, file_size, card_layout, sort_order,
-  is_active, published_at, deleted_at, created_at, meta_title, meta_desc,
+  is_active, published_at, deleted_at, created_at, meta_title,
   meta_description, download_count
 ) ON products TO anon;
 

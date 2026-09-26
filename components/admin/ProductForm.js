@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/components/ui/toast'
 import { Select } from '@/components/ui/select'
+import ProductCard from '@/components/public/ProductCard'
 
 const BADGE_OPTIONS = [
   { value: 'baru', label: 'Baru' },
@@ -55,7 +56,7 @@ export default function ProductForm({ initialData, categories = [] }) {
     purchase_button_label: initialData?.purchase_button_label || 'Beli Sekarang',
     is_active: true,
     meta_title: '',
-    meta_description: initialData?.meta_desc || '',
+    meta_description: initialData?.meta_description || initialData?.meta_desc || '',
     ...initialData,
     badges: initialData?.badge ? [initialData.badge] : [],
     sale_price: initialData?.sale_price ?? 0,
@@ -364,7 +365,7 @@ export default function ProductForm({ initialData, categories = [] }) {
               onChange={e => updateField('is_featured', e.target.checked)}
               className="rounded text-[#0ea5a0] focus:ring-[#0ea5a0]"
             />
-            <span className="text-sm font-medium text-gray-700">Produk Unggulan</span>
+            <span className="text-sm font-medium text-gray-700">Highlight (kartu bergoyang di toko)</span>
           </label>
         </div>
       </CardSection>
@@ -577,6 +578,25 @@ export default function ProductForm({ initialData, categories = [] }) {
       </CardSection>
 
       <CardSection title="Ringkasan">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Preview kartu di toko</p>
+          <div
+            className="grid grid-cols-2 gap-3 rounded-2xl bg-gradient-to-b from-[#0ea5a0] to-[#e8f7f6] p-3"
+            onClickCapture={(e) => { if (e.target.closest('a')) e.preventDefault() }}
+          >
+            <div className={['square', 'portrait'].includes(form.card_layout) ? 'col-span-1' : 'col-span-2'}>
+              <ProductCard product={{
+                ...form,
+                id: 'preview',
+                title: form.title || 'Judul produk',
+                cover_path: coverImage,
+                sale_price: Number(form.sale_price) || 0,
+                original_price: Number(form.original_price) || null,
+                stock_qty: form.stock_type === 'limited' ? Number(form.stock_qty) || 0 : null,
+              }} />
+            </div>
+          </div>
+        </div>
         <div className="space-y-2 text-sm">
           <p className="break-words font-semibold text-gray-900">{form.title || 'Judul produk'}</p>
           <p className="text-gray-600">{form.type === 'paid' ? formatRupiah(form.sale_price) : 'Gratis'}</p>

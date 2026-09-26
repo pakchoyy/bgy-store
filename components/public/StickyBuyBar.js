@@ -61,10 +61,12 @@ export default function StickyBuyBar({ product, onAddToCart }) {
           <button
             onClick={() => btnRef.current?.click()}
             disabled={isSoldOut}
-            className={`store-buy-button min-h-12 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0ea5a0] focus-visible:ring-offset-2 ${
+            className={`min-h-12 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 ${
               isSoldOut
                 ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-gradient-to-r from-[#0ea5a0] via-[#0d7a8a] to-[#2d6a7f] shadow-sm active:scale-[0.96]'
+                : product.type === 'free'
+                  ? 'bg-emerald-500 hover:bg-emerald-600 shadow-sm active:scale-[0.96]'
+                  : 'bg-rose-500 hover:bg-rose-600 shadow-md shadow-rose-500/30 active:scale-[0.96]'
             }`}
           >
             {isSoldOut ? 'Stok Habis' : product.purchase_button_label || 'Beli Sekarang'}

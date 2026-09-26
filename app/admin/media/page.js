@@ -163,9 +163,9 @@ export default async function AdminMedia({ searchParams }) {
               </table>
               <MediaDetailActions id={selected.id} url={selected.url} />
             </div>
-            <a href={`/admin/media?filter=${filter}`} className="text-gray-400 hover:text-gray-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <a href={`/admin/media?filter=${filter}`} aria-label="Tutup detail" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500 text-white shadow-md shadow-red-500/30 ring-2 ring-red-100 hover:bg-red-600">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </a>
           </div>

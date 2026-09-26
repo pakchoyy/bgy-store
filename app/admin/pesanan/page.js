@@ -22,6 +22,19 @@ async function generateLink(formData) {
   redirect(`/admin/pesanan?toast=${error ? 'error' : 'success'}&selected=${id}`)
 }
 
+async function markRead(formData) {
+  'use server'
+  const id = formData.get('id')
+  const back = formData.get('back') || ''
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/pesanan?${back}`)
+  const supabase = await createClient()
+  const query = supabase.from('orders').update({ admin_read_at: new Date().toISOString() }).is('admin_read_at', null)
+  const { error } = id ? await query.eq('id', id) : await query
+  const params = new URLSearchParams(back)
+  params.set('toast', error ? 'error' : 'read')
+  redirect(`/admin/pesanan?${params.toString()}`)
+}
+
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
   paid: 'bg-green-100 text-green-800',
@@ -72,6 +85,7 @@ export default async function AdminPesanan({ searchParams }) {
           status: o.status || 'pending',
           date: o.created_at ? o.created_at.slice(0, 10) : '2026-01-01',
           download_token: o.download_token || null,
+          unread: o.admin_read_at === null,
         }
       })
     }
@@ -94,6 +108,7 @@ export default async function AdminPesanan({ searchParams }) {
   }
 
   const selectedOrder = selected ? orders.find(o => o.id === selected) : null
+  const unreadCount = orders.filter(o => o.unread).length
   const statuses = ['all', 'pending', 'paid', 'failed', 'expired']
   const types = ['all', 'produk', 'donasi']
   const baseQuery = (overrides = {}) => {
@@ -108,7 +123,19 @@ export default async function AdminPesanan({ searchParams }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h1 className="text-lg font-extrabold text-gray-900">Kelola Pesanan</h1>
+        <h1 className="text-lg font-extrabold text-gray-900">
+          Kelola Pesanan
+          {unreadCount > 0 && <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 align-middle text-xs font-bold text-white">{unreadCount} baru</span>}
+        </h1>
+        <div className="flex flex-wrap items-center gap-2">
+        {unreadCount > 0 && (
+          <form action={markRead}>
+            <input type="hidden" name="back" value={baseQuery({ toast: '' })} />
+            <button type="submit" className="rounded-lg bg-[#0ea5a0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d7a8a]">
+              ✓ Tandai semua dibaca
+            </button>
+          </form>
+        )}
         <form method="GET" action="/admin/pesanan">
           <input type="hidden" name="status" value={statusFilter} />
           <input type="hidden" name="type" value={typeFilter} />
@@ -119,8 +146,9 @@ export default async function AdminPesanan({ searchParams }) {
             Export CSV
           </button>
         </form>
+        </div>
       </div>
-      <AdminToast toast={toast} message={toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
+      <AdminToast toast={toast === 'read' ? 'success' : toast} message={toast === 'read' ? 'Pesanan ditandai sudah dibaca' : toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex max-w-full gap-1 overflow-x-auto bg-gray-100 rounded-lg p-1">
           {statuses.map(s => (
@@ -173,9 +201,10 @@ export default async function AdminPesanan({ searchParams }) {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.map(order => (
-                <tr key={order.id} className="hover:bg-gray-50/50">
+                <tr key={order.id} className={order.unread ? 'bg-emerald-50/70 hover:bg-emerald-50' : 'hover:bg-gray-50/50'}>
                   <td className="px-4 py-3">
-                    <a href={`/admin/pesanan?${baseQuery({ selected: order.id, toast })}`} className="font-medium text-gray-900 hover:text-[#0ea5a0]">
+                    <a href={`/admin/pesanan?${baseQuery({ selected: order.id, toast: '' })}`} className={`inline-flex items-center gap-2 hover:text-[#0ea5a0] ${order.unread ? 'font-bold text-gray-950' : 'font-medium text-gray-900'}`}>
+                      {order.unread && <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" aria-label="Belum dibaca" />}
                       {order.buyer_name}
                     </a>
                   </td>
@@ -201,12 +230,21 @@ export default async function AdminPesanan({ searchParams }) {
                   </td>
                   <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">{order.date}</td>
                   <td className="px-4 py-3 text-right">
-                    <a
-                      href={`/admin/pesanan?${baseQuery({ selected: order.id, toast })}`}
-                      className="text-xs text-[#0ea5a0] hover:text-[#0d7a8a] font-medium"
-                    >
-                      Detail
-                    </a>
+                    <div className="flex items-center justify-end gap-3">
+                      {order.unread && (
+                        <form action={markRead}>
+                          <input type="hidden" name="id" value={order.id} />
+                          <input type="hidden" name="back" value={baseQuery({ toast: '' })} />
+                          <button type="submit" aria-label={`Tandai pesanan ${order.buyer_name} dibaca`} className="whitespace-nowrap text-xs font-semibold text-gray-500 hover:text-gray-800">✓ Dibaca</button>
+                        </form>
+                      )}
+                      <a
+                        href={`/admin/pesanan?${baseQuery({ selected: order.id, toast: '' })}`}
+                        className="text-xs text-[#0ea5a0] hover:text-[#0d7a8a] font-medium"
+                      >
+                        Detail
+                      </a>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -266,9 +304,9 @@ export default async function AdminPesanan({ searchParams }) {
         <div className="mt-6 rounded-2xl bg-white p-6 shadow-card xl:hidden">
           <div className="flex items-start justify-between mb-4">
             <h3 className="text-sm font-bold text-gray-900">Detail Pesanan — {selectedOrder.id}</h3>
-            <a href={`/admin/pesanan?${baseQuery()}`} className="text-gray-400 hover:text-gray-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <a href={`/admin/pesanan?${baseQuery({ toast: '' })}`} aria-label="Tutup detail" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500 text-white shadow-md shadow-red-500/30 ring-2 ring-red-100 hover:bg-red-600">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </a>
           </div>

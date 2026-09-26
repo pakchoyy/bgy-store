@@ -100,16 +100,7 @@ export default function FreePageClient({ products, categories, settings }) {
                   : 'col-span-1'
               return (
                 <ScrollReveal key={product.id} className={span} delay={Math.min(idx, 8) * 50}>
-                  <div className="space-y-2">
-                    <ProductCard product={product} />
-                    <button
-                      type="button"
-                      onClick={() => setDownloadProduct(product)}
-                      className="w-full bg-white text-[#0d7a8a] font-bold text-sm px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
-                    >
-                      Download Gratis
-                    </button>
-                  </div>
+                  <ProductCard product={product} onSelect={setDownloadProduct} />
                 </ScrollReveal>
               )
             })}

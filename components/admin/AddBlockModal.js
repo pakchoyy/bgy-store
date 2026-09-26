@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { CloseButton } from '@/components/ui/close-button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
 import { uploadMedia } from '@/lib/upload-media'
@@ -89,7 +90,7 @@ export default function AddBlockModal({ type, onClose, onCreated }) {
       <Card className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
         <CardHeader className="flex flex-row items-center justify-between">
           <h2 className="text-lg font-bold">{TITLES[type]}</h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
+          <CloseButton onClick={onClose} />
         </CardHeader>
         <CardContent className="space-y-4">
           {type === 'image' && (

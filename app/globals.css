@@ -37,42 +37,29 @@ body {
   font-family: var(--store-font, inherit);
 }
 
-.store-theme .store-buy-button {
-  border-radius: var(--store-radius, 16px);
-}
-
-.store-theme[data-button-style="outline"] .store-buy-button:not(:disabled) {
-  background: transparent;
-  color: var(--brand-dark);
-  border: 2px solid var(--brand);
-  box-shadow: none;
-}
-
-.store-theme[data-button-style="soft"] .store-buy-button:not(:disabled) {
-  background: color-mix(in srgb, var(--brand) 14%, white);
-  color: var(--brand-dark);
-  box-shadow: none;
-}
-
 .bgy-highlight-block {
-  animation: bgy-highlight-wiggle 2.8s ease-in-out infinite;
+  animation: bgy-highlight-wiggle 2.4s ease-in-out infinite;
+  box-shadow: 0 0 0 2px rgb(252 211 77), 0 0 22px rgba(251, 191, 36, 0.45);
 }
 
 @keyframes bgy-highlight-wiggle {
-  0%, 78%, 100% {
-    transform: rotate(0deg) translateY(0);
+  0%, 60%, 100% {
+    transform: rotate(0deg) scale(1);
   }
-  82% {
-    transform: rotate(-0.55deg) translateY(-1px);
+  66% {
+    transform: rotate(-2deg) scale(1.03);
   }
-  86% {
-    transform: rotate(0.55deg) translateY(0);
+  72% {
+    transform: rotate(2deg) scale(1.03);
+  }
+  78% {
+    transform: rotate(-1.5deg) scale(1.02);
+  }
+  84% {
+    transform: rotate(1deg) scale(1.01);
   }
   90% {
-    transform: rotate(-0.35deg) translateY(-1px);
-  }
-  94% {
-    transform: rotate(0.25deg) translateY(0);
+    transform: rotate(0deg) scale(1);
   }
 }
 

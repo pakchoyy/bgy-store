@@ -3,6 +3,10 @@ import ContentBlockCard from '@/components/public/ContentBlockCard'
 import { getCardLayout } from '@/lib/utils'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
+function StaticWrap({ className, children }) {
+  return <div className={className}>{children}</div>
+}
+
 function mergeItems(products, contentBlocks) {
   const blocks = [...contentBlocks].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
   if (!blocks.length) return products.map((p) => ({ ...p, _kind: 'product' }))
@@ -23,8 +27,9 @@ function mergeItems(products, contentBlocks) {
   return result
 }
 
-export default function ProductStack({ products = [], contentBlocks = [], emptyText = 'Belum ada produk' }) {
+export default function ProductStack({ products = [], contentBlocks = [], emptyText = 'Belum ada produk', animate = true }) {
   const items = mergeItems(products, contentBlocks)
+  const Wrap = animate ? ScrollReveal : StaticWrap
 
   if (!items.length) {
     return (
@@ -39,9 +44,9 @@ export default function ProductStack({ products = [], contentBlocks = [], emptyT
       {items.map((item, index) => {
         if (item._kind === 'block') {
           return (
-            <ScrollReveal key={`block-${item.id}`} className="col-span-2" delay={Math.min(index, 8) * 45}>
+            <Wrap key={`block-${item.id}`} className="col-span-2" delay={Math.min(index, 8) * 45}>
               <ContentBlockCard block={item} />
-            </ScrollReveal>
+            </Wrap>
           )
         }
 
@@ -52,9 +57,9 @@ export default function ProductStack({ products = [], contentBlocks = [], emptyT
             : 'col-span-1'
 
         return (
-          <ScrollReveal key={`product-${item.id}`} className={span} delay={Math.min(index, 8) * 45}>
+          <Wrap key={`product-${item.id}`} className={span} delay={Math.min(index, 8) * 45}>
             <ProductCard product={item} />
-          </ScrollReveal>
+          </Wrap>
         )
       })}
     </div>

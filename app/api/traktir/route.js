@@ -3,15 +3,13 @@ import { NextResponse } from 'next/server'
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { amount, buyer_name, buyer_whatsapp, buyer_email } = body
-    const cleanAmount = Math.floor(Number(amount) || 0)
-    const cleanWhatsapp = String(buyer_whatsapp || '').replace(/[^\d+]/g, '')
+    const cleanAmount = Math.floor(Number(body.amount) || 0)
+    const buyerName = String(body.buyer_name || '').trim().slice(0, 120) || 'Pendukung BGY'
+    const buyerEmail = String(body.buyer_email || '').trim().slice(0, 254) || process.env.TRAKTIR_DEFAULT_EMAIL || 'traktir@bantuguruyuk.web.id'
+    const cleanWhatsapp = String(body.buyer_whatsapp || '').replace(/[^\d+]/g, '') || process.env.TRAKTIR_DEFAULT_PHONE || '081200000000'
 
     if (cleanAmount < 1000) return NextResponse.json({ error: 'Nominal minimal Rp1.000' }, { status: 400 })
-    if (!buyer_name?.trim()) return NextResponse.json({ error: 'Nama diperlukan' }, { status: 400 })
-    if (!buyer_whatsapp?.trim()) return NextResponse.json({ error: 'Nomor WhatsApp diperlukan' }, { status: 400 })
-    if (cleanWhatsapp.replace(/\D/g, '').length < 8) return NextResponse.json({ error: 'Nomor WhatsApp tidak valid' }, { status: 400 })
-    if (!buyer_email?.trim()) return NextResponse.json({ error: 'Email diperlukan' }, { status: 400 })
+    if (cleanAmount > 10000000) return NextResponse.json({ error: 'Nominal terlalu besar' }, { status: 400 })
 
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
       && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_supabase_url'
@@ -33,9 +31,9 @@ export async function POST(request) {
       .from('orders')
       .insert({
         product_id: null,
-        buyer_name: buyer_name.trim(),
+        buyer_name: buyerName,
         buyer_whatsapp: cleanWhatsapp,
-        buyer_email: buyer_email.trim(),
+        buyer_email: buyerEmail,
         amount: cleanAmount,
         status: 'pending',
         payment_method: 'mayar',
@@ -57,7 +55,7 @@ export async function POST(request) {
         name: 'Traktir Kopi',
         description: 'Traktir Kopi - Bantu Guru Yuk',
         redirectUrl,
-        customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: cleanWhatsapp },
+        customer: { name: buyerName, email: buyerEmail, phone: cleanWhatsapp },
       })
       const { paymentUrl, invoiceId } = extractMayarInvoice(mayarResponse)
 

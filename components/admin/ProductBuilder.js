@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
 import AddBlockModal from '@/components/admin/AddBlockModal'
+import ProductStack from '@/components/public/ProductStack'
+import { CloseButton } from '@/components/ui/close-button'
 
 function priceLabel(p) {
   if (p.type === 'free' || !p.sale_price) return 'GRATIS'
@@ -20,7 +22,7 @@ const DEMO_KEY = '_bgym_demo_products'
 const IS_DEMO = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
 const bySortOrder = (a, b) => (a.sort_order || 0) - (b.sort_order || 0)
 
-export default function ProductBuilder({ products: initialProducts, categories = [], contentBlocks: initialContentBlocks = [], siteName = 'BGY' }) {
+export default function ProductBuilder({ products: initialProducts, categories = [], contentBlocks: initialContentBlocks = [], appearance = {} }) {
   const { addToast } = useToast()
   const [products, setProducts] = useState(() => [...initialProducts].sort(bySortOrder))
   const [blocks, setBlocks] = useState(() => [...initialContentBlocks].sort(bySortOrder))
@@ -97,7 +99,12 @@ export default function ProductBuilder({ products: initialProducts, categories =
 
   const selected = products.find((p) => p.id === selectedId) || null
   const menuProduct = openMenuId ? products.find((p) => p.id === openMenuId) || null : null
-  const previewList = products.filter((p) => p.is_active).slice(0, 8)
+  const previewProducts = useMemo(() => products.filter((p) => p.is_active).sort(bySortOrder), [products])
+  const previewBlocks = useMemo(() => blocks.filter((b) => b.is_active !== false), [blocks])
+  const profileName = appearance.profileName || 'Bantu Guru Yuk'
+  const previewBg = appearance.bgStyle === 'flat'
+    ? { backgroundColor: appearance.bgColor || '#0ea5a0' }
+    : { backgroundImage: `linear-gradient(180deg, ${appearance.bgColor || '#0ea5a0'} 0%, ${appearance.bgColor || '#0ea5a0'}cc 35%, #f0fdfa 70%, #f8fafc 100%)` }
 
   function showToast(type, msg) {
     addToast(msg, type === 'error' ? 'error' : 'success')
@@ -368,9 +375,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                       <span>Basic</span>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => setShowBlockPicker(false)}>
-                    ✕
-                  </Button>
+                  <CloseButton onClick={() => setShowBlockPicker(false)} />
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -418,7 +423,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                 Belum ada produk. Klik <strong>Add new block</strong>.
               </div>
             ) : (
-              <div className="space-y-2 p-3">{mergedList.map((item, idx) => {
+              <div className="space-y-2 p-2 sm:p-3">{mergedList.map((item, idx) => {
                   if (item._kind === 'block') {
                     return (
                       <div key={`block-${item.id}`}>
@@ -496,7 +501,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           setOverId(null)
                         }}
                         onClick={() => setSelectedId(p.id)}
-                        className={`relative flex cursor-pointer items-center gap-3 rounded-2xl border px-3 py-3 shadow-sm transition-all ${
+                        className={`relative flex cursor-pointer items-center gap-2 rounded-2xl border px-2 py-2.5 shadow-sm transition-all ${
                           active ? 'border-[#0ea5a0]/30 bg-[rgba(14,165,160,0.07)]' : 'border-gray-100 bg-white hover:bg-gray-50/80'
                         } ${isOver ? 'ring-2 ring-inset ring-[#0ea5a0]/40' : ''} ${
                           dragId === p.id ? 'opacity-40' : ''
@@ -533,7 +538,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         </button>
                       </div>
 
-                      <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-gray-100 ring-1 ring-black/5">
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-gray-100 ring-1 ring-black/5">
                         {p.cover_path ? (
                           <img src={p.cover_path} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -550,7 +555,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-900 truncate leading-snug">
+                        <p className="text-sm font-semibold text-slate-900 line-clamp-2 break-words leading-snug">
                           {p.title}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -568,6 +573,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
 
                       <Button
                         size="sm"
+                        className="h-8 shrink-0 px-2 text-[11px]"
                         variant={p.is_active ? 'default' : 'outline'}
                         onClick={(e) => {
                           e.stopPropagation()
@@ -580,6 +586,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                       <div className="relative shrink-0">
                         <Button
                           size="icon"
+                          className="h-8 w-8"
                           onClick={(e) => {
                             e.stopPropagation()
                             setOpenMenuId((current) => (current === p.id ? null : p.id))
@@ -631,100 +638,32 @@ export default function ProductBuilder({ products: initialProducts, categories =
           <div className="mx-auto w-[290px]">
             <div className="relative rounded-[2.2rem] border-[10px] border-gray-900 bg-gray-900 shadow-2xl overflow-hidden">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-gray-900 rounded-b-2xl z-20" />
-              <div className="h-[540px] bg-gradient-to-b from-[#0d7a8a] via-[#0ea5a0] to-[#e8f7f6] overflow-y-auto">
-                {/* header store */}
-                <div className="pt-8 pb-4 px-4 text-center text-white">
-                  <div className="w-14 h-14 mx-auto rounded-full bg-white/20 backdrop-blur border-2 border-white/40 flex items-center justify-center text-sm font-extrabold mb-2">
-                    {siteName.slice(0, 3).toUpperCase()}
+              <div
+                className="h-[540px] overflow-y-auto"
+                style={previewBg}
+                onClickCapture={(e) => {
+                  const link = e.target.closest('a')
+                  if (link) e.preventDefault()
+                }}
+              >
+                <div className="px-3 pt-8 pb-3 text-center text-white">
+                  <div className="mx-auto mb-2 h-14 w-14 overflow-hidden rounded-full border-2 border-white/50 bg-white/20">
+                    {appearance.profileAvatarUrl ? (
+                      <img src={appearance.profileAvatarUrl} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center text-sm font-bold">{profileName.slice(0, 3).toUpperCase()}</span>
+                    )}
                   </div>
-                  <p className="text-sm font-extrabold">@{siteName.toLowerCase()}</p>
-                  <p className="text-[10px] text-white/80 mt-0.5">Toko digital guru</p>
-                  <div className="flex justify-center gap-2 mt-2 text-[10px] text-white/70">
-                    <span>WA</span>
-                    <span>·</span>
-                    <span>TT</span>
-                    <span>·</span>
-                    <span>IG</span>
-                  </div>
+                  <p className="text-sm font-semibold">{profileName}</p>
+                  {appearance.profileHandle && <p className="text-[11px] text-white/85">{appearance.profileHandle}</p>}
                 </div>
-
-                <div className="px-3 pb-6 space-y-2">
-                  {previewList.length === 0 && (
-                    <div className="bg-white/90 rounded-2xl p-4 text-center text-xs text-gray-400">
-                      Tidak ada produk aktif
-                    </div>
-                  )}
-                  {previewList.map((p) => {
-                    const hi = selectedId === p.id
-                    const layout = p.card_layout || 'compact'
-                    if (layout === 'portrait' || layout === 'square') {
-                      return (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => setSelectedId(p.id)}
-                          className={`w-[48%] inline-block align-top mr-[4%] odd:mr-0 text-left bg-white rounded-2xl overflow-hidden shadow-sm border transition-all ${
-                            hi ? 'border-[#0ea5a0] ring-2 ring-[#0ea5a0]/25' : 'border-transparent'
-                          }`}
-                        >
-                          <div
-                            className={`${layout === 'square' ? 'aspect-square' : 'aspect-[3/4]'} flex items-center justify-center text-white text-[10px] font-bold ${
-                              p.type === 'free'
-                                ? 'bg-gradient-to-br from-sky-400 to-sky-600'
-                                : 'bg-gradient-to-br from-amber-400 to-orange-500'
-                            }`}
-                          >
-                            {p.type === 'free' ? 'FREE' : 'PAID'}
-                          </div>
-                          <div className="p-2">
-                            <p className="text-[10px] font-bold text-gray-900 line-clamp-2">{p.title}</p>
-                            <p className="text-[9px] font-extrabold text-[#0ea5a0] mt-0.5">{priceLabel(p)}</p>
-                          </div>
-                        </button>
-                      )
-                    }
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => setSelectedId(p.id)}
-                        className={`w-full text-left bg-white rounded-2xl p-3 shadow-sm border transition-all ${
-                          hi ? 'border-[#0ea5a0] ring-2 ring-[#0ea5a0]/25' : 'border-transparent'
-                        }`}
-                      >
-                        <div className="flex gap-2.5">
-                          <div
-                            className={`w-11 h-11 rounded-xl shrink-0 flex items-center justify-center text-white text-[10px] font-bold ${
-                              p.type === 'free'
-                                ? 'bg-gradient-to-br from-sky-400 to-sky-600'
-                                : 'bg-gradient-to-br from-amber-400 to-orange-500'
-                            }`}
-                          >
-                            {p.type === 'free' ? 'FREE' : 'PAID'}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-[11px] font-bold text-gray-900 leading-snug line-clamp-2">
-                              {p.title}
-                            </p>
-                            <p className="text-[10px] font-extrabold text-[#0ea5a0] mt-1">
-                              {priceLabel(p)}
-                              {p.original_price && p.type === 'paid' && (
-                                <span className="text-gray-300 line-through font-medium ml-1">
-                                  {formatRupiah(p.original_price)}
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-[9px] text-gray-400 mt-0.5 capitalize">{layout}</p>
-                          </div>
-                        </div>
-                      </button>
-                    )
-                  })}
+                <div className="px-3 pb-6">
+                  <ProductStack products={previewProducts} contentBlocks={previewBlocks} emptyText="Tidak ada produk aktif" animate={false} />
                 </div>
               </div>
             </div>
             <p className="text-center text-[11px] text-gray-400 mt-3 px-2">
-              Atur urutan dengan ▲▼ · Klik blok untuk pilih
+              Preview langsung berubah saat urutan, ON/OFF, atau highlight diubah
             </p>
           </div>
         </div>
@@ -742,7 +681,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
           >
             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
               <p className="min-w-0 truncate text-sm font-bold text-slate-900">{menuProduct.title}</p>
-              <Button variant="ghost" size="sm" aria-label="Tutup menu" onClick={() => setOpenMenuId(null)}>✕</Button>
+              <CloseButton label="Tutup menu" onClick={() => setOpenMenuId(null)} />
             </div>
             <div className="py-1">
               <button type="button" className="flex min-h-12 w-full items-center justify-between px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { toggleActive(menuProduct.id); setOpenMenuId(null) }}>

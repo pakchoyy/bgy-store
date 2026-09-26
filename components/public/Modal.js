@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import { CloseButton } from '@/components/ui/close-button';
 export default function Modal({ title, onClose, closeDisabled = false, size = 'md', children }) {
   const ref = useRef(null);
   const sizeClass = size === 'checkout' ? 'max-w-4xl' : 'max-w-md';
@@ -16,7 +17,7 @@ export default function Modal({ title, onClose, closeDisabled = false, size = 'm
     className={`w-[calc(100%-2rem)] ${sizeClass} max-h-[90dvh] rounded-3xl p-0 shadow-2xl shadow-slate-950/20 backdrop:bg-slate-950/55`}>
     <div className={`max-h-[90dvh] overflow-y-auto overscroll-contain p-5 sm:p-6 ${size === 'checkout' ? 'pb-6' : ''}`}><div className="mb-5 flex items-start justify-between gap-4">
       <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-      <button type="button" disabled={closeDisabled} aria-label="Tutup dialog" onClick={onClose} className="shrink-0 min-w-11 min-h-11 rounded-lg text-gray-600 hover:bg-gray-100 disabled:opacity-40">✕</button>
+      <CloseButton disabled={closeDisabled} label="Tutup dialog" onClick={onClose} />
     </div>{children}</div>
   </dialog>;
 }

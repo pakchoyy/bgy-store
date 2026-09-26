@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { CloseButton } from '@/components/ui/close-button';
 
 const paymentLogos = [
   { name: 'QRIS', src: '/logos/qris.svg' },
@@ -83,15 +84,7 @@ export default function BuyModal({ product, isOpen, onClose }) {
       >
         <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
           <p className="text-sm font-bold text-slate-900">Checkout</p>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={busy}
-            aria-label="Tutup"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-lg font-semibold text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
-          >
-            ×
-          </button>
+          <CloseButton onClick={onClose} disabled={busy} />
         </div>
 
         <div className="overflow-y-auto">

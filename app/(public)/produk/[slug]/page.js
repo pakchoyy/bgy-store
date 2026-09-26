@@ -9,7 +9,7 @@ import ShareButtons from '@/components/public/ShareButtons'
 import ProductActions from '@/components/public/ProductActions'
 import ProductReviewList from '@/components/public/ProductReviewList'
 import { demoProducts } from '@/lib/demo-data'
-import { fetchStoreShell, demoShellData, hasSupabase, PUBLIC_PRODUCT_COLUMNS } from '@/lib/store-shell'
+import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import Link from 'next/link'
 
 async function getProduct(slug) {
@@ -19,16 +19,9 @@ async function getProduct(slug) {
   }
 
   const shell = await fetchStoreShell()
+  const product = (shell.products || []).find((p) => p.slug === slug) || null
   const { createClient } = await import('@/lib/supabase-server')
   const supabase = await createClient()
-
-  const { data: product } = await supabase
-    .from('products')
-    .select(`${PUBLIC_PRODUCT_COLUMNS}, category:categories(*)`)
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .is('deleted_at', null)
-    .single()
 
   let faqs = []
   if (product?.id) {
@@ -47,7 +40,7 @@ export async function generateMetadata({ params }) {
   const { product } = await getProduct(params.slug)
   if (!product) return { title: 'Produk tidak ditemukan', robots: { index: false } }
   const title = product.meta_title || `${product.title} | Bantu Guru Yuk`
-  const description = product.meta_description || product.meta_desc || (product.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
+  const description = product.meta_description || (product.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
   return {
     title,
     description,

@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import ProductBuilder from '@/components/admin/ProductBuilder'
+import { demoSettings } from '@/lib/demo-data'
+import { getAppearance, settingsToMap } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,9 +22,15 @@ async function getData() {
       .from('content_blocks')
       .select('*')
       .order('sort_order', { ascending: true })
-    return { products: products || [], categories: categories || [], contentBlocks: contentBlocks || [] }
+    const { data: settingsRows } = await supabase.from('settings').select('*')
+    return {
+      products: products || [],
+      categories: categories || [],
+      contentBlocks: contentBlocks || [],
+      appearance: getAppearance(settingsRows?.length ? settingsToMap(settingsRows) : demoSettings),
+    }
   } catch {}
-  return { products: [], categories: [], contentBlocks: [] }
+  return { products: [], categories: [], contentBlocks: [], appearance: getAppearance(demoSettings) }
 }
 
 export default async function AdminProduk() {
@@ -33,9 +41,9 @@ export default async function AdminProduk() {
     if (!session) redirect('/login')
   }
 
-  const { products, categories, contentBlocks } = await getData()
+  const { products, categories, contentBlocks, appearance } = await getData()
 
   return (
-    <ProductBuilder products={products} categories={categories} contentBlocks={contentBlocks} siteName="BGY" />
+    <ProductBuilder products={products} categories={categories} contentBlocks={contentBlocks} appearance={appearance} />
   )
 }

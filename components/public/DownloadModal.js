@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { CloseButton } from '@/components/ui/close-button';
 
 const TIP_PRESETS = [5000, 10000, 20000];
 
@@ -13,6 +14,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
   const [tipBusy, setTipBusy] = useState(false);
   const [tipError, setTipError] = useState('');
   const [downloadError, setDownloadError] = useState('');
+  const [downloaded, setDownloaded] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -24,6 +26,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
       setTipBusy(false);
       setTipError('');
       setDownloadError('');
+      setDownloaded(false);
     }
   }, [isOpen]);
 
@@ -39,6 +42,8 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.url) throw new Error(data.error || 'File belum dapat diunduh.');
       window.location.assign(data.url);
+      setDownloaded(true);
+      setDownloading(false);
     } catch (e) {
       setDownloading(false);
       setDownloadError(e.message || 'File belum dapat diunduh. Coba lagi.');
@@ -46,13 +51,13 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
   }, [product]);
 
   useEffect(() => {
-    if (phase !== 2 || downloading || downloadError) return;
+    if (phase !== 2 || downloading || downloadError || downloaded) return;
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
       return () => clearTimeout(timer);
     }
     triggerDownload();
-  }, [phase, countdown, downloading, downloadError, triggerDownload]);
+  }, [phase, countdown, downloading, downloadError, downloaded, triggerDownload]);
 
   const handleSkipTraktir = useCallback(() => {
     setPhase(2);
@@ -63,11 +68,10 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
     setTipBusy(true);
     setTipError('');
     try {
-      const fields = Object.fromEntries(new FormData(event.currentTarget));
       const response = await fetch('/api/traktir', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...fields, amount: tipAmount }),
+        body: JSON.stringify({ amount: tipAmount }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Gagal menyiapkan pembayaran. Coba lagi ya.');
@@ -82,10 +86,10 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
   }, [tipAmount]);
 
   const handleBackdropClick = useCallback((e) => {
-    if (e.target === e.currentTarget && phase === 1) {
+    if (e.target === e.currentTarget && (phase === 1 || downloaded)) {
       onClose();
     }
-  }, [phase, onClose]);
+  }, [phase, downloaded, onClose]);
 
   if (!isOpen || !product) return null;
 
@@ -108,11 +112,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 id="download-modal-title" className="text-lg font-bold text-gray-900">Download {product.title}</h3>
-              <button type="button" onClick={onClose} aria-label="Tutup" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <CloseButton onClick={onClose} />
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
@@ -135,7 +135,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
             {!showTraktirForm && (
               <>
                 <p className="text-sm text-gray-700 font-medium mb-4 text-center">
-                  Dukung kami dengan traktir kopi agar terus berkarya!
+                  Dukung Pak Choy dengan traktir kopi agar semangat berkarya 😊
                 </p>
 
                 <button
@@ -147,9 +147,9 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
 
                 <button
                   onClick={handleSkipTraktir}
-                  className="w-full text-sm text-gray-500 hover:text-gray-700 font-medium py-2 transition-colors"
+                  className="w-full rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 font-semibold py-2.5 transition-colors"
                 >
-                  Tidak dulu, langsung download
+                  Kapan-kapan ya Pak, langsung download 😅
                 </button>
               </>
             )}
@@ -190,10 +190,6 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                   />
                 </div>
 
-                <input name="buyer_email" type="email" aria-label="Email" autoComplete="email" required maxLength={254} placeholder="Email" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
-                <input name="buyer_name" aria-label="Nama" autoComplete="name" required maxLength={120} placeholder="Nama" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
-                <input name="buyer_whatsapp" type="tel" aria-label="Nomor WhatsApp" autoComplete="tel" inputMode="tel" required pattern="[0-9+ \(\)\-]{8,25}" placeholder="No. WhatsApp" className="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-[#0ea5a0] focus:ring-2 focus:ring-[#0ea5a0]/20" />
-
                 <button
                   type="submit"
                   disabled={tipBusy || tipAmount < 1000}
@@ -206,9 +202,9 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                   type="button"
                   onClick={handleSkipTraktir}
                   disabled={tipBusy}
-                  className="w-full text-sm text-gray-500 hover:text-gray-700 font-medium py-2 transition-colors disabled:opacity-60"
+                  className="w-full rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 font-semibold py-2.5 transition-colors disabled:opacity-60"
                 >
-                  Tidak dulu, langsung download
+                  Kapan-kapan ya Pak, langsung download 😅
                 </button>
               </form>
             )}
@@ -216,24 +212,39 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
         )}
 
         {phase === 2 && (
-          <div className="p-6 text-center">
-            <div className="w-16 h-16 bg-[#0ea5a0] rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
+          <div className="relative p-6 text-center">
+            {(downloaded || downloadError) && (
+              <CloseButton onClick={onClose} className="absolute right-4 top-4" />
+            )}
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${downloaded ? 'bg-emerald-500' : 'bg-[#0ea5a0] animate-bounce'}`}>
+              {downloaded ? (
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              )}
             </div>
 
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              {downloading ? 'Mengunduh...' : 'Download Siap'}
+            <h3 role="status" className="text-lg font-bold text-gray-900 mb-2">
+              {downloaded ? 'Download berhasil! 🎉' : downloading ? 'Mengunduh...' : 'Download Siap'}
             </h3>
 
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-3 mb-4">
-              <p className="text-xs font-semibold text-amber-700">
-                {settings?.promo_download_text || '💡 Unduh dalam hitungan detik! File akan otomatis terdownload.'}
+            {downloaded ? (
+              <p className="mb-4 text-sm text-gray-600">
+                File sedang diunduh. Cek notifikasi browser atau folder <strong>Download</strong> di HP kamu.
               </p>
-            </div>
+            ) : (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-3 mb-4">
+                <p className="text-xs font-semibold text-amber-700">
+                  {settings?.promo_download_text || '💡 Unduh dalam hitungan detik! File akan otomatis terdownload.'}
+                </p>
+              </div>
+            )}
 
-            {countdown > 0 && !downloading && (
+            {countdown > 0 && !downloading && !downloaded && !downloadError && (
               <div className="mb-4">
                 <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                   <div
@@ -251,25 +262,32 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
               </p>
             )}
 
-            {!downloading && (
+            {downloaded ? (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full rounded-xl bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] px-6 py-3 text-sm font-bold text-white"
+                >
+                  Selesai
+                </button>
+                <button
+                  type="button"
+                  onClick={triggerDownload}
+                  className="text-xs font-semibold text-gray-500 underline hover:text-gray-700"
+                >
+                  File belum masuk? Download ulang
+                </button>
+              </div>
+            ) : !downloading && (downloadError || countdown === 0) ? (
               <button
                 type="button"
                 onClick={triggerDownload}
-                className="mt-3 text-sm text-[#0ea5a0] hover:text-[#0d7a8a] font-semibold underline transition-colors"
+                className="mt-1 w-full rounded-xl bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] px-6 py-3 text-sm font-bold text-white"
               >
-                {downloadError ? 'Coba lagi' : 'Klik jika download tidak dimulai'}
+                Coba lagi
               </button>
-            )}
-
-            {downloading && (
-              <button
-                type="button"
-                onClick={onClose}
-                className="mt-4 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
-              >
-                Tutup
-              </button>
-            )}
+            ) : null}
           </div>
         )}
       </div>
