@@ -2,9 +2,7 @@ import { ImageResponse } from 'next/og'
 import { demoProducts } from '@/lib/demo-data'
 
 export const runtime = 'edge'
-export const alt = 'Produk Bantu Guru Yuk'
-export const size = { width: 1200, height: 630 }
-export const contentType = 'image/png'
+const size = { width: 1200, height: 630 }
 
 const plain = (text) => String(text || '').replace(/[^\p{L}\p{N}\p{P}\p{Zs}]/gu, '').replace(/\s+/g, ' ').trim()
 const rupiah = (value) => `Rp${Number(value || 0).toLocaleString('id-ID')}`
@@ -25,7 +23,7 @@ async function loadProduct(slug) {
   return rows[0] || null
 }
 
-export default async function Image({ params }) {
+export async function GET(request, { params }) {
   const product = await loadProduct(params.slug)
   const title = plain(product?.title) || 'Bantu Guru Yuk'
   const isFree = product?.type === 'free' || !Number(product?.sale_price)
@@ -54,6 +52,6 @@ export default async function Image({ params }) {
         </div>
       </div>
     ),
-    size,
+    { ...size, headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=3600' } },
   )
 }

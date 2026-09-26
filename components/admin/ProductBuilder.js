@@ -257,6 +257,37 @@ export default function ProductBuilder({ products: initialProducts, categories =
     }
   }
 
+  async function createVariants(product) {
+    const input = window.prompt(
+      `Buat varian dari "${product.title}".\nTulis nama varian, pisahkan dengan koma.\nContoh: Kelas 1, Kelas 2, Kelas 3`,
+    )
+    const names = String(input || '').split(',').map((n) => n.trim()).filter(Boolean).slice(0, 12)
+    if (!names.length) return
+    const slugPart = (text) => text.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    let created = 0
+    for (const name of names) {
+      try {
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...product,
+            title: `${product.title} – ${name}`,
+            slug: `${product.slug || 'produk'}-${slugPart(name) || Date.now()}`,
+            is_active: false,
+          }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(data.error || 'Gagal')
+        created += 1
+        setProducts((prev) => [...prev, { ...data.product, sort_order: prev.length + 1 }])
+      } catch {}
+    }
+    showToast(created ? 'success' : 'error', created
+      ? `${created} varian dibuat sebagai draft. Edit judul, file, dan harganya lalu aktifkan.`
+      : 'Varian gagal dibuat. Mungkin slug sudah dipakai.')
+  }
+
   async function deleteProduct(id) {
     const prevProducts = products
     setProducts((prev) => prev.filter((p) => p.id !== id))
@@ -737,6 +768,9 @@ export default function ProductBuilder({ products: initialProducts, categories =
               </button>
               <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { duplicateProduct(menuProduct); setOpenMenuId(null) }}>
                 <span aria-hidden="true">⧉</span> Duplikat
+              </button>
+              <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { const target = menuProduct; setOpenMenuId(null); createVariants(target) }}>
+                <span aria-hidden="true">⊞</span> Buat varian (Kelas 1, 2, 3…)
               </button>
               <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-semibold text-red-600 hover:bg-red-50" onClick={() => { const target = menuProduct; setOpenMenuId(null); if (window.confirm(`Hapus "${target.title}"? Produk dipindahkan ke Recycle Bin.`)) deleteProduct(target.id) }}>
                 <span aria-hidden="true">⌫</span> Hapus produk

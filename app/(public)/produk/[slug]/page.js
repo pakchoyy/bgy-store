@@ -85,6 +85,7 @@ export async function generateMetadata({ params }) {
       title,
       description,
       url: `/produk/${product.slug}`,
+      images: [{ url: `/og/produk/${product.slug}`, width: 1200, height: 630, alt: product.title }],
     },
   }
 }
@@ -117,7 +118,7 @@ export default async function ProdukDetailPage({ params }) {
     '@type': 'Product',
     name: product.title,
     description: (product.meta_description || product.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300) || product.title,
-    image: product.cover_path ? [product.cover_path] : [`${siteUrl}/produk/${product.slug}/opengraph-image`],
+    image: [product.cover_path || `${siteUrl}/og/produk/${product.slug}`],
     brand: { '@type': 'Brand', name: 'Bantu Guru Yuk' },
     offers: {
       '@type': 'Offer',

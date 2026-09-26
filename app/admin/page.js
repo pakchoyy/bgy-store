@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatRupiah } from '@/lib/utils'
+import RevenueChart from '@/components/admin/RevenueChart'
 
 async function getDashboardData() {
   const empty = { products: [], orders: [], events: [] }
@@ -47,6 +48,18 @@ export default async function AdminDashboard() {
 
   const recentProducts = [...products].sort((a, b) => (b.created_at || 0) - (a.created_at || 0)).slice(0, 5)
   const topDownloads = [...products].sort((a, b) => (b.download_count || 0) - (a.download_count || 0)).slice(0, 5)
+  const revenueDays = Array.from({ length: 30 }, (_, i) => {
+    const date = new Date()
+    date.setDate(date.getDate() - (29 - i))
+    const key = dayKey(date)
+    const dayOrders = paidOrders.filter(o => o.created_at && dayKey(o.paid_at || o.created_at) === key)
+    return {
+      key,
+      fullLabel: date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', timeZone: 'Asia/Jakarta' }),
+      total: dayOrders.reduce((sum, o) => sum + Number(o.amount || 0), 0),
+      count: dayOrders.length,
+    }
+  })
   const chartDays = Array.from({ length: 14 }, (_, i) => {
     const date = new Date()
     date.setDate(date.getDate() - (13 - i))
@@ -142,6 +155,8 @@ export default async function AdminDashboard() {
           <div className="relative mt-5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#10946b]">{paidOrders.length} transaksi lunas tercatat</div>
         </div>
       </section>
+
+      <RevenueChart days={revenueDays} />
 
       <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
         <div className="flex items-center justify-between">
