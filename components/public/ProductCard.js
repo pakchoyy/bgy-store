@@ -7,6 +7,9 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
   const hasDiscount = !isFree && product.original_price && product.original_price > product.sale_price
   return (
     <span className={`flex shrink-0 flex-col items-end gap-0.5 ${className}`}>
+      {product.flash_active && !isSoldOut && (
+        <span className="rounded-md bg-gradient-to-r from-amber-400 to-orange-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">⚡ Flash sale</span>
+      )}
       {hasDiscount && !isSoldOut && (
         <span className="font-numeric text-[10px] font-semibold text-gray-400 line-through">{fmt(product.original_price)}</span>
       )}

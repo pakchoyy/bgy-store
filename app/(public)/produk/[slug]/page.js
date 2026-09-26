@@ -13,6 +13,7 @@ import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import Link from 'next/link'
 import { whatsappUrl, parsePreviewImages, formatRupiah } from '@/lib/utils'
 import ProductStack from '@/components/public/ProductStack'
+import FlashCountdown from '@/components/public/FlashCountdown'
 
 async function getProduct(slug) {
   if (!hasSupabase()) {
@@ -165,6 +166,7 @@ export default async function ProdukDetailPage({ params }) {
             <h1 className="text-2xl font-semibold text-gray-950 leading-tight">{product.title}</h1>
             <div className="mt-3">
               <PriceBlock salePrice={product.sale_price} originalPrice={product.original_price} />
+              {product.flash_active && <FlashCountdown endsAt={product.flash_ends_at} className="mt-3" />}
             </div>
           </div>
 

@@ -65,6 +65,10 @@ export default function ProductForm({ initialData, categories = [], productOptio
     card_layout: initialData?.card_layout || 'landscape',
     preview_images: parsePreviewImages(initialData?.preview_path),
     bundle_product_ids: Array.isArray(initialData?.bundle_product_ids) ? initialData.bundle_product_ids : [],
+    flash_price: initialData?.flash_price ?? '',
+    flash_ends_at: initialData?.flash_ends_at
+      ? new Date(new Date(initialData.flash_ends_at).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 16)
+      : '',
   })
 
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
@@ -166,6 +170,8 @@ export default function ProductForm({ initialData, categories = [], productOptio
       cover_path: form.cover_path || null,
       preview_path: form.preview_images?.length ? JSON.stringify(form.preview_images) : null,
       bundle_product_ids: form.type === 'paid' ? form.bundle_product_ids || [] : [],
+      flash_price: form.type === 'paid' && form.flash_price !== '' ? Number(form.flash_price) : null,
+      flash_ends_at: form.type === 'paid' && form.flash_price !== '' ? form.flash_ends_at || null : null,
       file_path: deliveryMode === 'upload' ? form.file_path || null : null,
       file_url: deliveryMode === 'link' ? form.file_url || null : null,
       file_name: form.file_name || null,
@@ -419,6 +425,43 @@ export default function ProductForm({ initialData, categories = [], productOptio
               </div>
             )}
           </div>
+        </CardSection>
+      )}
+
+      {form.type === 'paid' && (
+        <CardSection title="⚡ Flash Sale (opsional)">
+          <p className="text-xs leading-relaxed text-gray-500">
+            Harga promo sementara dengan hitung mundur di halaman produk. Setelah waktu habis, harga otomatis kembali ke Harga Jual. Kosongkan harga untuk mematikan.
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Harga flash sale (Rp)
+              <input
+                type="number"
+                min="0"
+                value={form.flash_price}
+                onChange={e => updateField('flash_price', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
+                placeholder="Contoh: 15000"
+                className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0]"
+              />
+            </label>
+            <label className="block text-sm font-medium text-gray-700">
+              Berakhir (WIB)
+              <input
+                type="datetime-local"
+                value={form.flash_ends_at}
+                required={form.flash_price !== ''}
+                onChange={e => updateField('flash_ends_at', e.target.value)}
+                className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0]"
+              />
+            </label>
+          </div>
+          {form.flash_price !== '' && Number(form.flash_price) >= Number(form.sale_price || 0) && (
+            <p className="mt-2 text-xs font-semibold text-red-600">Harga flash sale harus lebih murah dari Harga Jual.</p>
+          )}
+          {form.flash_price !== '' && Number(form.flash_price) > 0 && Number(form.flash_price) < 1000 && (
+            <p className="mt-2 text-xs font-semibold text-red-600">Minimal Rp1.000.</p>
+          )}
         </CardSection>
       )}
 

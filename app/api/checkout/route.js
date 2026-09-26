@@ -29,12 +29,16 @@ export async function POST(request) {
     const { createTrustedServerClient } = await import('@/lib/supabase-server')
     const supabase = await createTrustedServerClient()
 
-    const { data: found, error: productError } = await supabase
+    const productQuery = (columns) => supabase
       .from('products')
-      .select('id, title, type, sale_price, stock_type, stock_qty')
+      .select(columns)
       .in('id', requestedIds)
       .eq('is_active', true)
       .is('deleted_at', null)
+    let { data: found, error: productError } = await productQuery('id, title, type, sale_price, stock_type, stock_qty, flash_price, flash_ends_at')
+    if (productError) ({ data: found, error: productError } = await productQuery('id, title, type, sale_price, stock_type, stock_qty'))
+    const { effectivePrice } = await import('@/lib/utils')
+    found = (found || []).map((p) => ({ ...p, sale_price: effectivePrice(p).price }))
 
     const items = requestedIds.map((id) => (found || []).find((p) => p.id === id)).filter(Boolean)
     if (productError || items.length !== requestedIds.length) {

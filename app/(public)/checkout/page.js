@@ -2,7 +2,7 @@ import Link from 'next/link';
 import CheckoutPage from '@/components/public/CheckoutPage';
 import { demoProducts } from '@/lib/demo-data';
 import { hasSupabase } from '@/lib/store-shell';
-import { whatsappUrl } from '@/lib/utils';
+import { whatsappUrl, withEffectivePrice } from '@/lib/utils';
 
 const COLUMNS = 'id,title,slug,type,sale_price,original_price,cover_path,stock_type,stock_qty';
 
@@ -15,10 +15,15 @@ async function getProducts({ slug, items }) {
   }
   const { createClient } = await import('@/lib/supabase-server');
   const supabase = await createClient();
-  let query = supabase.from('products').select(COLUMNS).eq('is_active', true).is('deleted_at', null);
+  let query = supabase.from('products').select(`${COLUMNS},flash_price,flash_ends_at`).eq('is_active', true).is('deleted_at', null);
   query = ids.length ? query.in('id', ids) : query.eq('slug', slug);
-  const { data } = await query;
-  const rows = data || [];
+  let { data, error } = await query;
+  if (error) {
+    let retry = supabase.from('products').select(COLUMNS).eq('is_active', true).is('deleted_at', null);
+    retry = ids.length ? retry.in('id', ids) : retry.eq('slug', slug);
+    ({ data } = await retry);
+  }
+  const rows = (data || []).map((p) => withEffectivePrice(p));
   return ids.length ? ids.map((id) => rows.find((p) => p.id === id)).filter(Boolean) : rows.slice(0, 1);
 }
 

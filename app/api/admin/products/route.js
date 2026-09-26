@@ -42,19 +42,43 @@ function sanitizeProduct(body) {
     is_active: body.is_active !== false,
     published_at: body.is_active ? new Date().toISOString() : null,
     deleted_at: null,
+    ...('flash_price' in body
+      ? {
+          flash_price: body.type === 'paid' && Number.isFinite(Number(body.flash_price)) && body.flash_price !== '' && body.flash_price !== null ? Math.max(0, Math.round(Number(body.flash_price))) : null,
+          flash_ends_at: body.type === 'paid' && body.flash_ends_at ? toWibIso(body.flash_ends_at) : null,
+        }
+      : {}),
     ...(Array.isArray(body.bundle_product_ids)
       ? { bundle_product_ids: body.type === 'paid' ? [...new Set(body.bundle_product_ids.filter((id) => typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id)))].slice(0, 30) : [] }
       : {}),
   }
 }
 
+function toWibIso(value) {
+  const text = String(value)
+  const date = new Date(/[zZ]|[+-]\d\d:\d\d$/.test(text) ? text : `${text.length === 16 ? `${text}:00` : text}+07:00`)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
+}
+
+const OPTIONAL_COLUMNS = [
+  { key: 'bundle_product_ids', sql: '016', label: 'Isi paket' },
+  { key: 'flash_price', sql: '017', label: 'Flash sale' },
+  { key: 'flash_ends_at', sql: '017', label: 'Flash sale' },
+]
+
 async function withoutMissingBundleColumn(run, product) {
-  let result = await run(product)
-  if (result.error && /bundle_product_ids/.test(result.error.message || '')) {
-    const { bundle_product_ids, ...rest } = product
-    result = await run(rest)
-    if (!result.error && bundle_product_ids?.length) result.warning = 'Isi paket belum tersimpan: jalankan SQL 016 dulu.'
+  let row = { ...product }
+  const warnings = new Set()
+  let result = await run(row)
+  for (let attempt = 0; attempt < OPTIONAL_COLUMNS.length && result.error; attempt++) {
+    const missing = OPTIONAL_COLUMNS.find((c) => c.key in row && (result.error.message || '').includes(c.key))
+    if (!missing) break
+    const dropped = row[missing.key]
+    delete row[missing.key]
+    if (dropped && (!Array.isArray(dropped) || dropped.length)) warnings.add(`${missing.label} belum tersimpan: jalankan SQL ${missing.sql} dulu.`)
+    result = await run(row)
   }
+  if (!result.error && warnings.size) result.warning = [...warnings].join(' ')
   return result
 }
 
