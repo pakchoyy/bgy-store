@@ -16,7 +16,7 @@ function saveDone(key) {
   } catch {}
 }
 
-export default function DownloadReady({ token, freeProductId, title, isLink = false, fileName = null, storageKey }) {
+export default function DownloadReady({ token, itemId, freeProductId, title, isLink = false, fileName = null, storageKey, compact = false }) {
   const [state, setState] = useState('ready')
   const [error, setError] = useState('')
   const [toast, setToast] = useState(false)
@@ -40,7 +40,7 @@ export default function DownloadReady({ token, freeProductId, title, isLink = fa
     try {
       let url
       if (token) {
-        url = `/api/download?token=${encodeURIComponent(token)}`
+        url = `/api/download?token=${encodeURIComponent(token)}${itemId ? `&item=${encodeURIComponent(itemId)}` : ''}`
       } else {
         const response = await fetch('/api/download/free', {
           method: 'POST',
@@ -70,7 +70,7 @@ export default function DownloadReady({ token, freeProductId, title, isLink = fa
 
   return (
     <>
-      <div className={`mt-4 rounded-2xl border p-4 text-left ${done ? 'border-emerald-200 bg-emerald-50' : 'border-teal-200 bg-teal-50/60'}`}>
+      <div className={`${compact ? 'mt-3' : 'mt-4'} rounded-2xl border p-4 text-left ${done ? 'border-emerald-200 bg-emerald-50' : 'border-teal-200 bg-teal-50/60'}`}>
         <div className="flex items-start gap-3">
           <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white ${done ? 'bg-emerald-500' : 'bg-[#0ea5a0]'}`} aria-hidden="true">
             {done ? (

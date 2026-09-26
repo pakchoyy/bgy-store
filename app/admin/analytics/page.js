@@ -64,10 +64,14 @@ async function getData() {
     const topPages = countBy(views, 'path').map(([path, count]) => ({ label: path, count }))
     const topClicked = countBy(clicks, 'product_id').map(([id, count]) => ({ label: titleOf(id), count }))
 
+    const { data: itemRows, error: itemsError } = await supabase.from('order_items').select('order_id, product_id')
+    const itemsByOrder = {}
+    if (!itemsError) for (const row of itemRows || []) (itemsByOrder[row.order_id] ||= []).push(row.product_id)
+    const productIdsOf = (o) => itemsByOrder[o.id]?.length ? itemsByOrder[o.id].filter(Boolean) : o.product_id ? [o.product_id] : []
+
     const salesByProduct = {}
     for (const o of paidOrders) {
-      if (!o.product_id) continue
-      salesByProduct[o.product_id] = (salesByProduct[o.product_id] || 0) + 1
+      for (const id of productIdsOf(o)) salesByProduct[id] = (salesByProduct[id] || 0) + 1
     }
     const topProductIds = Object.entries(salesByProduct)
       .sort((a, b) => b[1] - a[1])
@@ -83,7 +87,8 @@ async function getData() {
     const recentSince = new Date(since)
     const recentSales = {}
     for (const o of paidOrders) {
-      if (o.product_id && new Date(o.created_at) >= recentSince) recentSales[o.product_id] = (recentSales[o.product_id] || 0) + 1
+      if (new Date(o.created_at) < recentSince) continue
+      for (const id of productIdsOf(o)) recentSales[id] = (recentSales[id] || 0) + 1
     }
     const productPerformance = (allProducts || [])
       .filter(p => p.is_active)

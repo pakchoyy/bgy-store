@@ -30,14 +30,17 @@ function formatRupiah(value) {
   return `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
 }
 
-export default function CheckoutPage({ product, waUrl }) {
+export default function CheckoutPage({ products, waUrl }) {
+  const product = products[0];
+  const isCart = products.length > 1;
+  const backHref = isCart ? '/produk' : `/produk/${product.slug}`;
   const [voucherOpen, setVoucherOpen] = useState(false);
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherState, setVoucherState] = useState({ status: 'idle', message: '', discount: 0 });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const price = Number(product.sale_price || 0);
+  const price = products.reduce((sum, p) => sum + Number(p.sale_price || 0), 0);
   const total = Math.max(0, price - voucherState.discount);
   const tooSmall = total > 0 && total < MIN_PAYMENT;
 
@@ -67,7 +70,7 @@ export default function CheckoutPage({ product, waUrl }) {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...fields, product_id: product.id }),
+        body: JSON.stringify({ ...fields, product_ids: products.map((p) => p.id) }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Pembayaran belum dapat diproses. Silakan coba lagi.');
@@ -87,9 +90,9 @@ export default function CheckoutPage({ product, waUrl }) {
     <main className="min-h-screen overflow-x-clip bg-[#eef7f5] pb-4 text-slate-900">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-12 w-full max-w-5xl items-center justify-between px-3 sm:px-6">
-          <BackButton href={`/produk/${product.slug}`} label="Kembali ke produk" />
+          <BackButton href={backHref} label="Kembali" />
           <h1 className="text-base font-bold tracking-tight sm:text-lg">Checkout</h1>
-          <Link href={`/produk/${product.slug}`} aria-label="Tutup checkout" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500 text-white shadow-md shadow-red-500/30 ring-2 ring-red-100 transition hover:bg-red-600 active:scale-95"><svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg></Link>
+          <Link href={backHref} aria-label="Tutup checkout" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500 text-white shadow-md shadow-red-500/30 ring-2 ring-red-100 transition hover:bg-red-600 active:scale-95"><svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg></Link>
         </div>
       </header>
 
@@ -97,16 +100,21 @@ export default function CheckoutPage({ product, waUrl }) {
       <form onSubmit={submitCheckout} aria-busy={busy} className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-3 px-3 pt-3 sm:px-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)]">
         <div className="space-y-3">
           <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80 sm:p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-emerald-50 ring-1 ring-slate-200">
-                {product.cover_path ? <img src={product.cover_path} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs font-black text-emerald-700">BGY</div>}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="line-clamp-2 text-sm font-semibold leading-snug sm:text-base">{product.title}</p>
-                <p className="text-xs text-slate-500">1x produk digital</p>
-              </div>
-              <p className="shrink-0 text-sm font-bold text-emerald-600">{formatRupiah(price)}</p>
-            </div>
+            {isCart && <p className="mb-2 text-[11px] font-bold uppercase tracking-[.12em] text-slate-400">{products.length} produk di keranjang</p>}
+            <ul className="divide-y divide-slate-100">
+              {products.map((item) => (
+                <li key={item.id} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-emerald-50 ring-1 ring-slate-200">
+                    {item.cover_path ? <img src={item.cover_path} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs font-black text-emerald-700">BGY</div>}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 text-sm font-semibold leading-snug sm:text-base">{item.title}</p>
+                    <p className="text-xs text-slate-500">1x produk digital</p>
+                  </div>
+                  <p className="shrink-0 text-sm font-bold text-emerald-600">{formatRupiah(item.sale_price)}</p>
+                </li>
+              ))}
+            </ul>
           </section>
 
           <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80 sm:p-4">
@@ -155,7 +163,7 @@ export default function CheckoutPage({ product, waUrl }) {
           {tooSmall && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">Total pembayaran online minimal {formatRupiah(MIN_PAYMENT)}. {voucherState.discount > 0 ? 'Hapus atau ganti voucher.' : 'Hubungi admin untuk produk ini.'}</p>}
           {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm font-semibold text-red-700">{error}</p>}
           <button disabled={busy || tooSmall} className="sticky bottom-2 z-10 h-12 w-full rounded-xl bg-emerald-500 px-4 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60">{busy ? 'Memproses...' : total === 0 ? 'Ambil Gratis dengan Voucher' : `Beli sekarang - ${formatRupiah(total)}`}</button>
-          <WhatsAppBuyButton waUrl={waUrl} product={product} />
+          <WhatsAppBuyButton waUrl={waUrl} product={isCart ? { title: products.map((p) => p.title).join(', '), sale_price: price } : product} />
         </div>
       </form>
     </main>

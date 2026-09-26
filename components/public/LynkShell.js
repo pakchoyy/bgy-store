@@ -85,7 +85,7 @@ export default function LynkShell({
     return true
   })
   const cartTotal = cartItems.reduce((sum, item) => sum + Number(item.sale_price || 0), 0)
-  const primaryCartItem = cartItems[0]
+  const cartCheckoutHref = cartItems.length ? `/checkout?items=${cartItems.map((item) => item.id).join(',')}` : '/produk'
 
   return (
     <div className="min-h-screen" style={bg}>
@@ -167,7 +167,7 @@ export default function LynkShell({
                           <span className="block text-sm font-semibold leading-snug text-slate-900 line-clamp-2">{item.title}</span>
                           <span className="mt-1 block text-sm font-semibold text-emerald-600">{formatCartPrice(item.sale_price)}</span>
                         </span>
-                        <span className="shrink-0 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white">Beli</span>
+                        <span className="shrink-0 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">Lihat</span>
                       </a>
                       <button
                         type="button"
@@ -187,13 +187,9 @@ export default function LynkShell({
                     <span className="font-semibold text-slate-500">Total ({cartItems.length} item)</span>
                     <span className="font-bold text-slate-900">{formatCartPrice(cartTotal)}</span>
                   </div>
-                  {cartItems.length === 1 ? (
-                  <a href={primaryCartItem?.slug ? `/produk/${primaryCartItem.slug}` : '/produk'} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-transform duration-150 hover:bg-emerald-600 active:scale-[0.96]">
-                    Beli Sekarang
+                  <a href={cartCheckoutHref} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-transform duration-150 hover:bg-emerald-600 active:scale-[0.96]">
+                    {cartItems.length > 1 ? `Checkout Semua (${cartItems.length} produk)` : 'Beli Sekarang'}
                   </a>
-                  ) : (
-                    <p className="rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-xs font-medium text-emerald-800">Pembayaran dilakukan per produk. Tekan <b>Beli</b> pada produk yang ingin dibayar.</p>
-                  )}
                   <a href="/produk" className="flex min-h-12 w-full items-center justify-center rounded-xl border border-[#0ea5a0] px-4 py-3 text-sm font-semibold text-[#0d7a8a]">
                     Lanjut Belanja
                   </a>

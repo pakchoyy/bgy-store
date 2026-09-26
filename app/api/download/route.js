@@ -11,6 +11,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
+    const itemId = searchParams.get('item');
 
     if (!token || token.length > 256) {
       return fail('Token diperlukan', 400);
@@ -31,7 +32,7 @@ export async function GET(request) {
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('status, token_expires_at, product:products(file_url, file_path, file_name)')
+      .select('id, status, token_expires_at, product_id, product:products(file_url, file_path, file_name)')
       .eq('download_token', token)
       .maybeSingle();
 
@@ -41,7 +42,20 @@ export async function GET(request) {
       return fail('Token sudah kedaluwarsa', 403);
     }
 
-    const downloadUrl = await resolveProductDownloadUrl(supabase, order.product);
+    let target = order.product;
+    if (itemId && itemId !== order.product_id) {
+      if (!/^[0-9a-f-]{36}$/i.test(itemId)) return fail('Item tidak valid', 400);
+      const { data: item } = await supabase
+        .from('order_items')
+        .select('product:products(file_url, file_path, file_name)')
+        .eq('order_id', order.id)
+        .eq('product_id', itemId)
+        .maybeSingle();
+      if (!item?.product) return fail('Produk tidak ada di pesanan ini', 403);
+      target = item.product;
+    }
+
+    const downloadUrl = await resolveProductDownloadUrl(supabase, target);
     if (!downloadUrl) return fail('File tidak tersedia', 404);
 
     const response = NextResponse.redirect(downloadUrl, 302);

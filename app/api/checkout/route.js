@@ -3,10 +3,11 @@ import { NextResponse } from 'next/server'
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { product_id, buyer_name, buyer_whatsapp, buyer_email, voucher_code } = body
+    const { product_id, product_ids, buyer_name, buyer_whatsapp, buyer_email, voucher_code } = body
+    const requestedIds = [...new Set((Array.isArray(product_ids) && product_ids.length ? product_ids : [product_id]).filter((id) => typeof id === 'string' && id.length <= 64))].slice(0, 20)
     const cleanWhatsapp = String(buyer_whatsapp || '').replace(/[^\d+]/g, '')
 
-    if (!product_id) return NextResponse.json({ error: 'product_id diperlukan' }, { status: 400 })
+    if (!requestedIds.length) return NextResponse.json({ error: 'Produk belum dipilih' }, { status: 400 })
     if (!buyer_name?.trim()) return NextResponse.json({ error: 'Nama pembeli diperlukan' }, { status: 400 })
     if (!buyer_whatsapp?.trim()) return NextResponse.json({ error: 'Nomor WhatsApp diperlukan' }, { status: 400 })
     if (cleanWhatsapp.replace(/\D/g, '').length < 8) return NextResponse.json({ error: 'Nomor WhatsApp tidak valid' }, { status: 400 })
@@ -16,9 +17,6 @@ export async function POST(request) {
     }
     if (typeof buyer_name !== 'string' || buyer_name.trim().length > 120) {
       return NextResponse.json({ error: 'Nama terlalu panjang' }, { status: 400 })
-    }
-    if (typeof product_id !== 'string' || product_id.length > 64) {
-      return NextResponse.json({ error: 'Produk tidak valid' }, { status: 400 })
     }
 
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -31,21 +29,25 @@ export async function POST(request) {
     const { createTrustedServerClient } = await import('@/lib/supabase-server')
     const supabase = await createTrustedServerClient()
 
-    const { data: product, error: productError } = await supabase
+    const { data: found, error: productError } = await supabase
       .from('products')
       .select('id, title, type, sale_price, stock_type, stock_qty')
-      .eq('id', product_id)
+      .in('id', requestedIds)
       .eq('is_active', true)
       .is('deleted_at', null)
-      .single()
 
-    if (productError || !product) return NextResponse.json({ error: 'Produk tidak ditemukan' }, { status: 404 })
-    if (product.type !== 'paid') return NextResponse.json({ error: 'Produk bukan produk berbayar' }, { status: 400 })
-    if (product.stock_type === 'limited' && product.stock_qty <= 0) {
-      return NextResponse.json({ error: 'Sold Out' }, { status: 400 })
+    const items = requestedIds.map((id) => (found || []).find((p) => p.id === id)).filter(Boolean)
+    if (productError || items.length !== requestedIds.length) {
+      return NextResponse.json({ error: 'Ada produk yang sudah tidak tersedia. Hapus dari keranjang lalu coba lagi.' }, { status: 404 })
     }
+    const notPaid = items.find((p) => p.type !== 'paid')
+    if (notPaid) return NextResponse.json({ error: `${notPaid.title} adalah produk gratis, tidak perlu dibeli.` }, { status: 400 })
+    const soldOut = items.find((p) => p.stock_type === 'limited' && p.stock_qty <= 0)
+    if (soldOut) return NextResponse.json({ error: `${soldOut.title} sudah habis.` }, { status: 400 })
+    const product = items[0]
+    const isCart = items.length > 1
 
-    let amount = product.sale_price
+    let amount = items.reduce((sum, p) => sum + Number(p.sale_price || 0), 0)
     let voucherCode = null
     let discountAmount = 0
     if (voucher_code) {
@@ -59,7 +61,7 @@ export async function POST(request) {
       discountAmount = Math.min(amount, discount)
       amount = Math.max(0, amount - discountAmount)
     }
-    const name = product.title
+    const name = isCart ? `${items.length} produk: ${items.map((p) => p.title).join(', ')}`.slice(0, 200) : product.title
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
     const { hasMayarApiKey, createPaymentLink, extractMayarInvoice } = await import('@/lib/mayar')
 
@@ -91,6 +93,17 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Gagal membuat pesanan' }, { status: 500 })
     }
 
+    if (isCart) {
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(items.map((p) => ({ order_id: order.id, product_id: p.id, title: p.title, price: Number(p.sale_price || 0) })))
+      if (itemsError) {
+        console.error('checkout order_items insert error:', itemsError)
+        await supabase.from('orders').delete().eq('id', order.id)
+        return NextResponse.json({ error: 'Checkout keranjang belum aktif. Beli produk satu per satu dulu, atau hubungi admin.' }, { status: 500 })
+      }
+    }
+
     if (amount === 0) {
       const { data: fullOrder } = await supabase.from('orders').select('*, product:products(*)').eq('id', order.id).single()
       const { markOrderPaid } = await import('@/lib/orders')
@@ -108,7 +121,7 @@ export async function POST(request) {
       const mayarResponse = await createPaymentLink({
         amount,
         name,
-        description: `Pembelian ${name}`,
+        description: isCart ? `Pembelian ${items.length} produk Bantu Guru Yuk` : `Pembelian ${name}`,
         redirectUrl,
         customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: cleanWhatsapp },
       })

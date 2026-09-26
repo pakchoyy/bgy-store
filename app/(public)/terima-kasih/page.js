@@ -7,6 +7,7 @@ import { parseSocialLinks } from '@/lib/utils'
 import Link from 'next/link'
 import PaymentWaiter from '@/components/public/PaymentWaiter'
 import DownloadReady from '@/components/public/DownloadReady'
+import ClearPurchasedCart from '@/components/public/ClearPurchasedCart'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,7 +57,17 @@ async function getOrder({ token, orderId }) {
     }
   }
 
-  return { ...shell, order: order || null }
+  let items = []
+  if (order?.product_id) {
+    const { data: rows, error: itemsError } = await supabase
+      .from('order_items')
+      .select('product_id, title, product:products(file_url, file_name)')
+      .eq('order_id', order.id)
+      .order('id')
+    if (!itemsError) items = rows || []
+  }
+
+  return { ...shell, order: order || null, items }
 }
 
 function getWhatsAppUrl(appearance) {
@@ -90,6 +101,7 @@ export default async function TerimaKasihPage({ searchParams }) {
   const fileId = searchParams?.file || ''
   const data = await getOrder({ token, orderId })
   const { order, navItems, appearance, footerConfig, announcement, products } = data
+  const items = data.items || []
   const isDonation = order && !order.product_id
   const freeFile = isDonation && fileId
     ? (products || []).find((p) => p.id === fileId && p.type === 'free') || null
@@ -137,7 +149,25 @@ export default async function TerimaKasihPage({ searchParams }) {
               <p className="mt-1 text-sm text-gray-600">
                 Terima kasih, <span className="font-semibold">{order.buyer_name}</span>!
               </p>
-              <DownloadReady token={order.download_token} title={order.product?.title} storageKey={`dl-${order.id}`} {...deliveryOf(order.product)} />
+              {items.length > 1 ? (
+                <>
+                  <p className="mt-3 text-sm font-semibold text-gray-700">{items.length} produk siap diunduh:</p>
+                  {items.map((item) => (
+                    <DownloadReady
+                      key={item.product_id}
+                      compact
+                      token={order.download_token}
+                      itemId={item.product_id}
+                      title={item.title}
+                      storageKey={`dl-${order.id}-${item.product_id}`}
+                      {...deliveryOf(item.product)}
+                    />
+                  ))}
+                </>
+              ) : (
+                <DownloadReady token={order.download_token} title={order.product?.title} storageKey={`dl-${order.id}`} {...deliveryOf(order.product)} />
+              )}
+              <ClearPurchasedCart productIds={items.length ? items.map((i) => i.product_id) : [order.product_id]} />
             </>
           ) : isPending ? (
             <>

@@ -89,7 +89,10 @@ export default async function AdminPesanan({ searchParams }) {
 
   let orders = []
   if (!isDemo) {
-    const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
+    const { data } = await supabase.from('orders').select('*, product:products(title)').order('created_at', { ascending: false })
+    const { data: itemRows, error: itemsError } = await supabase.from('order_items').select('order_id, title')
+    const itemsByOrder = {}
+    if (!itemsError) for (const row of itemRows || []) (itemsByOrder[row.order_id] ||= []).push(row.title)
     if (data && data.length > 0) {
       orders = data.map(o => {
         const type = o.product_id ? 'produk' : 'donasi'
@@ -99,7 +102,11 @@ export default async function AdminPesanan({ searchParams }) {
           buyer_name: o.buyer_name || o.customer_name || 'Unknown',
           whatsapp: o.buyer_whatsapp || o.whatsapp || o.phone || '-',
           email: o.buyer_email || o.email || '-',
-          product_title: type === 'donasi' ? '☕ Traktir Kopi' : (o.product_title || o.product?.title || 'Unknown'),
+          product_title: type === 'donasi'
+            ? '☕ Traktir Kopi'
+            : itemsByOrder[o.id]?.length > 1
+              ? `${itemsByOrder[o.id].length} produk: ${itemsByOrder[o.id].join(', ')}`
+              : (o.product_title || o.product?.title || 'Produk dihapus'),
           price: o.price || o.amount || 0,
           status: o.status || 'pending',
           date: o.created_at ? o.created_at.slice(0, 10) : '2026-01-01',
