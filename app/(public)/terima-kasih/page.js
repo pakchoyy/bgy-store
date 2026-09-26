@@ -37,7 +37,7 @@ async function getOrder({ token, orderId }) {
 
   let query = supabase
     .from('orders')
-    .select('id, buyer_name, status, amount, product_id, download_token, token_expires_at, product:products(id, title, slug)')
+    .select('id, buyer_name, status, amount, product_id, download_token, token_expires_at, product:products(id, title, slug, file_url, file_name)')
 
   query = token ? query.eq('download_token', token) : query.eq('id', orderId)
 
@@ -49,7 +49,7 @@ async function getOrder({ token, orderId }) {
     if (status === 'paid') {
       const { data: fresh } = await supabase
         .from('orders')
-        .select('id, buyer_name, status, amount, product_id, download_token, token_expires_at, product:products(id, title, slug)')
+        .select('id, buyer_name, status, amount, product_id, download_token, token_expires_at, product:products(id, title, slug, file_url, file_name)')
         .eq('id', order.id)
         .maybeSingle()
       order = fresh || order
@@ -97,6 +97,14 @@ export default async function TerimaKasihPage({ searchParams }) {
   const recommended = (products || [])
     .filter((p) => p.is_active && p.id !== order?.product?.id && p.id !== freeFile?.id)
     .slice(0, 3)
+  let freeFileInfo = null
+  if (freeFile && hasSupabase()) {
+    const { createTrustedServerClient } = await import('@/lib/supabase-server')
+    const supabase = await createTrustedServerClient()
+    const { data: info } = await supabase.from('products').select('file_url, file_name').eq('id', freeFile.id).maybeSingle()
+    freeFileInfo = info
+  }
+  const deliveryOf = (info) => ({ isLink: !!info?.file_url, fileName: info?.file_url ? null : info?.file_name || null })
   const isPaid = order?.status === 'paid' && (isDonation || order.download_token)
   const isPending = order?.status === 'pending'
   const isFailed = order && ['failed', 'expired'].includes(order.status)
@@ -120,7 +128,7 @@ export default async function TerimaKasihPage({ searchParams }) {
               <p className="mt-1 text-sm text-gray-600">
                 Dukunganmu bikin Pak Choy makin semangat berkarya{order.buyer_name && order.buyer_name !== 'Pendukung BGY' ? `, ${order.buyer_name}` : ''}.
               </p>
-              {freeFile && <DownloadReady freeProductId={freeFile.id} title={freeFile.title} />}
+              {freeFile && <DownloadReady freeProductId={freeFile.id} title={freeFile.title} storageKey={`dl-${order.id}`} {...deliveryOf(freeFileInfo)} />}
             </>
           ) : isPaid ? (
             <>
@@ -129,7 +137,7 @@ export default async function TerimaKasihPage({ searchParams }) {
               <p className="mt-1 text-sm text-gray-600">
                 Terima kasih, <span className="font-semibold">{order.buyer_name}</span>!
               </p>
-              <DownloadReady token={order.download_token} title={order.product?.title} />
+              <DownloadReady token={order.download_token} title={order.product?.title} storageKey={`dl-${order.id}`} {...deliveryOf(order.product)} />
             </>
           ) : isPending ? (
             <>

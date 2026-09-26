@@ -106,6 +106,25 @@ export default function ProductBuilder({ products: initialProducts, categories =
 
   const selected = products.find((p) => p.id === selectedId) || null
   const menuProduct = openMenuId ? products.find((p) => p.id === openMenuId) || null : null
+
+  async function shareProductFile(product, target) {
+    const waWindow = target === 'wa' ? window.open('', '_blank') : null
+    try {
+      const response = await fetch(`/api/admin/products/file?id=${encodeURIComponent(product.id)}`)
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data.url) throw new Error(data.error || 'Gagal mengambil link file.')
+      const message = `Halo, terima kasih sudah membeli *${product.title}* di Bantu Guru Yuk 🙏\n\nBerikut ${data.kind === 'link' ? 'link produknya' : 'link download filenya (berlaku 7 hari)'}:\n${data.url}`
+      if (target === 'wa') {
+        waWindow.location.href = `https://wa.me/?text=${encodeURIComponent(message)}`
+      } else {
+        await navigator.clipboard.writeText(data.url)
+        addToast('Link file disalin', 'success')
+      }
+    } catch (error) {
+      waWindow?.close()
+      addToast(error.message || 'Gagal mengambil link file.', 'error')
+    }
+  }
   const previewProducts = useMemo(() => products.filter((p) => p.is_active).sort(bySortOrder), [products])
   const previewBlocks = useMemo(() => blocks.filter((b) => b.is_active !== false), [blocks])
   const profileName = appearance.profileName || 'Bantu Guru Yuk'
@@ -707,6 +726,15 @@ export default function ProductBuilder({ products: initialProducts, categories =
               <Link href={`/admin/produk/${menuProduct.id}/edit`} className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50">
                 <span aria-hidden="true">✎</span> Edit produk
               </Link>
+              <a href={`/api/admin/products/file?id=${menuProduct.id}&mode=download`} target="_blank" rel="noopener noreferrer" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50">
+                <span aria-hidden="true">⬇</span> Download / buka file produk
+              </a>
+              <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { shareProductFile(menuProduct, 'copy'); setOpenMenuId(null) }}>
+                <span aria-hidden="true">🔗</span> Salin link file (berlaku 7 hari)
+              </button>
+              <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { shareProductFile(menuProduct, 'wa'); setOpenMenuId(null) }}>
+                <span aria-hidden="true">💬</span> Kirim link file via WhatsApp
+              </button>
               <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { duplicateProduct(menuProduct); setOpenMenuId(null) }}>
                 <span aria-hidden="true">⧉</span> Duplikat
               </button>

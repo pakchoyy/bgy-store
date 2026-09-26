@@ -11,18 +11,29 @@ export function PrintButton() {
   )
 }
 
+function waPhone(value) {
+  const digits = String(value || '').replace(/\D/g, '')
+  if (digits.startsWith('0')) return `62${digits.slice(1)}`
+  if (digits.startsWith('8')) return `62${digits}`
+  return digits
+}
+
+function thankYouLink(token) {
+  return `${window.location.origin}/terima-kasih?token=${encodeURIComponent(token)}`
+}
+
 export function FollowUpButton({ order }) {
   const handleClick = () => {
-    const phone = String(order.whatsapp || '').replace(/\D/g, '')
+    const phone = waPhone(order.whatsapp)
     if (!phone) return
     const message = order.status === 'paid'
-      ? `Halo ${order.buyer_name}, terima kasih sudah membeli ${order.product_title}! Ada yang bisa kami bantu?`
-      : `Halo ${order.buyer_name}, kami lihat pesanan ${order.product_title} kamu masih pending. Butuh bantuan menyelesaikan pembayaran?`
+      ? `Halo ${order.buyer_name}, terima kasih sudah membeli *${order.product_title}* di Bantu Guru Yuk 🙏${order.download_token ? `\n\nFile bisa diunduh di sini (berlaku 7 hari):\n${thankYouLink(order.download_token)}` : ''}\n\nKalau ada kendala, balas pesan ini ya.`
+      : `Halo ${order.buyer_name}, pesanan *${order.product_title}* kamu masih menunggu pembayaran. Ada yang bisa kami bantu?`
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
   }
   return (
     <Button size="sm" variant="outline" onClick={handleClick}>
-      💬 Follow Up
+      💬 {order.status === 'paid' ? 'Kirim link download via WA' : 'Follow Up WA'}
     </Button>
   )
 }
@@ -33,7 +44,7 @@ export function CopyLinkButton({ downloadToken }) {
   const handleClick = async () => {
     if (!downloadToken) return
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/api/download?token=${downloadToken}`)
+      await navigator.clipboard.writeText(thankYouLink(downloadToken))
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     } catch {}
@@ -41,7 +52,7 @@ export function CopyLinkButton({ downloadToken }) {
 
   return (
     <Button size="sm" variant="outline" onClick={handleClick} disabled={!downloadToken}>
-      {copied ? '✓ Tersalin!' : '📋 Copy Link'}
+      {copied ? '✓ Tersalin!' : '📋 Salin link download'}
     </Button>
   )
 }

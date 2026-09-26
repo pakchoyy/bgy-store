@@ -332,9 +332,12 @@ export default async function AdminPesanan({ searchParams }) {
           )}
         </div>
         <div className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-white/70">
-          <h2 className="text-sm font-bold text-gray-900">Follow Up Text</h2>
+          <h2 className="text-sm font-bold text-gray-900">Kirim ke Pembeli</h2>
           {selectedOrder ? (
-            <FollowUpButton order={selectedOrder} className="mt-3 w-full rounded-xl border border-[#0ea5a0] px-4 py-2.5 text-xs font-bold text-[#0ea5a0] hover:bg-emerald-50 transition-colors" />
+            <div className="mt-3 flex flex-wrap gap-2">
+              <FollowUpButton order={selectedOrder} />
+              {selectedOrder.download_token && <CopyLinkButton downloadToken={selectedOrder.download_token} />}
+            </div>
           ) : (
             <p className="mt-3 text-xs text-gray-400">Pilih pesanan untuk mengirim follow up.</p>
           )}
@@ -393,7 +396,8 @@ export default async function AdminPesanan({ searchParams }) {
                 Generate Ulang Link Download
               </button>
             </form>
-            <CopyLinkButton downloadToken={selectedOrder.download_token} className="bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors" />
+            <FollowUpButton order={selectedOrder} />
+            <CopyLinkButton downloadToken={selectedOrder.download_token} />
             <form action={deleteOrder}>
               <input type="hidden" name="id" value={selectedOrder.id} />
               <input type="hidden" name="back" value={baseQuery({ toast: '' })} />

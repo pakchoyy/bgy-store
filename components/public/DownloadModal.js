@@ -268,12 +268,21 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
             </div>
 
             <h3 role="status" className="text-lg font-bold text-gray-900 mb-2">
-              {downloaded ? 'Download berhasil! 🎉' : downloading ? 'Mengunduh...' : 'Download Siap'}
+              {downloaded
+                ? product.is_link ? 'Link produk dibuka ✓' : 'Download dimulai ✓'
+                : downloading ? (product.is_link ? 'Membuka link...' : 'Mengunduh...') : product.is_link ? 'Link Siap Dibuka' : 'Download Siap'}
             </h3>
 
             {downloaded ? (
               <p className="mb-4 text-sm text-gray-600">
-                File sedang diunduh. Cek notifikasi browser atau folder <strong>Download</strong> di HP kamu.
+                {product.is_link ? (
+                  <>Simpan atau bookmark link produk supaya mudah dibuka lagi.</>
+                ) : (
+                  <>
+                    <strong>Tidak perlu download lagi.</strong> Cek notifikasi HP, aplikasi <strong>File Manager → Download</strong>, atau Chrome <strong>⋮ → Download</strong>.
+                    {product.file_name && <span className="mt-1 block break-all font-semibold text-gray-700">📄 {product.file_name}</span>}
+                  </>
+                )}
               </p>
             ) : (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-3 mb-4">
@@ -306,16 +315,16 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full rounded-xl bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] px-6 py-3 text-sm font-bold text-white"
+                  className="w-full rounded-xl bg-emerald-500 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-600"
                 >
                   Selesai
                 </button>
                 <button
                   type="button"
-                  onClick={triggerDownload}
+                  onClick={() => { if (window.confirm(product.is_link ? 'Buka link produk lagi?' : 'File mungkin sudah ada di HP kamu. Tetap download lagi?')) triggerDownload(); }}
                   className="text-xs font-semibold text-gray-500 underline hover:text-gray-700"
                 >
-                  File belum masuk? Download ulang
+                  {product.is_link ? 'Buka link lagi' : 'File tidak ketemu? Download ulang'}
                 </button>
               </div>
             ) : !downloading && (downloadError || countdown === 0) ? (

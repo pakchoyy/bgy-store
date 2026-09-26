@@ -11,6 +11,7 @@ import ProductReviewList from '@/components/public/ProductReviewList'
 import { demoProducts } from '@/lib/demo-data'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import Link from 'next/link'
+import { parseSocialLinks } from '@/lib/utils'
 
 async function getProduct(slug) {
   if (!hasSupabase()) {
@@ -33,7 +34,15 @@ async function getProduct(slug) {
     faqs = faqData || []
   }
 
-  return { ...shell, product: product || null, faqs }
+  let delivery = { is_link: false, file_name: null }
+  if (product?.id) {
+    const { createTrustedServerClient } = await import('@/lib/supabase-server')
+    const trusted = await createTrustedServerClient()
+    const { data: fileInfo } = await trusted.from('products').select('file_url, file_name').eq('id', product.id).maybeSingle()
+    delivery = { is_link: !!fileInfo?.file_url, file_name: fileInfo?.file_url ? null : fileInfo?.file_name || null }
+  }
+
+  return { ...shell, product: product ? { ...product, ...delivery } : null, faqs }
 }
 
 export async function generateMetadata({ params }) {
@@ -75,6 +84,8 @@ export default async function ProdukDetailPage({ params }) {
   }
 
   const isSoldOut = product.stock_type === 'limited' && product.stock_qty <= 0
+  const wa = parseSocialLinks(appearance?.socialLinks || []).find((l) => l.platform === 'whatsapp')
+  const waUrl = wa?.url ? (wa.url.startsWith('http') ? wa.url : `https://wa.me/${wa.url.replace(/\D/g, '')}`) : null
   const productUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bantuguruyuk.web.id'}/produk/${product.slug}`
 
   return (
@@ -144,7 +155,10 @@ export default async function ProdukDetailPage({ params }) {
               description: product.description,
               file_size: product.file_size,
               purchase_button_label: product.purchase_button_label,
+              is_link: product.is_link,
+              file_name: product.file_name,
             }}
+            waUrl={waUrl}
             settings={{}}
           />
         </div>
