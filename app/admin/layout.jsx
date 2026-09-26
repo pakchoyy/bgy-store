@@ -68,7 +68,9 @@ function Sidebar({ counts }) {
       items: [
         { href: '/admin/produk', label: 'Produk', icon: 'package' },
         { href: '/admin/pesanan', label: 'Pesanan', icon: 'shopping-cart', countKey: 'orders' },
+        { href: '/admin/analytics', label: 'Analytics', icon: 'chart' },
         { href: '/admin/reviews', label: 'Review', icon: 'star', countKey: 'reviews' },
+        { href: '/admin/notifikasi', label: 'Notifikasi', icon: 'bell' },
         { href: '/admin/kategori', label: 'Kategori', icon: 'tags' },
         { href: '/admin/halaman', label: 'Halaman & Navigasi', icon: 'file-text' },
       ],
@@ -77,6 +79,7 @@ function Sidebar({ counts }) {
       label: 'Tampilan',
       items: [
         { href: '/admin/homepage', label: 'Appearance', icon: 'home' },
+        { href: '/admin/theme', label: 'Tema Warna', icon: 'palette' },
         { href: '/admin/footer', label: 'Footer', icon: 'rectangle' },
         { href: '/admin/announcement', label: 'Announcement', icon: 'megaphone' },
       ],
@@ -88,6 +91,10 @@ function Sidebar({ counts }) {
         { href: '/admin/settings', label: 'Settings', icon: 'settings' },
         { href: '/admin/seo', label: 'SEO', icon: 'search' },
         { href: '/admin/custom-404', label: 'Custom 404', icon: 'alert-circle' },
+        { href: '/admin/recycle-bin', label: 'Recycle Bin', icon: 'trash' },
+        { href: '/admin/backup', label: 'Backup Data', icon: 'database' },
+        { href: '/admin/site-health', label: 'Cek Sistem', icon: 'activity' },
+        { href: '/admin/error-log', label: 'Error Log', icon: 'alert-circle' },
       ],
     },
   ];
