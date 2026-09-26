@@ -1,13 +1,9 @@
 import { createClient } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
+import { csvRow as row, csvResponse } from '@/lib/csv'
 
 export const dynamic = 'force-dynamic'
 
-const cell = (value) => {
-  const text = String(value ?? '')
-  return /[;"\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
-}
-const row = (...values) => values.map(cell).join(';')
 
 export async function GET(request) {
   const supabase = await createClient()
@@ -92,11 +88,5 @@ export async function GET(request) {
     )),
   ]
 
-  return new Response(`﻿${lines.join('\r\n')}`, {
-    headers: {
-      'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="laporan-bgy-${month}.csv"`,
-      'Cache-Control': 'no-store',
-    },
-  })
+  return csvResponse(lines, `laporan-bgy-${month}.csv`)
 }

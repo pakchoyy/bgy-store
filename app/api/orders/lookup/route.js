@@ -1,3 +1,4 @@
+import { rateLimited, tooMany } from '@/lib/rate-limit'
 import crypto from 'crypto'
 import { NextResponse } from 'next/server'
 import { createServiceClient, hasServiceRole } from '@/lib/supabase-server'
@@ -8,6 +9,7 @@ const WEEK = 7 * 24 * 60 * 60 * 1000
 const phoneKey = (value) => String(value || '').replace(/\D/g, '').replace(/^(62|0)/, '').slice(-9)
 
 export async function POST(request) {
+  if (rateLimited(request, 'orders-lookup', 8, 10 * 60 * 1000)) return tooMany()
   const body = await request.json().catch(() => ({}))
   const email = String(body.email || '').trim().toLowerCase()
   const phone = phoneKey(body.whatsapp)

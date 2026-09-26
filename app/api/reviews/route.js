@@ -1,7 +1,9 @@
+import { rateLimited, tooMany } from '@/lib/rate-limit'
 import { createServiceClient } from '@/lib/supabase-server'
 
 // POST /api/reviews - Create new review
 export async function POST(request) {
+  if (rateLimited(request, 'reviews', 5, 10 * 60 * 1000)) return tooMany()
   try {
     const { product_id, order_id, reviewer_name, reviewer_institution, rating, comment } = await request.json()
     const name = String(reviewer_name || '').replace(/<[^>]*>/g, '').trim().slice(0, 100)

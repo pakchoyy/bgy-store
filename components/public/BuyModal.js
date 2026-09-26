@@ -72,7 +72,7 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Pembayaran belum dapat diproses. Silakan coba lagi.');
-      if (typeof data.redirect_url === 'string' && data.redirect_url.startsWith('/')) {
+      if (typeof data.redirect_url === 'string' && data.redirect_url.startsWith('/') && !data.redirect_url.startsWith('//')) {
         window.location.assign(data.redirect_url);
         return;
       }

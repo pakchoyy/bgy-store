@@ -1,6 +1,8 @@
+import { rateLimited, tooMany } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 
 export async function POST(request) {
+  if (rateLimited(request, 'checkout', 15, 10 * 60 * 1000)) return tooMany()
   try {
     const body = await request.json()
     const { product_id, product_ids, buyer_name, buyer_whatsapp, buyer_email, voucher_code } = body
@@ -58,6 +60,8 @@ export async function POST(request) {
       voucherCode = String(voucher_code).trim().toUpperCase().slice(0, 64)
       const { data: voucher } = await supabase.from('vouchers').select('*').eq('code', voucherCode).eq('is_active', true).maybeSingle()
       if (!voucher) return NextResponse.json({ error: 'Voucher tidak ditemukan atau sudah tidak aktif' }, { status: 400 })
+      const { isOwnReferral } = await import('@/lib/referral')
+      if (isOwnReferral(voucher, buyer_email)) return NextResponse.json({ error: 'Kode referral tidak bisa dipakai untuk pembelianmu sendiri. Bagikan ke teman ya!' }, { status: 400 })
       const now = new Date()
       if ((voucher.starts_at && new Date(voucher.starts_at) > now) || (voucher.ends_at && new Date(voucher.ends_at) < now) || (voucher.max_uses && voucher.used_count >= voucher.max_uses)) return NextResponse.json({ error: 'Voucher sudah tidak berlaku' }, { status: 400 })
       if (amount < Number(voucher.min_order_amount || 0)) return NextResponse.json({ error: 'Minimal belanja untuk voucher belum terpenuhi' }, { status: 400 })

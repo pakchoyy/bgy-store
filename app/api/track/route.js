@@ -1,3 +1,4 @@
+import { rateLimited, tooMany } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 import { createTrustedServerClient } from '@/lib/supabase-server'
 
@@ -5,6 +6,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const BOT = /bot|crawl|spider|slurp|preview|headless|lighthouse/i
 
 export async function POST(request) {
+  if (rateLimited(request, 'track', 120, 60 * 1000)) return tooMany()
   if (BOT.test(request.headers.get('user-agent') || '')) return new NextResponse(null, { status: 204 })
 
   let body

@@ -1,9 +1,11 @@
+import { rateLimited, tooMany } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 import { createTrustedServerClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request) {
+  if (rateLimited(request, 'voucher', 20, 10 * 60 * 1000)) return tooMany()
   try {
     const { searchParams } = new URL(request.url)
     const code = String(searchParams.get('code') || '').trim().toUpperCase().slice(0, 64)
