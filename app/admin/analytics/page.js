@@ -41,7 +41,7 @@ async function getData() {
     const [{ data: orders }, { data: events }, { data: allProducts }] = await Promise.all([
       supabase.from('orders').select('id, product_id, amount, status, created_at'),
       supabase.from('analytics_events').select('event_type, path, product_id').gte('created_at', since).limit(50000),
-      supabase.from('products').select('id, title'),
+      supabase.from('products').select('id, title, slug, type, is_active').is('deleted_at', null),
     ])
     const titleOf = (id) => allProducts?.find(p => p.id === id)?.title || 'Produk dihapus'
 
@@ -76,6 +76,33 @@ async function getData() {
 
     const topProducts = topProductIds.map(id => ({ title: titleOf(id), sales: salesByProduct[id] }))
 
+    const viewsByPath = {}
+    for (const v of views) if (v.path) viewsByPath[v.path] = (viewsByPath[v.path] || 0) + 1
+    const clicksByProduct = {}
+    for (const c of clicks) if (c.product_id) clicksByProduct[c.product_id] = (clicksByProduct[c.product_id] || 0) + 1
+    const recentSince = new Date(since)
+    const recentSales = {}
+    for (const o of paidOrders) {
+      if (o.product_id && new Date(o.created_at) >= recentSince) recentSales[o.product_id] = (recentSales[o.product_id] || 0) + 1
+    }
+    const productPerformance = (allProducts || [])
+      .filter(p => p.is_active)
+      .map(p => {
+        const productViews = viewsByPath[`/produk/${p.slug}`] || 0
+        const sold = recentSales[p.id] || 0
+        return {
+          id: p.id,
+          title: p.title,
+          type: p.type,
+          views: productViews,
+          clicks: clicksByProduct[p.id] || 0,
+          sold,
+          conversion: p.type === 'paid' && productViews ? Math.round((sold / productViews) * 1000) / 10 : null,
+        }
+      })
+      .sort((a, b) => b.views + b.clicks - (a.views + a.clicks))
+      .slice(0, 15)
+
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     const recentPaid = paidOrders.filter(o => new Date(o.created_at) >= thirtyDaysAgo)
     const recentRevenue = recentPaid.filter(o => o.product_id).reduce((sum, o) => sum + (o.amount || 0), 0)
@@ -95,6 +122,7 @@ async function getData() {
       clickRate: views.length ? Math.round((clicks.length / views.length) * 100) : 0,
       topPages,
       topClicked,
+      productPerformance,
     }
   } catch {
     return null
@@ -153,6 +181,46 @@ export default async function AdminAnalytics() {
           </div>
         )}
       </div>
+      <div className="bg-white rounded-xl shadow-card p-5">
+        <h2 className="text-sm font-bold text-gray-900">Performa Produk (30 hari)</h2>
+        <p className="mt-1 text-xs text-gray-500">
+          Dilihat = halaman produk dibuka. Konversi = terjual ÷ dilihat. Produk yang banyak dilihat tapi konversinya rendah biasanya perlu cover, deskripsi, atau harga yang lebih menarik.
+        </p>
+        {stats.productPerformance.length === 0 ? (
+          <p className="mt-4 text-sm text-gray-400">Belum ada data.</p>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[480px] text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 text-left text-xs uppercase text-gray-500">
+                  <th className="py-2 pr-3 font-semibold">Produk</th>
+                  <th className="px-2 py-2 text-right font-semibold">Dilihat</th>
+                  <th className="px-2 py-2 text-right font-semibold">Diklik</th>
+                  <th className="px-2 py-2 text-right font-semibold">Terjual</th>
+                  <th className="py-2 pl-2 text-right font-semibold">Konversi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {stats.productPerformance.map((p) => (
+                  <tr key={p.id}>
+                    <td className="max-w-[200px] truncate py-2 pr-3 text-gray-800">
+                      {p.title}
+                      {p.type === 'free' && <span className="ml-1.5 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">Gratis</span>}
+                    </td>
+                    <td className="px-2 py-2 text-right font-semibold text-gray-900">{p.views}</td>
+                    <td className="px-2 py-2 text-right text-gray-700">{p.clicks}</td>
+                    <td className="px-2 py-2 text-right text-gray-700">{p.type === 'paid' ? p.sold : '–'}</td>
+                    <td className={`py-2 pl-2 text-right font-semibold ${p.conversion === null ? 'text-gray-300' : p.conversion >= 2 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      {p.conversion === null ? '–' : `${p.conversion}%`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-2">
         <RankList title="Produk Paling Banyak Diklik" items={stats.topClicked} empty="Belum ada klik tercatat." unit="klik" />
         <RankList title="Halaman Terpopuler" items={stats.topPages} empty="Belum ada kunjungan tercatat." unit="views" />

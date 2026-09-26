@@ -5,7 +5,7 @@ import Link from 'next/link'
 import AboutPage from '@/components/public/AboutPage'
 import TermsPage from '@/components/public/TermsPage'
 import { demoNavItems, demoSettings, demoFooterConfig } from '@/lib/demo-data'
-import { getAppearance, settingsToMap, parseSocialLinks } from '@/lib/utils'
+import { getAppearance, settingsToMap, whatsappUrl } from '@/lib/utils'
 import { getAnnouncement, hasSupabase } from '@/lib/store-shell'
 
 const demoPages = {
@@ -53,19 +53,39 @@ const demoPages = {
 const faqItems = [
   {
     question: 'Bagaimana cara download produk gratis?',
-    answer: 'Buka halaman Gratis, pilih materi yang dibutuhkan, lalu tekan tombol download pada halaman produk.',
+    answer: 'Buka menu Gratis, pilih produk, lalu tekan Download Gratis. Kamu bisa traktir kopi dulu (file muncul setelah pembayaran berhasil) atau pilih "Kapan-kapan ya Pak" untuk langsung download.',
   },
   {
     question: 'Bagaimana cara membeli produk berbayar?',
-    answer: 'Buka halaman Produk, pilih produk, lalu tekan Beli Sekarang. Anda akan diarahkan ke pembayaran, kemudian tautan unduhan aktif setelah pembayaran berhasil.',
+    answer: 'Pilih produk, tekan Beli Sekarang, isi email, nama, dan WhatsApp, lalu bayar di halaman Mayar. Setelah berhasil, kamu otomatis kembali ke halaman Terima Kasih dan tombol download langsung muncul.',
   },
   {
-    question: 'Apakah ada fitur keranjang?',
-    answer: 'Ada. Keranjang dipakai untuk menyimpan produk yang menarik. Checkout tetap dilakukan dari halaman produk agar pembayaran dan tautan unduhan lebih jelas.',
+    question: 'Metode pembayaran apa saja yang bisa dipakai?',
+    answer: 'QRIS (semua e-wallet dan m-banking), GoPay, DANA, OVO, ShopeePay, LinkAja, transfer bank/virtual account, Alfamart/Indomaret, dan kartu. Minimal pembayaran Rp1.000.',
   },
   {
-    question: 'Bagaimana jika file bermasalah?',
-    answer: 'Hubungi admin melalui kontak resmi dan sertakan nama produk serta kendala yang dialami.',
+    question: 'Tidak punya QRIS atau e-wallet, bisa beli?',
+    answer: 'Bisa. Tekan "Beli via WhatsApp" di bawah tombol Beli Sekarang, admin akan bantu proses pembeliannya.',
+  },
+  {
+    question: 'Sudah bayar tapi tombol download belum muncul?',
+    answer: 'Tunggu beberapa detik, halaman mengecek pembayaran otomatis. Bisa juga tekan "Saya sudah bayar, cek sekarang". Kalau masih belum, hubungi admin lewat WhatsApp dan sebutkan nama serta produk yang dibeli.',
+  },
+  {
+    question: 'File sudah didownload, tapi di mana?',
+    answer: 'Cek notifikasi HP, aplikasi File Manager/File Saya di folder Download, atau di Chrome ketuk ⋮ lalu Download. Tidak perlu download berulang kali.',
+  },
+  {
+    question: 'Berapa lama link download berlaku?',
+    answer: '7 hari sejak pembayaran berhasil. Simpan file di HP atau laptop setelah diunduh. Kalau link kedaluwarsa, hubungi admin untuk dibuatkan link baru.',
+  },
+  {
+    question: 'Cara pakai kode voucher?',
+    answer: 'Di halaman checkout tekan Tambah voucher, ketik kodenya, lalu tekan Pakai. Potongan langsung terlihat di total pembayaran.',
+  },
+  {
+    question: 'File rusak atau tidak bisa dibuka?',
+    answer: 'Hubungi admin lewat WhatsApp, sertakan nama produk dan kendalanya. Kami bantu kirim ulang atau ganti filenya.',
   },
 ]
 
@@ -129,8 +149,7 @@ export default async function HalamanPage({ params }) {
   const { page, navItems, appearance, footerConfig, announcement } = await getData(slug)
   const isAbout = slug === 'tentang-kami' && page
   const isTerms = slug === 'syarat-dan-ketentuan' && page
-  const wa = parseSocialLinks(appearance?.socialLinks || []).find((l) => l.platform === 'whatsapp')
-  const waUrl = wa?.url ? (wa.url.startsWith('http') ? wa.url : `https://wa.me/${wa.url.replace(/\D/g, '')}`) : null
+  const waUrl = whatsappUrl(appearance?.socialLinks)
 
   return (
     <LynkShell

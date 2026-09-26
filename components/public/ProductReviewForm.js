@@ -105,7 +105,7 @@ export default function ProductReviewForm({ productId, orderId, onSuccess }) {
         <label htmlFor="review-name" className="block text-sm font-semibold text-gray-700 mb-1">
           Nama
         </label>
-        <p className="mb-2 text-xs text-gray-500">Boleh nama samaran, misalnya "Bu Guru Kelas 3".</p>
+        <p className="mb-2 text-xs text-gray-500">Boleh nama samaran, misalnya &ldquo;Bu Guru Kelas 3&rdquo;.</p>
         <input
           type="text"
           id="review-name"

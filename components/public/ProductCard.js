@@ -31,14 +31,24 @@ function DownloadCount({ product, isFree }) {
   return <span className="block text-[11px] font-medium text-gray-500">{count.toLocaleString('id-ID')}× diunduh</span>
 }
 
-function Thumb({ product, isFree, className }) {
-  return (
-    <span className={`flex shrink-0 items-center justify-center overflow-hidden text-[10px] font-bold text-white ${className} ${
-      product.cover_path ? 'bg-gray-100' : isFree ? 'bg-gradient-to-br from-emerald-300 to-emerald-500' : 'bg-gradient-to-br from-teal-500 to-emerald-700'
-    }`}>
-      {product.cover_path ? (
+function Thumb({ product, isFree, className, large = false }) {
+  if (product.cover_path) {
+    return (
+      <span className={`flex shrink-0 overflow-hidden bg-gray-100 ${className}`}>
         <img src={product.cover_path} alt="" loading="lazy" className="h-full w-full object-cover" />
-      ) : isFree ? 'FREE' : 'PRO'}
+      </span>
+    )
+  }
+  return (
+    <span className={`relative flex shrink-0 flex-col items-center justify-center overflow-hidden text-white ${className} ${
+      isFree ? 'bg-gradient-to-br from-emerald-400 to-teal-600' : 'bg-gradient-to-br from-teal-600 to-[#123b35]'
+    }`}>
+      <span className="absolute -right-3 -top-3 h-10 w-10 rounded-full bg-white/15" aria-hidden="true" />
+      <svg aria-hidden="true" className={large ? 'h-8 w-8' : 'h-5 w-5'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2zM9 13h6M9 17h4" />
+      </svg>
+      {large && <span className="mt-2 line-clamp-2 px-3 text-center text-xs font-bold leading-snug text-white/95">{product.title}</span>}
+      <span className={`font-bold uppercase tracking-wider text-white/80 ${large ? 'mt-1 text-[9px]' : 'mt-0.5 text-[8px]'}`}>{isFree ? 'Gratis' : 'Premium'}</span>
     </span>
   )
 }
@@ -64,7 +74,7 @@ export default function ProductCard({ product, onSelect, className = '' }) {
   ) : (
     <span className="flex h-full flex-col">
       <span className={`relative block overflow-hidden ${layout.aspect}`}>
-        <Thumb product={product} isFree={isFree} className="h-full w-full" />
+        <Thumb product={product} isFree={isFree} className="h-full w-full" large />
       </span>
       <span className={`flex flex-1 gap-2 p-2.5 ${layout.value === 'wide' ? 'items-center' : 'flex-col'}`}>
         <span className="min-w-0 flex-1">

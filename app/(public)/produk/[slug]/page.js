@@ -11,7 +11,7 @@ import ProductReviewList from '@/components/public/ProductReviewList'
 import { demoProducts } from '@/lib/demo-data'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import Link from 'next/link'
-import { parseSocialLinks } from '@/lib/utils'
+import { whatsappUrl } from '@/lib/utils'
 
 async function getProduct(slug) {
   if (!hasSupabase()) {
@@ -84,8 +84,7 @@ export default async function ProdukDetailPage({ params }) {
   }
 
   const isSoldOut = product.stock_type === 'limited' && product.stock_qty <= 0
-  const wa = parseSocialLinks(appearance?.socialLinks || []).find((l) => l.platform === 'whatsapp')
-  const waUrl = wa?.url ? (wa.url.startsWith('http') ? wa.url : `https://wa.me/${wa.url.replace(/\D/g, '')}`) : null
+  const waUrl = whatsappUrl(appearance?.socialLinks)
   const productUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bantuguruyuk.web.id'}/produk/${product.slug}`
 
   return (
@@ -95,8 +94,12 @@ export default async function ProdukDetailPage({ params }) {
           {product.cover_path ? (
             <img src={product.cover_path} alt={product.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300 font-bold">
-              {product.type === 'free' ? 'GRATIS' : 'PAID'}
+            <div className={`flex h-full w-full flex-col items-center justify-center px-8 text-center text-white ${product.type === 'free' ? 'bg-gradient-to-br from-emerald-400 to-teal-600' : 'bg-gradient-to-br from-teal-600 to-[#123b35]'}`}>
+              <svg aria-hidden="true" className="h-12 w-12 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2zM9 13h6M9 17h4" />
+              </svg>
+              <p className="mt-3 line-clamp-3 text-lg font-bold leading-snug">{product.title}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-widest text-white/75">{product.type === 'free' ? 'Gratis' : 'Premium'}</p>
             </div>
           )}
           <div className="absolute top-3 left-3 flex flex-wrap gap-2">

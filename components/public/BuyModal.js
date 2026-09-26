@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CloseButton } from '@/components/ui/close-button';
+import WhatsAppBuyButton from '@/components/public/WhatsAppBuyButton';
 
 const paymentLogos = [
   { name: 'QRIS', src: '/logos/qris.svg' },
@@ -20,7 +21,7 @@ function formatRupiah(value) {
   return `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
 }
 
-export default function BuyModal({ product, isOpen, onClose }) {
+export default function BuyModal({ product, isOpen, onClose, waUrl }) {
   const [voucherOpen, setVoucherOpen] = useState(false);
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherState, setVoucherState] = useState({ status: 'idle', message: '', discount: 0 });
@@ -183,6 +184,7 @@ export default function BuyModal({ product, isOpen, onClose }) {
             <button disabled={busy || tooSmall} className="h-12 w-full rounded-xl bg-emerald-500 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60">
               {busy ? 'Memproses...' : total === 0 ? 'Ambil Gratis dengan Voucher' : `Beli sekarang - ${formatRupiah(total)}`}
             </button>
+            <WhatsAppBuyButton waUrl={waUrl} product={product} className="pt-1 pb-[env(safe-area-inset-bottom)]" />
           </form>
         </div>
       </div>
