@@ -11,7 +11,7 @@ export async function GET() {
   const auth = await requireAdmin(supabase)
   if (auth.error) return auth.error
 
-  const tables = ['products', 'categories', 'pages', 'orders', 'vouchers', 'settings']
+  const tables = ['products', 'product_faqs', 'categories', 'pages', 'navigation_items', 'content_blocks', 'footer_config', 'footer_links', 'media', 'orders', 'order_items', 'vouchers', 'product_reviews', 'settings']
   const backup = { exported_at: new Date().toISOString() }
 
   for (const table of tables) {
