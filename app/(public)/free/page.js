@@ -4,6 +4,8 @@ import FreePageClient from './FreePageClient'
 import { fetchStoreShell, demoShellDataWithProducts, hasSupabase } from '@/lib/store-shell'
 import { demoProducts, demoCategories } from '@/lib/demo-data'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Produk Gratis | Bantu Guru Yuk',
   description: 'Download gratis modul ajar, ATP, dan media pembelajaran untuk guru dan pendidik.',

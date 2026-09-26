@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import crypto from 'crypto'
 
 function normalizeWebhookPayload(parsed) {
   const data = parsed?.data || parsed?.payload || parsed || {}
@@ -48,37 +47,6 @@ function normalizeWebhookPayload(parsed) {
   }
 }
 
-async function findOrder(supabase, { localOrderId, mayarId }) {
-  if (localOrderId) {
-    const { data } = await supabase
-      .from('orders')
-      .select('*, product:products(*)')
-      .eq('id', localOrderId)
-      .maybeSingle()
-
-    if (data) return data
-  }
-
-  if (!mayarId) return null
-
-  const fields = ['mayar_order_id', 'mayar_payment_id', 'payment_id']
-  for (const field of fields) {
-    const { data } = await supabase
-      .from('orders')
-      .select('*, product:products(*)')
-      .eq(field, mayarId)
-      .maybeSingle()
-
-    if (data) return data
-  }
-
-  return null
-}
-
-function makeDownloadToken(orderId) {
-  return `${orderId}-${Date.now()}-${crypto.randomBytes(24).toString('base64url')}`
-}
-
 export async function POST(request) {
   try {
     const payload = await request.text()
@@ -96,9 +64,8 @@ export async function POST(request) {
       || ''
     const { verifyWebhookSignature } = await import('@/lib/mayar')
 
-    if (!verifyWebhookSignature(payload, signature)) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-    }
+    // Unsigned or unverifiable webhooks are not trusted: the order is re-checked against the Mayar API instead.
+    const trusted = verifyWebhookSignature(payload, signature)
 
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL
       && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_supabase_url'
@@ -115,83 +82,24 @@ export async function POST(request) {
     }
 
     const normalized = normalizeWebhookPayload(parsed)
-    const order = await findOrder(supabase, normalized)
+    const { findOrderForWebhook, markOrderPaid, syncOrderWithMayar } = await import('@/lib/orders')
+    const order = await findOrderForWebhook(supabase, normalized)
 
     if (!order) {
       console.error('[Mayar Webhook] Order not found:', normalized)
       return NextResponse.json({ error: 'Pesanan tidak ditemukan' }, { status: 404 })
     }
 
-    if (normalized.isPaid) {
-      const downloadToken = order.download_token || makeDownloadToken(order.id)
-      const expiresAt = order.token_expires_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({
-          status: 'paid',
-          mayar_order_id: normalized.mayarId || order.mayar_order_id,
-          mayar_payment_id: normalized.paymentId || order.mayar_payment_id,
-          payment_id: normalized.paymentId || order.payment_id,
-          paid_at: order.paid_at || new Date().toISOString(),
-          download_token: downloadToken,
-          token_expires_at: expiresAt,
-        })
-        .eq('id', order.id)
-
-      if (updateError) {
-        console.error('[Mayar Webhook] Failed to update order:', updateError)
-        return NextResponse.json({ error: 'Gagal memperbarui pesanan' }, { status: 500 })
-      }
-
-      if (order.status !== 'paid' && order.product?.stock_type === 'limited') {
-        await supabase.rpc('decrement_stock_qty', { p_product_id: order.product.id })
-      }
-
-      if (order.status !== 'paid' && order.voucher_code) {
-        await supabase.rpc('increment_voucher_usage', { p_code: order.voucher_code })
-      }
-
-      const { error: notifError } = await supabase.from('notifications').insert({
-        type: 'order_paid',
-        message: `${order.buyer_name} telah membayar ${order.product?.title || 'produk'}`,
-        payload: {
-          order_id: order.id,
-          product_id: order.product_id,
-          buyer_name: order.buyer_name,
-          payment_id: normalized.paymentId,
-        },
-      })
-
-      if (notifError) {
-        console.error('[Mayar Webhook] Failed to create notification:', notifError)
-      }
-
-      if (order.status !== 'paid' && order.product_id) {
-        try {
-          const { sendDownloadEmail } = await import('@/lib/email')
-          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
-          await sendDownloadEmail({
-            to: order.buyer_email,
-            buyerName: order.buyer_name,
-            productTitle: order.product?.title,
-            downloadUrl: `${siteUrl}/terima-kasih?token=${encodeURIComponent(downloadToken)}`,
-            expiresAt,
-          })
-        } catch (emailError) {
-          console.error('[Mayar Webhook] Failed to send download email:', emailError)
-        }
-      }
-    } else if (normalized.isFailed) {
+    if (!trusted) {
+      await syncOrderWithMayar(supabase, order)
+    } else if (normalized.isPaid) {
+      await markOrderPaid(supabase, order, { mayarId: normalized.mayarId, paymentId: normalized.paymentId })
+    } else if (normalized.isFailed && order.status === 'pending') {
       await supabase
         .from('orders')
-        .update({
-          status: 'failed',
-          mayar_order_id: normalized.mayarId || order.mayar_order_id,
-          mayar_payment_id: normalized.paymentId || order.mayar_payment_id,
-          payment_id: normalized.paymentId || order.payment_id,
-        })
+        .update({ status: 'failed' })
         .eq('id', order.id)
+        .eq('status', 'pending')
     }
 
     return NextResponse.json({ status: 'ok' })

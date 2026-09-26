@@ -29,6 +29,7 @@ export default function MediaDetailActions({ id, url }) {
       addToast('Media berhasil dihapus', 'success')
       router.push('/admin/media')
       router.refresh()
+      router.refresh()
     } catch (e) {
       setBusy(false)
       addToast(e.message, 'error')

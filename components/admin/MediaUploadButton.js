@@ -28,6 +28,7 @@ export default function MediaUploadButton() {
       await uploadMedia(file, kind)
       router.push('/admin/media?toast=success')
       router.refresh()
+      router.refresh()
     } catch {
       router.push('/admin/media?toast=error')
     } finally {

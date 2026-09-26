@@ -3,6 +3,8 @@ import ProductStack from '@/components/public/ProductStack'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import { demoProducts } from '@/lib/demo-data'
 
+export const dynamic = 'force-dynamic'
+
 async function getData() {
   if (!hasSupabase()) {
     const saved = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('_bgym_demo_products') || '[]') : []

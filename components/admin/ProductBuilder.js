@@ -39,6 +39,13 @@ export default function ProductBuilder({ products: initialProducts, categories =
   const [orderDirty, setOrderDirty] = useState(false)
 
   useEffect(() => {
+    if (IS_DEMO || orderDirty) return
+    setProducts([...initialProducts].sort(bySortOrder))
+    setBlocks([...initialContentBlocks].sort(bySortOrder))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialProducts, initialContentBlocks])
+
+  useEffect(() => {
     if (!IS_DEMO) return
     try {
       const saved = JSON.parse(localStorage.getItem(DEMO_KEY) || '[]')

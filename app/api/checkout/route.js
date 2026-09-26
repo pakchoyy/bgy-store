@@ -100,7 +100,7 @@ export async function POST(request) {
         redirectUrl,
         customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: cleanWhatsapp },
       })
-      const { paymentUrl, invoiceId } = extractMayarInvoice(mayarResponse)
+      const { paymentUrl, invoiceId, transactionId } = extractMayarInvoice(mayarResponse)
 
       if (!paymentUrl) {
         throw new Error('Tautan pembayaran Mayar tidak tersedia')
@@ -110,8 +110,8 @@ export async function POST(request) {
         .from('orders')
         .update({
           mayar_order_id: invoiceId || null,
-          mayar_payment_id: invoiceId || null,
-          payment_id: invoiceId || null,
+          mayar_payment_id: transactionId || invoiceId || null,
+          payment_id: transactionId || invoiceId || null,
           payment_url: paymentUrl,
         })
         .eq('id', order.id)

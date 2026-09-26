@@ -193,7 +193,10 @@ export default function ProductForm({ initialData, categories = [] }) {
           localStorage.setItem('_bgym_demo_products', JSON.stringify(next))
         }
         localStorage.removeItem(draftKey)
-        setTimeout(() => router.push('/admin/produk'), 1000)
+        setTimeout(() => {
+          router.push('/admin/produk')
+          router.refresh()
+        }, 600)
       }
     } catch (e) {
       addToast(e.message || 'Gagal menyimpan', 'error')
@@ -641,11 +644,11 @@ export default function ProductForm({ initialData, categories = [] }) {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-200">
+      <div className="flex items-center justify-between gap-2 pt-4 border-t border-gray-200">
         <button
           type="button"
           onClick={() => leave(() => router.back())}
-          className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
+          className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm font-semibold text-red-600 ring-1 ring-inset ring-red-200 transition-colors hover:bg-red-100"
         >
           Batal
         </button>
@@ -653,14 +656,14 @@ export default function ProductForm({ initialData, categories = [] }) {
           <button
             type="button"
             disabled={!initialData?.is_active} title="Membuka versi produk yang sudah diterbitkan" onClick={handlePreview}
-            className="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
+            className="whitespace-nowrap rounded-xl border border-[#0ea5a0] bg-white px-3.5 py-2.5 text-sm font-semibold text-[#0d7a8a] transition-colors hover:bg-teal-50 disabled:border-gray-200 disabled:text-gray-400 disabled:hover:bg-white"
           >
             Lihat Terbitan
           </button>
           <button
             type="submit"
             disabled={saving || uploading}
-            className="px-6 py-2.5 bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="whitespace-nowrap rounded-xl bg-emerald-500 px-3.5 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition-colors hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Menyimpan...' : isEditing ? 'Perbarui Produk' : 'Simpan Produk'}
           </button>

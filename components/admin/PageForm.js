@@ -77,7 +77,10 @@ export default function PageForm({ initialData }) {
       if (!response.ok) throw new Error(data.error || 'Gagal menyimpan halaman')
       localStorage.removeItem(draftKey)
       addToast(isEditing ? 'Halaman berhasil diperbarui!' : 'Halaman berhasil disimpan!', 'success')
-      setTimeout(() => router.push('/admin/halaman'), 1000)
+      setTimeout(() => {
+        router.push('/admin/halaman')
+        router.refresh()
+      }, 600)
     } catch (err) {
       addToast(err.message, 'error')
       setSaving(false)

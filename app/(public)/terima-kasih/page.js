@@ -29,7 +29,7 @@ async function getOrder({ token, orderId }) {
   }
 
   const shell = await fetchStoreShell()
-  const { createTrustedServerClient } = await import('@/lib/supabase-server')
+  const { createTrustedServerClient, hasServiceRole } = await import('@/lib/supabase-server')
   const supabase = await createTrustedServerClient()
 
   if (orderId && !/^[0-9a-f-]{36}$/i.test(orderId)) return { ...shell, order: null }
@@ -41,7 +41,20 @@ async function getOrder({ token, orderId }) {
 
   query = token ? query.eq('download_token', token) : query.eq('id', orderId)
 
-  const { data: order } = await query.maybeSingle()
+  let { data: order } = await query.maybeSingle()
+
+  if (order?.status === 'pending' && hasServiceRole()) {
+    const { syncOrderWithMayar } = await import('@/lib/orders')
+    const status = await syncOrderWithMayar(supabase, order.id).catch(() => null)
+    if (status === 'paid') {
+      const { data: fresh } = await supabase
+        .from('orders')
+        .select('id, buyer_name, status, amount, product_id, download_token, token_expires_at, product:products(id, title, slug)')
+        .eq('id', order.id)
+        .maybeSingle()
+      order = fresh || order
+    }
+  }
 
   return { ...shell, order: order || null }
 }
