@@ -40,6 +40,7 @@ const MIGRATIONS = [
   { sql: '015', label: 'Checkout keranjang', table: 'order_items', column: 'id' },
   { sql: '016', label: 'Bundle / paket', table: 'products', column: 'bundle_product_ids' },
   { sql: '017', label: 'Flash sale', table: 'products', column: 'flash_price' },
+  { sql: '018', label: 'Semester produk', table: 'products', column: 'semester' },
 ]
 
 function envStatus({ name, required, why }) {

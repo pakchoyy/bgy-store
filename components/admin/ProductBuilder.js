@@ -622,6 +622,9 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           {cat && (
                             <span className="text-[10px] text-slate-500">{cat.name}</span>
                           )}
+                          {p.semester && (
+                            <span className="rounded-full bg-sky-50 px-1.5 py-0.5 text-[10px] font-bold text-sky-800">Smt {p.semester}</span>
+                          )}
                           {p.is_featured && (
                             <Badge variant="secondary" className="text-[10px] bg-emerald-50 text-emerald-700">Highlight</Badge>
                           )}

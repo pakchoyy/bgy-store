@@ -5,6 +5,7 @@ import useUnsavedChanges from '@/lib/use-unsaved-changes'
 import { useRouter } from 'next/navigation'
 import { generateSlug, formatRupiah, calcDiscount, CARD_LAYOUTS, parsePreviewImages } from '@/lib/utils'
 import { uploadMedia } from '@/lib/upload-media'
+import RichTextEditor from '@/components/admin/RichTextEditor'
 import FAQEditor from '@/components/admin/FAQEditor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -65,6 +66,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
     card_layout: initialData?.card_layout || 'landscape',
     preview_images: parsePreviewImages(initialData?.preview_path),
     bundle_product_ids: Array.isArray(initialData?.bundle_product_ids) ? initialData.bundle_product_ids : [],
+    semester: initialData?.semester ? String(initialData.semester) : '',
     flash_price: initialData?.flash_price ?? '',
     flash_ends_at: initialData?.flash_ends_at
       ? new Date(new Date(initialData.flash_ends_at).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 16)
@@ -172,6 +174,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
       bundle_product_ids: form.type === 'paid' ? form.bundle_product_ids || [] : [],
       flash_price: form.type === 'paid' && form.flash_price !== '' ? Number(form.flash_price) : null,
       flash_ends_at: form.type === 'paid' && form.flash_price !== '' ? form.flash_ends_at || null : null,
+      semester: form.semester ? Number(form.semester) : null,
       file_path: deliveryMode === 'upload' ? form.file_path || null : null,
       file_url: deliveryMode === 'link' ? form.file_url || null : null,
       file_name: form.file_name || null,
@@ -283,12 +286,10 @@ export default function ProductForm({ initialData, categories = [], productOptio
       <CardSection title="Konten">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-          <textarea
+          <RichTextEditor
             value={form.description}
-            onChange={e => updateField('description', e.target.value)}
-            rows={6}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
-            placeholder="Tulis deskripsi produk (HTML didukung)..."
+            onChange={val => updateField('description', val)}
+            placeholder="Tulis deskripsi produk..."
           />
         </div>
         <div>
@@ -340,6 +341,23 @@ export default function ProductForm({ initialData, categories = [], productOptio
               </label>
             </div>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+          <div className="flex flex-wrap gap-2">
+            {[['', 'Tidak pakai semester'], ['1', 'Semester 1'], ['2', 'Semester 2']].map(([value, label]) => (
+              <button
+                key={value || 'none'}
+                type="button"
+                onClick={() => updateField('semester', value)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${form.semester === value ? 'bg-[#0ea5a0] text-white border-[#0ea5a0] shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-1 text-xs text-gray-400">Produk bersemester bisa disembunyikan sekaligus lewat saklar di halaman daftar Produk.</p>
         </div>
 
         <div>

@@ -48,6 +48,7 @@ function sanitizeProduct(body) {
           flash_ends_at: body.type === 'paid' && body.flash_ends_at ? toWibIso(body.flash_ends_at) : null,
         }
       : {}),
+    ...('semester' in body ? { semester: [1, 2].includes(Number(body.semester)) ? Number(body.semester) : null } : {}),
     ...(Array.isArray(body.bundle_product_ids)
       ? { bundle_product_ids: body.type === 'paid' ? [...new Set(body.bundle_product_ids.filter((id) => typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id)))].slice(0, 30) : [] }
       : {}),
@@ -64,6 +65,7 @@ const OPTIONAL_COLUMNS = [
   { key: 'bundle_product_ids', sql: '016', label: 'Isi paket' },
   { key: 'flash_price', sql: '017', label: 'Flash sale' },
   { key: 'flash_ends_at', sql: '017', label: 'Flash sale' },
+  { key: 'semester', sql: '018', label: 'Semester' },
 ]
 
 async function withoutMissingBundleColumn(run, product) {

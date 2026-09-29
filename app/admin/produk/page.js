@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import ProductBuilder from '@/components/admin/ProductBuilder'
+import SemesterSwitch from '@/components/admin/SemesterSwitch'
 import { demoSettings } from '@/lib/demo-data'
 import { getAppearance, settingsToMap } from '@/lib/utils'
 
@@ -24,13 +25,14 @@ async function getData() {
       .order('sort_order', { ascending: true })
     const { data: settingsRows } = await supabase.from('settings').select('*')
     return {
+      settings: settingsRows?.length ? settingsToMap(settingsRows) : {},
       products: products || [],
       categories: categories || [],
       contentBlocks: contentBlocks || [],
       appearance: getAppearance(settingsRows?.length ? settingsToMap(settingsRows) : demoSettings),
     }
   } catch {}
-  return { products: [], categories: [], contentBlocks: [], appearance: getAppearance(demoSettings) }
+  return { settings: {}, products: [], categories: [], contentBlocks: [], appearance: getAppearance(demoSettings) }
 }
 
 export default async function AdminProduk() {
@@ -41,9 +43,12 @@ export default async function AdminProduk() {
     if (!session) redirect('/login')
   }
 
-  const { products, categories, contentBlocks, appearance } = await getData()
+  const { settings, products, categories, contentBlocks, appearance } = await getData()
 
   return (
-    <ProductBuilder products={products} categories={categories} contentBlocks={contentBlocks} appearance={appearance} />
+    <>
+      <SemesterSwitch products={products} settings={settings} />
+      <ProductBuilder products={products} categories={categories} contentBlocks={contentBlocks} appearance={appearance} />
+    </>
   )
 }

@@ -6,6 +6,7 @@ import { generateSlug } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import RichTextEditor from '@/components/admin/RichTextEditor'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -125,13 +126,12 @@ export default function PageForm({ initialData }) {
             <p className="text-xs text-slate-500 mt-1">URL: /halaman/{form.slug || '...'}</p>
           </div>
           <div>
-            <label className="text-sm font-medium mb-1 block">Konten (HTML)</label>
-            <Textarea
+            <label className="text-sm font-medium mb-1 block">Konten</label>
+            <RichTextEditor
               value={form.content}
-              onChange={e => updateField('content', e.target.value)}
-              rows={14}
-              placeholder="<h1>Selamat Datang</h1><p>Tulis konten halaman di sini...</p>"
-              className="font-mono"
+              onChange={val => updateField('content', val)}
+              placeholder="Tulis konten halaman di sini..."
+              minHeight={320}
             />
           </div>
         </CardContent>

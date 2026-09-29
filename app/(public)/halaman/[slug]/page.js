@@ -176,7 +176,7 @@ export default async function HalamanPage({ params }) {
               <FAQAccordion items={faqItems} />
             ) : (
               <div
-                className="prose prose-sm max-w-none text-gray-600 prose-headings:font-semibold prose-headings:text-gray-900 prose-p:leading-6"
+                className="rich-content text-sm leading-6 text-gray-600"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }}
               />
             )}
