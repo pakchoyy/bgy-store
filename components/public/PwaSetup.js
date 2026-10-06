@@ -29,7 +29,7 @@ export default function PwaSetup() {
 
   return (
     <div role="dialog" aria-label="Pasang aplikasi" className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-white p-3 shadow-2xl ring-1 ring-black/5">
-      <img src="/pwa-icon?size=192" alt="" className="h-11 w-11 rounded-xl" />
+      <img src="/logo-bgy.jpg" alt="" className="h-11 w-11 rounded-xl" />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold text-slate-900">Pasang di layar HP</p>
         <p className="text-xs text-slate-500">Buka toko lebih cepat seperti aplikasi.</p>

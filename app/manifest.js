@@ -10,9 +10,8 @@ export default function manifest() {
     theme_color: '#123b35',
     lang: 'id',
     icons: [
-      { src: '/pwa-icon?size=192', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: '/pwa-icon?size=512', sizes: '512x512', type: 'image/png', purpose: 'any' },
-      { src: '/pwa-icon?size=512&maskable=1', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      { src: '/logo-bgy.jpg', sizes: 'any', type: 'image/jpeg', purpose: 'any' },
+      { src: '/logo-bgy.jpg', sizes: 'any', type: 'image/jpeg', purpose: 'maskable' },
     ],
   }
 }

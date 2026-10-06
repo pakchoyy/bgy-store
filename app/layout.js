@@ -24,7 +24,7 @@ export const metadata = {
   },
   twitter: { card: 'summary_large_image' },
   appleWebApp: { capable: true, title: 'Bantu Guru Yuk', statusBarStyle: 'default' },
-  icons: { apple: '/pwa-icon?size=180' },
+  icons: { icon: '/logo-bgy.jpg', apple: '/logo-bgy.jpg' },
 }
 
 export const viewport = {
