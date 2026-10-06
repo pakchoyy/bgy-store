@@ -5,8 +5,8 @@ import { isAdmin } from './lib/admin-role'
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // Allow auth routes to pass through (signout, etc.)
-  if (pathname.startsWith('/auth')) {
+  // Public pages don't need auth check — skip fast to avoid timeout
+  if (!pathname.startsWith('/admin') && pathname !== '/login') {
     return NextResponse.next()
   }
 
@@ -17,7 +17,12 @@ export async function middleware(request) {
   const response = NextResponse.next()
   let user = null
 
-  if (hasSupabase) {
+  // Skip Supabase call if no auth cookie — no session to check
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'))
+
+  if (hasSupabase && hasAuthCookie) {
     try {
       const supabase = createServerClient(supabaseUrl, supabaseKey, {
         cookies: {
@@ -62,7 +67,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/admin/:path*', '/login'],
 }
