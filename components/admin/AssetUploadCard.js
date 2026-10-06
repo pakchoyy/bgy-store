@@ -6,10 +6,12 @@ import { uploadMedia } from '@/lib/upload-media'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/components/ui/toast'
+import { useConfirm } from '@/components/ui/confirm'
 
 export default function AssetUploadCard({ slotKey, currentUrl }) {
   const router = useRouter()
   const { addToast } = useToast()
+  const { confirm } = useConfirm()
   const fileInputRef = useRef(null)
   const [busy, setBusy] = useState(false)
 
@@ -37,7 +39,8 @@ export default function AssetUploadCard({ slotKey, currentUrl }) {
   }
 
   async function handleDelete() {
-    if (!window.confirm('Hapus asset ini?')) return
+    const ok = await confirm({ title: 'Hapus asset?', message: 'Asset ini akan dihapus dari slot ini.', confirmLabel: 'Ya, hapus', danger: true })
+    if (!ok) return
     setBusy(true)
     try {
       const res = await fetch(`/api/admin/assets?key=${encodeURIComponent(slotKey)}`, { method: 'DELETE' })

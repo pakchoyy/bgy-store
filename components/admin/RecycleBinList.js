@@ -6,6 +6,7 @@ import { formatRupiah } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
+import { useConfirm } from '@/components/ui/confirm'
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'
@@ -15,6 +16,7 @@ function formatDate(dateStr) {
 export default function RecycleBinList({ products: initial }) {
   const router = useRouter()
   const { addToast } = useToast()
+  const { confirm } = useConfirm()
   const [products, setProducts] = useState(initial)
   const [busyId, setBusyId] = useState(null)
 
@@ -38,7 +40,8 @@ export default function RecycleBinList({ products: initial }) {
   }
 
   const deleteForever = async (id) => {
-    if (!window.confirm('Hapus permanen? Tindakan ini tidak bisa dibatalkan.')) return
+    const ok = await confirm({ title: 'Hapus permanen?', message: 'Tindakan ini tidak bisa dibatalkan.', confirmLabel: 'Ya, hapus permanen', danger: true })
+    if (!ok) return
     setBusyId(id)
     try {
       const res = await fetch(`/api/admin/products?id=${encodeURIComponent(id)}&permanent=true`, { method: 'DELETE' })

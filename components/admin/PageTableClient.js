@@ -9,9 +9,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/components/ui/toast'
+import { useConfirm } from '@/components/ui/confirm'
 
 export default function PageTableClient({ pages: initialPages }) {
   const { addToast } = useToast()
+  const { confirm } = useConfirm()
   const [pages, setPages] = useState(initialPages)
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState([])
@@ -75,15 +77,17 @@ export default function PageTableClient({ pages: initialPages }) {
     }
   }
 
-  const handleBulkDelete = () => {
-    if (window.confirm(`Hapus ${selectedIds.length} halaman?`)) {
+  const handleBulkDelete = async () => {
+    const ok = await confirm({ title: `Hapus ${selectedIds.length} halaman?`, message: 'Halaman terpilih akan dihapus.', confirmLabel: 'Ya, hapus', danger: true })
+    if (ok) {
       deleteIds(selectedIds)
       setSelectedIds([])
     }
   }
 
-  const handleDelete = (id) => {
-    if (window.confirm('Hapus halaman ini?')) {
+  const handleDelete = async (id) => {
+    const ok = await confirm({ title: 'Hapus halaman ini?', message: 'Halaman akan dihapus.', confirmLabel: 'Ya, hapus', danger: true })
+    if (ok) {
       deleteIds([id])
     }
   }

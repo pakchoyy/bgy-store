@@ -83,6 +83,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
   const [coverPreview, setCoverPreview] = useState(null)
   const [savedDraft, setSavedDraft] = useState(false)
   const [draftError, setDraftError] = useState(false)
+  const [pendingDraft, setPendingDraft] = useState(null)
   const {dirty, markSaved, leave} = useUnsavedChanges(form)
 
   useEffect(() => {
@@ -107,21 +108,30 @@ export default function ProductForm({ initialData, categories = [], productOptio
         const draft = localStorage.getItem(draftKey)
         if (draft) {
           const parsed = JSON.parse(draft)
-          if (parsed.title && window.confirm('Ada draft tersimpan. Pulihkan?')) {
-            setSlugManuallyEdited(true)
-            const { _timestamp, ...rest } = parsed
-            setForm(prev => ({
-              ...prev,
-              ...rest,
-              cover_path: rest.cover_path || prev.cover_path,
-              file_path: rest.file_path || prev.file_path,
-              file_size: rest.file_size || prev.file_size,
-            }))
-          }
+          if (parsed.title) setPendingDraft(parsed)
         }
       } catch {}
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function applyPendingDraft() {
+    if (!pendingDraft) return
+    setSlugManuallyEdited(true)
+    const { _timestamp, ...rest } = pendingDraft
+    setForm(prev => ({
+      ...prev,
+      ...rest,
+      cover_path: rest.cover_path || prev.cover_path,
+      file_path: rest.file_path || prev.file_path,
+      file_size: rest.file_size || prev.file_size,
+    }))
+    setPendingDraft(null)
+  }
+
+  function discardPendingDraft() {
+    try { localStorage.removeItem(draftKey) } catch {}
+    setPendingDraft(null)
+  }
 
   const updateField = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -241,6 +251,16 @@ export default function ProductForm({ initialData, categories = [], productOptio
 
   return (
     <form onSubmit={handleSubmit}><fieldset disabled={saving || uploading} className="space-y-6 min-w-0">
+      {pendingDraft && (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-base">📝</span>
+          <p className="min-w-0 flex-1 text-sm text-amber-900"><strong>Ada draft tersimpan</strong> di browser ini. Pulihkan untuk melanjutkan?</p>
+          <div className="flex gap-2">
+            <Button type="button" size="sm" variant="outline" onClick={discardPendingDraft}>Buang</Button>
+            <Button type="button" size="sm" onClick={applyPendingDraft}>Pulihkan</Button>
+          </div>
+        </div>
+      )}
       {uploading && <p role="status">Mengunggah file…</p>}
       {draftError && <p role="status" className="text-sm text-amber-800">Draf belum bisa disimpan di browser ini. Simpan ke toko sebelum keluar.</p>}
       {dirty && !savedDraft && !draftError && <p role="status" className="text-sm text-slate-600">Perubahan belum disimpan ke toko.</p>}

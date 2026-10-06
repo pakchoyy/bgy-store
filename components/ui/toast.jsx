@@ -42,30 +42,30 @@ export function ToastProvider({ children }) {
 }
 
 export function Toast({ id, message, type = 'default', onClose }) {
-  const bgColor = {
-    default: 'bg-slate-900 text-white',
-    success: 'bg-green-600 text-white',
-    error: 'bg-red-600 text-white',
-    warning: 'bg-yellow-600 text-white',
-  }[type];
+  const styles = {
+    default: { badge: 'bg-slate-100 text-slate-700', icon: 'ℹ' },
+    success: { badge: 'bg-emerald-100 text-emerald-700', icon: '✓' },
+    error: { badge: 'bg-red-100 text-red-600', icon: '!' },
+    warning: { badge: 'bg-amber-100 text-amber-700', icon: '!' },
+  }[type] || { badge: 'bg-slate-100 text-slate-700', icon: 'ℹ' };
 
   return (
     <div
       role={type === 'error' ? 'alert' : 'status'}
-      className={cn(
-        'rounded-lg px-4 py-3 shadow-lg flex items-center justify-between gap-4',
-        bgColor
-      )}
+      className="animate-toast-in flex w-full max-w-xs items-center gap-3 rounded-2xl border border-slate-100 bg-white/95 py-2.5 pl-3 pr-2 shadow-xl shadow-slate-900/10 backdrop-blur"
     >
-      <p className="text-sm font-medium">{message}</p>
+      <span aria-hidden="true" className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black', styles.badge)}>
+        {styles.icon}
+      </span>
+      <p className="min-w-0 flex-1 text-[13px] font-medium leading-snug text-slate-800">{message}</p>
       <button
         type="button"
         onClick={() => onClose(id)}
         aria-label="Tutup notifikasi"
-        className="ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded hover:opacity-75"
+        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
       >
         <svg
-          className="h-4 w-4"
+          className="h-3.5 w-3.5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -73,7 +73,7 @@ export function Toast({ id, message, type = 'default', onClose }) {
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
+            strokeWidth={2.5}
             d="M6 18L18 6M6 6l12 12"
           />
         </svg>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ui/confirm'
 
 export function PrintButton() {
   return (
@@ -57,12 +58,16 @@ export function CopyLinkButton({ downloadToken }) {
   )
 }
 
-export function ConfirmSubmitButton({ message, children, className = '', ...props }) {
+export function ConfirmSubmitButton({ title = 'Yakin?', message, children, className = '', ...props }) {
+  const { confirm } = useConfirm()
   return (
     <button
       type="submit"
-      onClick={(event) => {
-        if (!window.confirm(message)) event.preventDefault()
+      onClick={async (event) => {
+        event.preventDefault()
+        const form = event.currentTarget.form
+        const ok = await confirm({ title, message, confirmLabel: 'Ya, lanjutkan', danger: true })
+        if (ok) form?.requestSubmit()
       }}
       className={className}
       {...props}

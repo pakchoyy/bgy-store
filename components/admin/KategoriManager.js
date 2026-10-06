@@ -8,11 +8,13 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/components/ui/toast'
+import { useConfirm } from '@/components/ui/confirm'
 
 const DEFAULT_COLORS = ['#0ea5a0', '#8b5cf6', '#f59e0b', '#ef4444', '#3b82f6', '#10b981', '#ec4899', '#6b7280']
 
 export default function KategoriManager({ categories: initialCategories }) {
   const { addToast } = useToast()
+  const { confirm } = useConfirm()
   const [categories, setCategories] = useState(initialCategories)
   const [editing, setEditing] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -68,10 +70,11 @@ export default function KategoriManager({ categories: initialCategories }) {
   const handleDelete = async (id) => {
     const cat = categories.find(c => c.id === id)
     if (cat && (cat.product_count || 0) > 0) {
-      alert(`Tidak dapat menghapus "${cat.name}" karena masih memiliki ${cat.product_count} produk aktif.`)
+      showToast('error', `Tidak dapat menghapus "${cat.name}" karena masih memiliki ${cat.product_count} produk aktif.`)
       return
     }
-    if (!window.confirm(`Hapus kategori "${cat?.name}"?`)) return
+    const ok = await confirm({ title: `Hapus kategori "${cat?.name}"?`, message: 'Kategori akan dihapus dari daftar.', confirmLabel: 'Ya, hapus', danger: true })
+    if (!ok) return
     try {
       const response = await fetch(`/api/admin/categories?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
       const data = await response.json()

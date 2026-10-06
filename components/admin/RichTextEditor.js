@@ -43,6 +43,11 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Tulis d
   const [fullscreen, setFullscreen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [empty, setEmpty] = useState(!value)
+  const [linkOpen, setLinkOpen] = useState(false)
+  const [videoOpen, setVideoOpen] = useState(false)
+  const [linkDraft, setLinkDraft] = useState('')
+  const [videoDraft, setVideoDraft] = useState('')
+  const [formError, setFormError] = useState('')
 
   useEffect(() => {
     const el = editorRef.current
@@ -142,28 +147,49 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Tulis d
     setMenu(null)
   }
 
-  function addLink() {
+  function openLinkPanel() {
     saveRange()
-    const url = window.prompt('Alamat link (contoh: https://wa.me/628xxx)')
-    if (!url) return
-    const href = /^(https?:|mailto:|tel:|\/|#)/i.test(url.trim()) ? url.trim() : `https://${url.trim()}`
-    const hasSelection = rangeRef.current && !rangeRef.current.collapsed
-    if (hasSelection) {
-      exec('createLink', href)
-      editorRef.current.querySelectorAll(`a[href="${CSS.escape(href)}"]`).forEach((a) => { a.target = '_blank'; a.rel = 'noopener noreferrer' })
-      emit()
-    } else {
-      insertHtml(`<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeAttr(url.trim())}</a>&nbsp;`)
-    }
+    setLinkDraft('')
+    setFormError('')
+    setVideoOpen(false)
+    setLinkOpen((v) => !v)
   }
 
-  function addVideo() {
+  function openVideoPanel() {
     saveRange()
-    const url = window.prompt('Tempel link video YouTube')
-    if (!url) return
+    setVideoDraft('')
+    setFormError('')
+    setLinkOpen(false)
+    setVideoOpen((v) => !v)
+  }
+
+  function submitLink() {
+    const url = linkDraft.trim()
+    if (!url) { setFormError('Isi alamat link dulu.'); return }
+    const href = /^(https?:|mailto:|tel:|\/|#)/i.test(url) ? url : `https://${url}`
+    const hasSelection = rangeRef.current && !rangeRef.current.collapsed
+    if (hasSelection) {
+      restoreRange()
+      document.execCommand('styleWithCSS', false, false)
+      document.execCommand('createLink', false, href)
+      editorRef.current.querySelectorAll(`a[href="${CSS.escape(href)}"]`).forEach((a) => { a.target = '_blank'; a.rel = 'noopener noreferrer' })
+      saveRange()
+      emit()
+    } else {
+      insertHtml(`<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer">${escapeAttr(url)}</a>&nbsp;`)
+    }
+    setLinkOpen(false)
+    setFormError('')
+  }
+
+  function submitVideo() {
+    const url = videoDraft.trim()
+    if (!url) { setFormError('Tempel link video YouTube dulu.'); return }
     const id = youtubeId(url)
-    if (!id) { window.alert('Link YouTube tidak dikenali. Contoh: https://youtu.be/abc123'); return }
+    if (!id) { setFormError('Link YouTube tidak dikenali. Contoh: https://youtu.be/abc123'); return }
     insertHtml(`<iframe src="https://www.youtube-nocookie.com/embed/${id}" title="Video" allowfullscreen></iframe><p><br></p>`)
+    setVideoOpen(false)
+    setFormError('')
   }
 
   async function addImage(e) {
@@ -175,7 +201,7 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Tulis d
       const media = await uploadMedia(file, 'cover')
       insertHtml(`<img src="${escapeAttr(media.url)}" alt="" /><p><br></p>`)
     } catch (err) {
-      window.alert(err.message || 'Gambar gagal diunggah.')
+      setFormError(err.message || 'Gambar gagal diunggah.')
     } finally {
       setUploading(false)
     }
@@ -277,11 +303,11 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Tulis d
             </div>
           )}
         </div>
-        <Tool title="Sisipkan link" onClick={addLink}><LinkIcon {...icon} /></Tool>
+        <Tool title="Sisipkan link" onClick={openLinkPanel}><LinkIcon {...icon} /></Tool>
         <Tool title="Sisipkan gambar" disabled={uploading} onClick={() => { saveRange(); fileRef.current?.click() }}>
           {uploading ? <span className="text-[10px] font-bold">...</span> : <Photo {...icon} />}
         </Tool>
-        <Tool title="Sisipkan video YouTube" onClick={addVideo}><BrandYoutube {...icon} /></Tool>
+        <Tool title="Sisipkan video YouTube" onClick={openVideoPanel}><BrandYoutube {...icon} /></Tool>
         <div className="relative">
           <MenuButton id="emoji" title="Emoji"><MoodSmile {...icon} /></MenuButton>
           {menu === 'emoji' && (
@@ -303,6 +329,49 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Tulis d
       </div>
 
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={addImage} />
+
+      {(linkOpen || videoOpen) && (
+        <div className="border-b border-emerald-100 bg-emerald-50/50 p-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              autoFocus
+              value={linkOpen ? linkDraft : videoDraft}
+              onChange={(e) => { setFormError(''); linkOpen ? setLinkDraft(e.target.value) : setVideoDraft(e.target.value) }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); linkOpen ? submitLink() : submitVideo() } }}
+              placeholder={linkOpen ? 'Alamat link (contoh: https://wa.me/628xxx)' : 'Tempel link video YouTube'}
+              className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            />
+            <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { linkOpen ? setLinkOpen(false) : setVideoOpen(false); setFormError('') }}
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { linkOpen ? submitLink() : submitVideo() }}
+                className="h-9 rounded-lg bg-emerald-700 px-3 text-xs font-bold text-white hover:bg-emerald-800"
+              >
+                Sisipkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!!formError && !linkOpen && !videoOpen && (
+        <div className="flex items-center justify-between gap-2 border-b border-red-100 bg-red-50 px-3 py-1.5">
+          <p role="alert" className="text-xs font-semibold text-red-700">{formError}</p>
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setFormError('')} aria-label="Tutup peringatan" className="text-sm font-bold text-red-400 hover:text-red-600">×</button>
+        </div>
+      )}
+      {!!formError && (linkOpen || videoOpen) && (
+        <p role="alert" className="border-b border-red-100 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">{formError}</p>
+      )}
 
       {codeView ? (
         <textarea

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
+import { useConfirm } from '@/components/ui/confirm'
 import AddBlockModal from '@/components/admin/AddBlockModal'
 import ProductStack from '@/components/public/ProductStack'
 import { CloseButton } from '@/components/ui/close-button'
@@ -24,6 +25,7 @@ const bySortOrder = (a, b) => (a.sort_order || 0) - (b.sort_order || 0)
 
 export default function ProductBuilder({ products: initialProducts, categories = [], contentBlocks: initialContentBlocks = [], appearance = {} }) {
   const { addToast } = useToast()
+  const { confirm, promptText } = useConfirm()
   const [products, setProducts] = useState(() => [...initialProducts].sort(bySortOrder))
   const [blocks, setBlocks] = useState(() => [...initialContentBlocks].sort(bySortOrder))
   const demoLoaded = useRef(!IS_DEMO)
@@ -265,9 +267,13 @@ export default function ProductBuilder({ products: initialProducts, categories =
   }
 
   async function createVariants(product) {
-    const input = window.prompt(
-      `Buat varian dari "${product.title}".\nTulis nama varian, pisahkan dengan koma.\nContoh: Kelas 1, Kelas 2, Kelas 3`,
-    )
+    const input = await promptText({
+      title: `Buat varian dari "${product.title}"`,
+      message: 'Tulis nama varian, pisahkan dengan koma. Contoh: Kelas 1, Kelas 2, Kelas 3',
+      placeholder: 'Kelas 1, Kelas 2, Kelas 3',
+      confirmLabel: 'Buat varian',
+    })
+    if (input == null) return
     const names = String(input || '').split(',').map((n) => n.trim()).filter(Boolean).slice(0, 12)
     if (!names.length) return
     const slugPart = (text) => text.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -540,7 +546,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                               size="sm"
                               variant="outline"
                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => { if (window.confirm('Hapus block ini?')) deleteBlock(item.id) }}
+                              onClick={async () => { const ok = await confirm({ title: 'Hapus block ini?', message: 'Block akan dihapus dari halaman.', confirmLabel: 'Ya, hapus', danger: true }); if (ok) deleteBlock(item.id) }}
                             >
                               Hapus
                             </Button>
@@ -791,7 +797,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
               <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { const target = menuProduct; setOpenMenuId(null); createVariants(target) }}>
                 <span aria-hidden="true">⊞</span> Buat varian (Kelas 1, 2, 3…)
               </button>
-              <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-semibold text-red-600 hover:bg-red-50" onClick={() => { const target = menuProduct; setOpenMenuId(null); if (window.confirm(`Hapus "${target.title}"? Produk dipindahkan ke Recycle Bin.`)) deleteProduct(target.id) }}>
+              <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-semibold text-red-600 hover:bg-red-50" onClick={async () => { const target = menuProduct; setOpenMenuId(null); const ok = await confirm({ title: `Hapus "${target.title}"?`, message: 'Produk dipindahkan ke Recycle Bin.', confirmLabel: 'Ya, hapus', danger: true }); if (ok) deleteProduct(target.id) }}>
                 <span aria-hidden="true">⌫</span> Hapus produk
               </button>
             </div>

@@ -8,9 +8,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
+import { useConfirm } from '@/components/ui/confirm'
 
 export default function ReviewsManager({ initialReviews }) {
   const { addToast } = useToast()
+  const { confirm } = useConfirm()
   const [reviews, setReviews] = useState(initialReviews)
   const [filter, setFilter] = useState('all') // all, pending, approved
   const [search, setSearch] = useState('')
@@ -82,7 +84,8 @@ export default function ReviewsManager({ initialReviews }) {
 
   // Delete review(s)
   async function deleteReview(reviewId) {
-    if (!confirm('Yakin hapus review ini?')) return
+    const ok = await confirm({ title: 'Hapus review ini?', message: 'Review akan dihapus permanen.', confirmLabel: 'Ya, hapus', danger: true })
+    if (!ok) return
 
     setIsLoading(true)
     try {
@@ -111,7 +114,8 @@ export default function ReviewsManager({ initialReviews }) {
   // Bulk approve
   async function bulkApprove() {
     if (selectedReviews.size === 0) return
-    if (!confirm(`Setujui ${selectedReviews.size} review?`)) return
+    const okApprove = await confirm({ title: `Setujui ${selectedReviews.size} review?`, message: 'Review terpilih akan ditampilkan di toko.', confirmLabel: 'Ya, setujui' })
+    if (!okApprove) return
 
     setIsLoading(true)
     try {
@@ -146,7 +150,8 @@ export default function ReviewsManager({ initialReviews }) {
   // Bulk delete
   async function bulkDelete() {
     if (selectedReviews.size === 0) return
-    if (!confirm(`Hapus ${selectedReviews.size} review?`)) return
+    const okDelete = await confirm({ title: `Hapus ${selectedReviews.size} review?`, message: 'Review terpilih akan dihapus permanen.', confirmLabel: 'Ya, hapus', danger: true })
+    if (!okDelete) return
 
     setIsLoading(true)
     try {

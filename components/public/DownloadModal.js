@@ -20,6 +20,13 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
   const [downloadError, setDownloadError] = useState('');
   const [downloaded, setDownloaded] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [confirmAgain, setConfirmAgain] = useState(false);
+
+  useEffect(() => {
+    if (!confirmAgain) return;
+    const timer = setTimeout(() => setConfirmAgain(false), 4000);
+    return () => clearTimeout(timer);
+  }, [confirmAgain]);
 
   useEffect(() => {
     if (isOpen) {
@@ -34,6 +41,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
       setTipError('');
       setDownloadError('');
       setDownloaded(false);
+      setConfirmAgain(false);
     }
   }, [isOpen]);
 
@@ -340,10 +348,16 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { if (window.confirm(product.is_link ? 'Buka link produk lagi?' : 'File mungkin sudah ada di HP kamu. Tetap download lagi?')) triggerDownload(); }}
-                  className="text-xs font-semibold text-gray-500 underline hover:text-gray-700"
+                  onClick={() => {
+                    if (!confirmAgain) { setConfirmAgain(true); return }
+                    setConfirmAgain(false)
+                    triggerDownload()
+                  }}
+                  className={`text-xs font-semibold underline hover:text-gray-700 ${confirmAgain ? 'text-amber-600' : 'text-gray-500'}`}
                 >
-                  {product.is_link ? 'Buka link lagi' : 'File tidak ketemu? Download ulang'}
+                  {confirmAgain
+                    ? (product.is_link ? 'Yakin buka link lagi? Klik sekali lagi' : 'File mungkin sudah ada di HP kamu. Klik lagi untuk tetap download')
+                    : (product.is_link ? 'Buka link lagi' : 'File tidak ketemu? Download ulang')}
                 </button>
               </div>
             ) : !downloading && (downloadError || countdown === 0) ? (

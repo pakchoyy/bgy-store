@@ -31,6 +31,7 @@ export default function PageForm({ initialData }) {
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
   const [saving, setSaving] = useState(false)
   const [savedDraft, setSavedDraft] = useState(false)
+  const [pendingDraft, setPendingDraft] = useState(null)
 
   useEffect(() => {
     if (!slugManuallyEdited && !isEditing) {
@@ -53,13 +54,22 @@ export default function PageForm({ initialData }) {
         const draft = localStorage.getItem(draftKey)
         if (draft) {
           const parsed = JSON.parse(draft)
-          if (parsed.title && window.confirm('Ada draft tersimpan. Pulihkan?')) {
-            setForm(prev => ({ ...prev, ...parsed, _timestamp: undefined }))
-          }
+          if (parsed.title) setPendingDraft(parsed)
         }
       } catch {}
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function applyPendingDraft() {
+    if (!pendingDraft) return
+    setForm((prev) => ({ ...prev, ...pendingDraft, _timestamp: undefined }))
+    setPendingDraft(null)
+  }
+
+  function discardPendingDraft() {
+    try { localStorage.removeItem(draftKey) } catch {}
+    setPendingDraft(null)
+  }
 
   const updateField = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -90,6 +100,16 @@ export default function PageForm({ initialData }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {pendingDraft && (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-base">📝</span>
+          <p className="min-w-0 flex-1 text-sm text-amber-900"><strong>Ada draft tersimpan</strong> di browser ini. Pulihkan untuk melanjutkan?</p>
+          <div className="flex gap-2">
+            <Button type="button" size="sm" variant="outline" onClick={discardPendingDraft}>Buang</Button>
+            <Button type="button" size="sm" onClick={applyPendingDraft}>Pulihkan</Button>
+          </div>
+        </div>
+      )}
       {savedDraft && (
         <Alert className="bg-blue-50 border-blue-200">
           <AlertDescription className="text-blue-700">

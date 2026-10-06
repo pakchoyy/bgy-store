@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
+import { useConfirm } from '@/components/ui/confirm'
 
 export default function MediaDetailActions({ id, url }) {
   const router = useRouter()
   const { addToast } = useToast()
+  const { confirm } = useConfirm()
   const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState(false)
 
@@ -20,7 +22,8 @@ export default function MediaDetailActions({ id, url }) {
   }
 
   async function handleDelete() {
-    if (!window.confirm('Hapus media ini?')) return
+    const ok = await confirm({ title: 'Hapus media?', message: 'File media ini akan dihapus permanen.', confirmLabel: 'Ya, hapus', danger: true })
+    if (!ok) return
     setBusy(true)
     try {
       const res = await fetch(`/api/admin/media?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
