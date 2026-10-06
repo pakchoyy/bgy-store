@@ -4,12 +4,13 @@ import { safeUrl } from '@/lib/utils'
 
 function sanitizeBlock(body) {
   const block_type = ['text', 'image', 'link'].includes(body.block_type) ? body.block_type : null
+  const bg = (body.background_color || '').trim()
   return {
     block_type,
     title: (body.title || '').trim() || null,
     url: safeUrl(body.url),
-    text_content: typeof body.text_content === 'string' ? body.text_content.slice(0, 5000) : null,
-    background_color: /^#[0-9a-f]{3,8}$/i.test(body.background_color || '') ? body.background_color : '#ffffff',
+    text_content: typeof body.text_content === 'string' ? body.text_content.slice(0, 20000) : null,
+    background_color: bg === 'transparent' || /^#[0-9a-f]{3,8}$/i.test(bg) ? bg : '#ffffff',
     image_path: safeUrl(body.image_path),
     is_active: body.is_active !== false,
   }
@@ -67,6 +68,57 @@ export async function POST(request) {
     return Response.json({ success: true, block: data })
   } catch (e) {
     console.error('POST /api/admin/blocks unexpected error:', e)
+    return Response.json({ error: e.message || 'Internal error' }, { status: 500 })
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const body = await request.json()
+    const id = body.id
+    if (!id) {
+      return Response.json({ error: 'id wajib diisi untuk edit' }, { status: 400 })
+    }
+    const block = sanitizeBlock(body)
+    if (body.url && !block.url) {
+      return Response.json({ error: 'URL harus diawali http:// atau https://' }, { status: 400 })
+    }
+    if (block.block_type === 'link' && !block.url) {
+      return Response.json({ error: 'URL wajib diisi' }, { status: 400 })
+    }
+    if (block.block_type === 'image' && !block.image_path) {
+      return Response.json({ error: 'Gambar wajib diunggah' }, { status: 400 })
+    }
+    const plainText = (block.text_content || '').replace(/<[^>]*>/g, '').trim()
+    if (block.block_type === 'text' && !plainText && !(block.text_content || '').includes('<img')) {
+      return Response.json({ error: 'Teks wajib diisi' }, { status: 400 })
+    }
+
+    if (isDemo()) {
+      return Response.json({ success: true, demo: true, block: { ...block, id } })
+    }
+
+    const supabase = await createClient()
+    const auth = await requireAdmin(supabase)
+    if (auth.error) return auth.error
+
+    const update = { ...block }
+    delete update.block_type
+    const { data, error } = await supabase
+      .from('content_blocks')
+      .update(update)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('PUT /api/admin/blocks update error:', error)
+      return Response.json({ error: error.message }, { status: 500 })
+    }
+
+    return Response.json({ success: true, block: data })
+  } catch (e) {
+    console.error('PUT /api/admin/blocks unexpected error:', e)
     return Response.json({ error: e.message || 'Internal error' }, { status: 500 })
   }
 }

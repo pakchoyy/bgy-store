@@ -1,4 +1,11 @@
 import { safeUrl } from '@/lib/utils'
+import { sanitizeHtml } from '@/lib/sanitize-html'
+
+function blockBg(block) {
+  const bg = (block.background_color || '').trim()
+  if (bg === 'transparent') return 'transparent'
+  return /^#[0-9a-f]{3,8}$/i.test(bg) ? bg : '#ffffff'
+}
 
 export default function ContentBlockCard({ block }) {
   const href = safeUrl(block.url)
@@ -43,15 +50,20 @@ export default function ContentBlockCard({ block }) {
   }
 
   if (block.block_type === 'text') {
+    const html = sanitizeHtml(block.text_content || '')
+    const plain = (block.text_content || '').replace(/<[^>]*>/g, '').trim()
+    if (!block.title && !plain && !html.includes('<img')) return null
+    const transparent = blockBg(block) === 'transparent'
     return (
       <div
-        className="rounded-2xl p-4 shadow-sm"
-        style={{ backgroundColor: /^#[0-9a-f]{3,8}$/i.test(block.background_color || '') ? block.background_color : '#ffffff' }}
+        className={`rounded-2xl p-4 ${transparent ? '' : 'shadow-sm'}`}
+        style={transparent ? undefined : { backgroundColor: blockBg(block) }}
       >
         {block.title && <h2 className="text-sm font-bold text-gray-900 mb-1">{block.title}</h2>}
-        <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-          {block.text_content}
-        </div>
+        <div
+          className="rich-content text-sm text-gray-700 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       </div>
     )
   }

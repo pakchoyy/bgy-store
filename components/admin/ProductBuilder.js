@@ -36,6 +36,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
   const [openMenuId, setOpenMenuId] = useState(null)
   const [showBlockPicker, setShowBlockPicker] = useState(false)
   const [blockModalType, setBlockModalType] = useState(null)
+  const [editingBlock, setEditingBlock] = useState(null)
   const [orderDirty, setOrderDirty] = useState(false)
 
   useEffect(() => {
@@ -195,6 +196,12 @@ export default function ProductBuilder({ products: initialProducts, categories =
   function handleBlockCreated(block) {
     if (!block) return
     setBlocks((prev) => [...prev, block])
+  }
+
+  function handleBlockUpdated(block) {
+    if (!block?.id) return
+    setBlocks((prev) => prev.map((b) => (b.id === block.id ? { ...b, ...block } : b)))
+    setEditingBlock(null)
   }
 
   async function patchProduct(id, patch) {
@@ -516,19 +523,28 @@ export default function ProductBuilder({ products: initialProducts, categories =
 
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-slate-900 truncate leading-snug">
-                              {item.title || (item.block_type === 'link' ? item.url : item.block_type === 'text' ? item.text_content?.slice(0, 40) : 'Image')}
+                              {item.title || (item.block_type === 'link' ? item.url : item.block_type === 'text' ? (item.text_content || '').replace(/<[^>]*>/g, '').trim().slice(0, 60) || 'Text' : 'Image')}
                             </p>
                             <span className="text-[10px] text-slate-500 capitalize">{item.block_type} block</span>
                           </div>
 
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => { if (window.confirm('Hapus block ini?')) deleteBlock(item.id) }}
-                          >
-                            Hapus
-                          </Button>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingBlock(item)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => { if (window.confirm('Hapus block ini?')) deleteBlock(item.id) }}
+                            >
+                              Hapus
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )
@@ -788,6 +804,15 @@ export default function ProductBuilder({ products: initialProducts, categories =
           type={blockModalType}
           onClose={() => setBlockModalType(null)}
           onCreated={handleBlockCreated}
+        />
+      )}
+
+      {editingBlock && (
+        <AddBlockModal
+          type={editingBlock.block_type}
+          initialBlock={editingBlock}
+          onClose={() => setEditingBlock(null)}
+          onUpdated={handleBlockUpdated}
         />
       )}
     </div>
