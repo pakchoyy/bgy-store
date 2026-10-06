@@ -33,7 +33,7 @@ export default async function AdminProdukBaru() {
   const productOptions = await getProductOptions()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-gray-900">Tambah Produk Baru</h1>

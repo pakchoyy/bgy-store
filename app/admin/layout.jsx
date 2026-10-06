@@ -52,8 +52,10 @@ export default async function AdminLayout({ children }) {
         <Sidebar counts={counts} />
         <div className="flex-1 lg:pl-64">
           <Header />
-          <main className="p-4 pb-24 md:p-6 lg:pb-6">
-            {children}
+          <main className="p-4 pb-24 md:p-5 lg:pb-8">
+            <div className="mx-auto w-full max-w-6xl">
+              {children}
+            </div>
           </main>
         </div>
       </div>

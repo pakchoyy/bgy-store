@@ -140,7 +140,7 @@ export default async function AdminVoucher({ searchParams }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-700">Vouchers</h1>
+          <h1 className="text-xl font-extrabold text-slate-700">Vouchers</h1>
           <p className="mt-1 text-sm text-slate-500">Atur kode diskon untuk checkout toko.</p>
         </div>
         <a href="/" target="_blank" className="rounded-xl border border-[#25bd83] bg-white px-4 py-2 text-sm font-bold text-[#10946b] shadow-sm">Share</a>

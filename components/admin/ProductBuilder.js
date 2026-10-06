@@ -369,7 +369,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">My Produk</h1>
+          <h1 className="text-xl font-bold">My Produk</h1>
           <p className="text-sm text-slate-500 mt-1">
             {orderDirty ? 'Urutan berubah — klik Simpan Urutan' : 'Atur urutan dengan ▲▼ · Preview HP realtime'}
           </p>
@@ -401,7 +401,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5 items-start">
         {/* LEFT */}
         <div className="space-y-4 min-w-0">
           {/* Tabs & Search */}

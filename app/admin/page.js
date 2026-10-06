@@ -110,7 +110,7 @@ export default async function AdminDashboard() {
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       <div className="flex items-center justify-between px-1">
-        <h1 className="text-2xl font-extrabold text-slate-700">Home</h1>
+        <h1 className="text-xl font-extrabold text-slate-700">Home</h1>
         <Link href="/admin/produk/baru" className="rounded-xl border border-[#25bd83] bg-white px-4 py-2 text-sm font-bold text-[#10946b] shadow-sm transition-transform active:scale-[0.96]">+ Produk</Link>
       </div>
       <section className="grid gap-3 lg:grid-cols-[1.35fr_0.9fr]">

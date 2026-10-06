@@ -250,7 +250,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
   }
 
   return (
-    <form onSubmit={handleSubmit}><fieldset disabled={saving || uploading} className="space-y-6 min-w-0">
+    <form onSubmit={handleSubmit}><fieldset disabled={saving || uploading} className="space-y-5 min-w-0">
       {pendingDraft && (
         <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
           <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-base">📝</span>
@@ -273,8 +273,8 @@ export default function ProductForm({ initialData, categories = [], productOptio
         </div>
       )}
 
-      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0 space-y-6">
+      <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0 space-y-5">
       {/* Identitas */}
       <CardSection title="Identitas Produk">
         <div>

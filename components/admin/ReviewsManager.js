@@ -185,7 +185,7 @@ export default function ReviewsManager({ initialReviews }) {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">Review Produk</h1>
+        <h1 className="text-xl font-bold text-slate-900">Review Produk</h1>
         <BackButton href="/admin" label="Kembali" showLabel />
       </div>
 
