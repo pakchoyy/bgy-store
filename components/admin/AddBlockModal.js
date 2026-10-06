@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CloseButton } from '@/components/ui/close-button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
 import RichTextEditor from '@/components/admin/RichTextEditor'
 import { uploadMedia } from '@/lib/upload-media'
@@ -115,13 +115,13 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/40 p-4 pt-[6vh] backdrop-blur-sm" onClick={onClose}>
-      <Card className="w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <h2 className="text-lg font-bold">{isEdit ? (EDIT_TITLES[type] || 'Edit Block') : TITLES[type]}</h2>
-          <CloseButton onClick={onClose} />
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/40 p-4 backdrop-blur-sm" onClick={onClose}>
+      <Card className={`my-auto flex max-h-[88vh] w-full flex-col overflow-hidden ${type === 'text' ? 'max-w-lg' : 'max-w-md'}`} onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
+          <h2 className="text-base font-bold">{isEdit ? (EDIT_TITLES[type] || 'Edit Block') : TITLES[type]}</h2>
+          <CloseButton onClick={onClose} className="h-7 w-7" />
+        </div>
+        <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
           {type === 'image' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
@@ -172,7 +172,7 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
                   value={textContent}
                   onChange={setTextContent}
                   placeholder="Tulis sesuatu... rata kiri, tengah, kanan, list, link, gambar, emoji didukung"
-                  minHeight={180}
+                  minHeight={140}
                 />
               </div>
               <div>
@@ -208,13 +208,13 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
             </div>
           )}
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-1">
             <Button variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
             <Button className="flex-1" onClick={handleSubmit} disabled={saving}>
               {saving ? 'Menyimpan...' : isEdit ? (EDIT_TITLES[type] || 'Simpan') : TITLES[type]}
             </Button>
           </div>
-        </CardContent>
+        </div>
       </Card>
     </div>
   )

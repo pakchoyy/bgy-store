@@ -429,19 +429,19 @@ export default function ProductBuilder({ products: initialProducts, categories =
 
           {/* Block picker dialog */}
           {showBlockPicker && (
-            <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/40 p-4 pt-[12vh] backdrop-blur-sm" onClick={() => setShowBlockPicker(false)}>
-              <Card className="w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
-                <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/40 p-4 backdrop-blur-sm" onClick={() => setShowBlockPicker(false)}>
+              <Card className="my-auto flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-5 py-3">
                   <div>
-                    <h2 className="text-lg font-bold">Add new block</h2>
-                    <div className="mt-2 flex gap-4 text-xs font-semibold text-slate-500">
+                    <h2 className="text-base font-bold">Add new block</h2>
+                    <div className="mt-1 flex gap-4 text-xs font-semibold text-slate-500">
                       <span className="text-slate-700">All Blocks</span>
                       <span>Basic</span>
                     </div>
                   </div>
-                  <CloseButton onClick={() => setShowBlockPicker(false)} />
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  <CloseButton onClick={() => setShowBlockPicker(false)} className="h-7 w-7" />
+                </div>
+                <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
                   <div>
                     <p className="text-xs font-bold text-slate-600 mb-3">Basic</p>
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -471,7 +471,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                       </Link>
                     </div>
                   </div>
-                </CardContent>
+                </div>
               </Card>
             </div>
           )}
