@@ -392,7 +392,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
           </code>
           <Button asChild size="sm">
             <Link href="/admin/produk/baru">
-              + Produk
+              + Tambah Produk
             </Link>
           </Button>
         </CardContent>

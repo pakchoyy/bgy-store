@@ -66,7 +66,7 @@ export default async function AdminLayout({ children }) {
 function Sidebar({ counts }) {
   const menuGroups = [
     {
-      label: 'Konten',
+      label: 'Toko',
       items: [
         { href: '/admin/produk', label: 'Produk', icon: 'package' },
         { href: '/admin/pesanan', label: 'Pesanan', icon: 'shopping-cart', countKey: 'orders' },
@@ -78,9 +78,9 @@ function Sidebar({ counts }) {
     {
       label: 'Tampilan',
       items: [
-        { href: '/admin/homepage', label: 'Appearance', icon: 'home', also: ['/admin/theme'] },
+        { href: '/admin/homepage', label: 'Tampilan Toko', icon: 'home', also: ['/admin/theme'] },
         { href: '/admin/footer', label: 'Footer', icon: 'rectangle' },
-        { href: '/admin/announcement', label: 'Announcement', icon: 'megaphone' },
+        { href: '/admin/announcement', label: 'Pengumuman', icon: 'megaphone' },
       ],
     },
     {
@@ -89,9 +89,14 @@ function Sidebar({ counts }) {
         { href: '/admin/voucher', label: 'Voucher & Kupon', icon: 'ticket' },
         { href: '/admin/settings', label: 'Pengaturan', icon: 'settings' },
         { href: '/admin/seo', label: 'SEO', icon: 'search' },
-        { href: '/admin/custom-404', label: '404 & Error Log', icon: 'alert-circle', also: ['/admin/error-log'] },
-        { href: '/admin/recycle-bin', label: 'Recycle Bin', icon: 'trash' },
+      ],
+    },
+    {
+      label: 'Sistem (jarang dipakai)',
+      items: [
         { href: '/admin/backup', label: 'Backup Data', icon: 'database' },
+        { href: '/admin/recycle-bin', label: 'Recycle Bin', icon: 'trash' },
+        { href: '/admin/custom-404', label: '404 & Error Log', icon: 'alert-circle', also: ['/admin/error-log'] },
       ],
     },
   ];
