@@ -91,7 +91,7 @@ export default function FreePageClient({ products, categories, settings }) {
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {filtered.map((product, idx) => {
-              const layout = getCardLayout(product.card_layout)
+              const layout = getCardLayout(product)
               const span =
                 layout.value === 'landscape' ||
                 layout.value === 'wide' ||

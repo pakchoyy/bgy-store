@@ -57,7 +57,7 @@ function Thumb({ product, isFree, className, large = false }) {
 }
 
 export default function ProductCard({ product, onSelect, className = '' }) {
-  const layout = getCardLayout(product.card_layout)
+  const layout = getCardLayout(product)
   const isFree = product.type === 'free'
   const isSoldOut = product.stock_type === 'limited' && product.stock_qty <= 0
   const highlight = product.is_featured ? 'bgy-highlight-block' : ''

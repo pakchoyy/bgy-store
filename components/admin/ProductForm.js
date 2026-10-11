@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import useUnsavedChanges from '@/lib/use-unsaved-changes'
 import { useRouter } from 'next/navigation'
-import { generateSlug, formatRupiah, calcDiscount, CARD_LAYOUTS, parsePreviewImages } from '@/lib/utils'
+import { formatRupiah, calcDiscount, parsePreviewImages } from '@/lib/utils'
 import { uploadMedia } from '@/lib/upload-media'
 import RichTextEditor from '@/components/admin/RichTextEditor'
 import FAQEditor from '@/components/admin/FAQEditor'
@@ -34,7 +34,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
 
   const [form, setForm] = useState({
     title: '',
-    slug: '',
     description: '',
     faqs: [],
     category_id: '',
@@ -53,7 +52,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
     file_name: initialData?.file_name || '',
     file_size: initialData?.file_size || '',
     mime_type: initialData?.mime_type || '',
-    card_layout: initialData?.card_layout || 'landscape',
     purchase_button_label: initialData?.purchase_button_label || 'Beli Sekarang',
     is_active: true,
     meta_title: '',
@@ -63,7 +61,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
     sale_price: initialData?.sale_price ?? 0,
     original_price: initialData?.original_price ?? '',
     stock_qty: initialData?.stock_qty ?? 1,
-    card_layout: initialData?.card_layout || 'landscape',
     preview_images: parsePreviewImages(initialData?.preview_path),
     bundle_product_ids: Array.isArray(initialData?.bundle_product_ids) ? initialData.bundle_product_ids : [],
     semester: initialData?.semester ? String(initialData.semester) : '',
@@ -73,7 +70,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
       : '',
   })
 
-  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deliveryMode, setDeliveryMode] = useState(initialData?.file_url ? 'link' : 'upload')
@@ -85,12 +81,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
   const [draftError, setDraftError] = useState(false)
   const [pendingDraft, setPendingDraft] = useState(null)
   const {dirty, markSaved, leave} = useUnsavedChanges(form)
-
-  useEffect(() => {
-    if (!slugManuallyEdited && !isEditing && form.title) {
-      setForm(prev => ({ ...prev, slug: generateSlug(form.title) }))
-    }
-  }, [form.title]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     setSavedDraft(false); setDraftError(false);
@@ -167,7 +157,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
       process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
     const payload = {
       title: form.title,
-      slug: form.slug,
       description: form.description,
       category_id: form.category_id || null,
       type: form.type,
@@ -190,7 +179,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
       file_name: form.file_name || null,
       file_size: form.file_size || null,
       mime_type: form.mime_type || null,
-      card_layout: form.card_layout || 'landscape',
       meta_title: form.meta_title || null,
       meta_description: form.meta_description || null,
       is_active: form.is_active,
@@ -287,18 +275,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
             placeholder="Masukkan judul produk"
             required
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-          <input
-            type="text"
-            value={form.slug}
-            onChange={e => { setSlugManuallyEdited(true); updateField('slug', e.target.value) }}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-mono bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
-            placeholder="auto-generated-slug"
-            required
-          />
-          <p className="text-xs text-gray-400 mt-1">URL: /produk/{form.slug || '...'}</p>
         </div>
       </CardSection>
 
@@ -585,47 +561,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
         )}
       </CardSection>
 
-      {/* Tata Letak Blok */}
-      <CardSection title="Tata Letak Blok">
-        <p className="text-xs text-gray-500 -mt-2 mb-2">
-          Bentuk kartu produk di halaman toko (per produk)
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {CARD_LAYOUTS.map((layout) => {
-            const active = form.card_layout === layout.value
-            return (
-              <button
-                key={layout.value}
-                type="button"
-                onClick={() => updateField('card_layout', layout.value)}
-                className={`rounded-xl border-2 p-3 text-left transition-all ${
-                  active
-                    ? 'border-[#0ea5a0] bg-teal-50 ring-2 ring-[#0ea5a0]/20'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                }`}
-              >
-                <div className="h-12 mb-2 flex items-end justify-center gap-1">
-                  {layout.value === 'compact' ? (
-                    <div className="w-full h-6 rounded bg-gray-300" />
-                  ) : layout.value === 'square' ? (
-                    <div className="w-10 h-10 rounded bg-gray-300" />
-                  ) : layout.value === 'portrait' ? (
-                    <div className="w-8 h-11 rounded bg-gray-300" />
-                  ) : layout.value === 'wide' ? (
-                    <div className="w-full h-5 rounded bg-gray-300" />
-                  ) : (
-                    <div className="w-full h-8 rounded bg-gray-300" />
-                  )}
-                </div>
-                <p className={`text-[11px] font-bold ${active ? 'text-[#0ea5a0]' : 'text-gray-700'}`}>
-                  {layout.label}
-                </p>
-              </button>
-            )
-          })}
-        </div>
-      </CardSection>
-
       {/* File produk */}
       <CardSection title="File Produk">
         <div className="space-y-4">
@@ -742,7 +677,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
             className="grid grid-cols-2 gap-3 rounded-2xl bg-gradient-to-b from-[#0ea5a0] to-[#e8f7f6] p-3"
             onClickCapture={(e) => { if (e.target.closest('a')) e.preventDefault() }}
           >
-            <div className={['square', 'portrait'].includes(form.card_layout) ? 'col-span-1' : 'col-span-2'}>
+            <div className={form.type === 'paid' ? 'col-span-1' : 'col-span-2'}>
               <ProductCard product={{
                 ...form,
                 id: 'preview',
@@ -758,7 +693,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
         <div className="space-y-2 text-sm">
           <p className="break-words font-semibold text-gray-900">{form.title || 'Judul produk'}</p>
           <p className="text-gray-600">{form.type === 'paid' ? formatRupiah(form.sale_price) : 'Gratis'}</p>
-          <p className="text-xs text-gray-500">{categories.find(category => category.id === form.category_id)?.name || 'Belum ada kategori'} · {form.card_layout || 'landscape'}</p>
+          <p className="text-xs text-gray-500">{categories.find(category => category.id === form.category_id)?.name || 'Belum ada kategori'}</p>
         </div>
         {form.type === 'paid' && (
           <div>

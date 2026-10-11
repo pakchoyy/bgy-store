@@ -251,7 +251,6 @@ export default function ProductBuilder({ products: initialProducts, categories =
         body: JSON.stringify({
           ...product,
           title: `${product.title} (Copy)`,
-          slug: `${product.slug || 'produk'}-copy-${Date.now()}`,
           is_active: false,
         }),
       })
@@ -276,7 +275,6 @@ export default function ProductBuilder({ products: initialProducts, categories =
     if (input == null) return
     const names = String(input || '').split(',').map((n) => n.trim()).filter(Boolean).slice(0, 12)
     if (!names.length) return
-    const slugPart = (text) => text.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     let created = 0
     for (const name of names) {
       try {
@@ -286,7 +284,6 @@ export default function ProductBuilder({ products: initialProducts, categories =
           body: JSON.stringify({
             ...product,
             title: `${product.title} – ${name}`,
-            slug: `${product.slug || 'produk'}-${slugPart(name) || Date.now()}`,
             is_active: false,
           }),
         })

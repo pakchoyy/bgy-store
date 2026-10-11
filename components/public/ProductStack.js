@@ -50,7 +50,7 @@ export default function ProductStack({ products = [], contentBlocks = [], emptyT
           )
         }
 
-        const layout = getCardLayout(item.card_layout)
+        const layout = getCardLayout(item)
         const span =
           layout.value === 'landscape' || layout.value === 'wide' || layout.value === 'compact'
             ? 'col-span-2'

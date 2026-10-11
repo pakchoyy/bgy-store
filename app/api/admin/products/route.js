@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
-import { generateSlug } from '@/lib/utils'
+import { randomSlug, autoCardLayoutValue } from '@/lib/utils'
 
 function normalizeFileUrl(value) {
   if (!value) return null
@@ -15,7 +15,6 @@ function normalizeFileUrl(value) {
 function sanitizeProduct(body) {
   return {
     title: (body.title || '').trim(),
-    slug: (body.slug || generateSlug(body.title || '')).trim(),
     description: (body.description || '').trim(),
     category_id: body.category_id || null,
     type: body.type === 'paid' ? 'paid' : 'free',
@@ -36,7 +35,7 @@ function sanitizeProduct(body) {
     file_name: body.file_name || null,
     file_size: body.file_size || null,
     mime_type: body.mime_type || null,
-    card_layout: body.card_layout || 'landscape',
+    card_layout: autoCardLayoutValue(body.type === 'paid' ? 'paid' : 'free'),
     meta_title: body.meta_title || null,
     meta_description: body.meta_description || null,
     is_active: body.is_active !== false,
@@ -104,7 +103,12 @@ export async function POST(request) {
       return Response.json({ error: 'title is required' }, { status: 400 })
     }
 
-    const { data, error, warning } = await withoutMissingBundleColumn((row) => supabase.from('products').insert(row).select().single(), product)
+    let result
+    for (let attempt = 0; attempt < 5; attempt++) {
+      result = await withoutMissingBundleColumn((row) => supabase.from('products').insert(row).select().single(), { ...product, slug: randomSlug(10) })
+      if (result.error?.code !== '23505') break
+    }
+    const { data, error, warning } = result
     if (error) {
       console.error('POST /api/admin/products insert error:', error)
       return Response.json({ error: error.message }, { status: 500 })
