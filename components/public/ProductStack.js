@@ -40,21 +40,18 @@ export default function ProductStack({ products = [], contentBlocks = [], emptyT
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-6 gap-2.5">
       {items.map((item, index) => {
         if (item._kind === 'block') {
           return (
-            <Wrap key={`block-${item.id}`} className="col-span-2" delay={Math.min(index, 8) * 45}>
+            <Wrap key={`block-${item.id}`} className="col-span-6" delay={Math.min(index, 8) * 45}>
               <ContentBlockCard block={item} />
             </Wrap>
           )
         }
 
-        const layout = getCardLayout(item)
-        const span =
-          layout.value === 'landscape' || layout.value === 'wide' || layout.value === 'compact'
-            ? 'col-span-2'
-            : 'col-span-1'
+        const layout = getCardLayout(item.card_layout)
+        const span = layout.grid
 
         return (
           <Wrap key={`product-${item.id}`} className={span} delay={Math.min(index, 8) * 45}>

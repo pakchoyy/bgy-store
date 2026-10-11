@@ -89,15 +89,10 @@ export default function FreePageClient({ products, categories, settings }) {
             Tidak ada produk gratis ditemukan
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-6 gap-2.5">
             {filtered.map((product, idx) => {
-              const layout = getCardLayout(product)
-              const span =
-                layout.value === 'landscape' ||
-                layout.value === 'wide' ||
-                layout.value === 'compact'
-                  ? 'col-span-2'
-                  : 'col-span-1'
+              const layout = getCardLayout(product.card_layout)
+              const span = layout.grid
               return (
                 <ScrollReveal key={product.id} className={span} delay={Math.min(idx, 8) * 50}>
                   <ProductCard product={product} onSelect={setDownloadProduct} />

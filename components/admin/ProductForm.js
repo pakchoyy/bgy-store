@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import useUnsavedChanges from '@/lib/use-unsaved-changes'
 import { useRouter } from 'next/navigation'
-import { formatRupiah, calcDiscount, parsePreviewImages } from '@/lib/utils'
+import { getCardLayout, formatRupiah, calcDiscount, CARD_LAYOUTS, parsePreviewImages } from '@/lib/utils'
 import { uploadMedia } from '@/lib/upload-media'
 import RichTextEditor from '@/components/admin/RichTextEditor'
 import FAQEditor from '@/components/admin/FAQEditor'
@@ -52,6 +52,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
     file_name: initialData?.file_name || '',
     file_size: initialData?.file_size || '',
     mime_type: initialData?.mime_type || '',
+    card_layout: initialData?.card_layout || 'landscape',
     purchase_button_label: initialData?.purchase_button_label || 'Beli Sekarang',
     is_active: true,
     meta_title: '',
@@ -61,6 +62,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
     sale_price: initialData?.sale_price ?? 0,
     original_price: initialData?.original_price ?? '',
     stock_qty: initialData?.stock_qty ?? 1,
+    card_layout: initialData?.card_layout || 'landscape',
     preview_images: parsePreviewImages(initialData?.preview_path),
     bundle_product_ids: Array.isArray(initialData?.bundle_product_ids) ? initialData.bundle_product_ids : [],
     semester: initialData?.semester ? String(initialData.semester) : '',
@@ -179,6 +181,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
       file_name: form.file_name || null,
       file_size: form.file_size || null,
       mime_type: form.mime_type || null,
+      card_layout: form.card_layout || 'landscape',
       meta_title: form.meta_title || null,
       meta_description: form.meta_description || null,
       is_active: form.is_active,
@@ -561,6 +564,47 @@ export default function ProductForm({ initialData, categories = [], productOptio
         )}
       </CardSection>
 
+      {/* Tata Letak Blok */}
+      <CardSection title="Tata Letak Blok">
+        <p className="text-xs text-gray-500 -mt-2 mb-2">
+          Persegi & Tegak tampil 3 per baris; lainnya selebar layar.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          {CARD_LAYOUTS.map((layout) => {
+            const active = form.card_layout === layout.value
+            return (
+              <button
+                key={layout.value}
+                type="button"
+                onClick={() => updateField('card_layout', layout.value)}
+                className={`rounded-xl border-2 p-3 text-left transition-all ${
+                  active
+                    ? 'border-[#0ea5a0] bg-teal-50 ring-2 ring-[#0ea5a0]/20'
+                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                }`}
+              >
+                <div className="h-12 mb-2 flex items-end justify-center gap-1">
+                  {layout.value === 'compact' ? (
+                    <div className="w-full h-6 rounded bg-gray-300" />
+                  ) : layout.value === 'square' ? (
+                    <div className="w-10 h-10 rounded bg-gray-300" />
+                  ) : layout.value === 'portrait' ? (
+                    <div className="w-8 h-11 rounded bg-gray-300" />
+                  ) : layout.value === 'wide' ? (
+                    <div className="w-full h-5 rounded bg-gray-300" />
+                  ) : (
+                    <div className="w-full h-8 rounded bg-gray-300" />
+                  )}
+                </div>
+                <p className={`text-[11px] font-bold ${active ? 'text-[#0ea5a0]' : 'text-gray-700'}`}>
+                  {layout.label}
+                </p>
+              </button>
+            )
+          })}
+        </div>
+      </CardSection>
+
       {/* File produk */}
       <CardSection title="File Produk">
         <div className="space-y-4">
@@ -674,10 +718,10 @@ export default function ProductForm({ initialData, categories = [], productOptio
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Preview kartu di toko</p>
           <div
-            className="grid grid-cols-2 gap-3 rounded-2xl bg-gradient-to-b from-[#0ea5a0] to-[#e8f7f6] p-3"
+            className="grid grid-cols-6 gap-2 rounded-2xl bg-gradient-to-b from-[#0ea5a0] to-[#e8f7f6] p-3"
             onClickCapture={(e) => { if (e.target.closest('a')) e.preventDefault() }}
           >
-            <div className={form.type === 'paid' ? 'col-span-1' : 'col-span-2'}>
+            <div className={getCardLayout(form.card_layout).grid}>
               <ProductCard product={{
                 ...form,
                 id: 'preview',
@@ -693,7 +737,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
         <div className="space-y-2 text-sm">
           <p className="break-words font-semibold text-gray-900">{form.title || 'Judul produk'}</p>
           <p className="text-gray-600">{form.type === 'paid' ? formatRupiah(form.sale_price) : 'Gratis'}</p>
-          <p className="text-xs text-gray-500">{categories.find(category => category.id === form.category_id)?.name || 'Belum ada kategori'}</p>
+          <p className="text-xs text-gray-500">{categories.find(category => category.id === form.category_id)?.name || 'Belum ada kategori'} · {form.card_layout || 'landscape'}</p>
         </div>
         {form.type === 'paid' && (
           <div>

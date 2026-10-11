@@ -50,14 +50,14 @@ function Thumb({ product, isFree, className, large = false }) {
       <svg aria-hidden="true" className={large ? 'h-8 w-8' : 'h-5 w-5'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2zM9 13h6M9 17h4" />
       </svg>
-      {large && <span className="mt-2 line-clamp-2 px-3 text-center text-xs font-bold leading-snug text-white/95">{product.title}</span>}
+      {large && <span className="mt-1 line-clamp-2 px-2 text-center text-xs font-bold leading-snug text-white/95">{product.title}</span>}
       <span className={`font-bold uppercase tracking-wider text-white/80 ${large ? 'mt-1 text-[9px]' : 'mt-0.5 text-[8px]'}`}>{isFree ? 'Gratis' : 'Premium'}</span>
     </span>
   )
 }
 
 export default function ProductCard({ product, onSelect, className = '' }) {
-  const layout = getCardLayout(product)
+  const layout = getCardLayout(product.card_layout)
   const isFree = product.type === 'free'
   const isSoldOut = product.stock_type === 'limited' && product.stock_qty <= 0
   const highlight = product.is_featured ? 'bgy-highlight-block' : ''
@@ -79,9 +79,9 @@ export default function ProductCard({ product, onSelect, className = '' }) {
       <span className={`relative block overflow-hidden ${layout.aspect}`}>
         <Thumb product={product} isFree={isFree} className="h-full w-full" large />
       </span>
-      <span className={`flex flex-1 gap-2 p-2.5 ${layout.value === 'wide' ? 'items-center' : 'flex-col'}`}>
+      <span className={`flex flex-1 gap-1.5 p-2 ${layout.value === 'wide' ? 'items-center' : 'flex-col'}`}>
         <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
+          <span className="block text-xs font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
           <DownloadCount product={product} isFree={isFree} />
         </span>
         <PricePill product={product} isFree={isFree} isSoldOut={isSoldOut} className={layout.value === 'wide' ? '' : 'items-start'} />

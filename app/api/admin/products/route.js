@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
-import { randomSlug, autoCardLayoutValue } from '@/lib/utils'
+import { randomSlug } from '@/lib/utils'
 
 function normalizeFileUrl(value) {
   if (!value) return null
@@ -35,7 +35,7 @@ function sanitizeProduct(body) {
     file_name: body.file_name || null,
     file_size: body.file_size || null,
     mime_type: body.mime_type || null,
-    card_layout: autoCardLayoutValue(body.type === 'paid' ? 'paid' : 'free'),
+    card_layout: ['landscape', 'square', 'portrait', 'wide', 'compact'].includes(body.card_layout) ? body.card_layout : 'landscape',
     meta_title: body.meta_title || null,
     meta_description: body.meta_description || null,
     is_active: body.is_active !== false,
