@@ -1,4 +1,10 @@
 import Link from 'next/link'
+import Image from 'next/image'
+
+const SUPABASE_PUBLIC = (() => {
+  try { return `https://${new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname}/storage/v1/object/public/` } catch { return null }
+})()
+const canOptimize = (src) => typeof src === 'string' && (src.startsWith('/') || (SUPABASE_PUBLIC && src.startsWith(SUPABASE_PUBLIC)))
 import { getCardLayout } from '@/lib/utils'
 
 const fmt = (value) => `Rp${Number(value || 0).toLocaleString('id-ID')}`
@@ -37,8 +43,12 @@ function DownloadCount({ product, isFree }) {
 function Thumb({ product, isFree, className, large = false }) {
   if (product.cover_path) {
     return (
-      <span className={`flex shrink-0 overflow-hidden bg-gray-100 ${className}`}>
-        <img src={product.cover_path} alt="" loading="lazy" className="h-full w-full object-cover" />
+      <span className={`relative flex shrink-0 overflow-hidden bg-gray-100 ${className}`}>
+        {canOptimize(product.cover_path) ? (
+          <Image src={product.cover_path} alt="" fill sizes={large ? '(max-width: 640px) 100vw, 480px' : '64px'} className="object-cover" />
+        ) : (
+          <img src={product.cover_path} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+        )}
       </span>
     )
   }

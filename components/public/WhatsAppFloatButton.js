@@ -1,12 +1,13 @@
 'use client';
 
-const SUPPORT_NUMBER = '6289530713597';
+const FALLBACK_URL = 'https://wa.me/6289530713597';
 const MESSAGE = 'Halo Pak Choy, saya butuh bantuan di toko BGY.';
 
-export default function WhatsAppFloatButton() {
+export default function WhatsAppFloatButton({ waUrl }) {
+  const base = waUrl || FALLBACK_URL;
   return (
     <a
-      href={`https://wa.me/${SUPPORT_NUMBER}?text=${encodeURIComponent(MESSAGE)}`}
+      href={`${base}${base.includes('?') ? '&' : '?'}text=${encodeURIComponent(MESSAGE)}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat admin via WhatsApp"
