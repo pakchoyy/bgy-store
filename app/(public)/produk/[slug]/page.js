@@ -11,6 +11,7 @@ import ProductReviewList from '@/components/public/ProductReviewList'
 import { demoProducts } from '@/lib/demo-data'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { whatsappUrl, parsePreviewImages, formatRupiah } from '@/lib/utils'
 import ProductStack from '@/components/public/ProductStack'
 import FlashCountdown from '@/components/public/FlashCountdown'
@@ -93,6 +94,13 @@ export async function generateMetadata({ params }) {
 export default async function ProdukDetailPage({ params }) {
   const { slug } = params
   const data = await getProduct(slug)
+  if (!data.product && hasSupabase()) {
+    // Slug lama (sebelum dipendekkan) → alihkan permanen ke slug baru.
+    const { createClient } = await import('@/lib/supabase-server')
+    const supabase = await createClient()
+    const { data: hit } = await supabase.from('product_slug_redirects').select('product:products(slug)').eq('old_slug', slug).maybeSingle()
+    if (hit?.product?.slug) redirect(`/produk/${hit.product.slug}`)
+  }
   const { product, navItems, appearance, footerConfig, announcement, faqs, bundleItems = [], related = [], promo = {}, rating = { count: 0, average: 0 } } = data
   const previewImages = parsePreviewImages(product?.preview_path)
   const bundleWorth = bundleItems.reduce((sum, p) => sum + Number(p.sale_price || 0), 0)
