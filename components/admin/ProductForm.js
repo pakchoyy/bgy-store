@@ -467,7 +467,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
               type="checkbox"
               checked={form.is_featured}
               onChange={e => updateField('is_featured', e.target.checked)}
-              className="rounded text-[#0ea5a0] focus:ring-[#0ea5a0]"
+              className="peer relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-gray-200 transition-colors before:absolute before:left-0.5 before:top-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow before:transition-transform checked:bg-emerald-500 checked:before:translate-x-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
             />
             <span className="text-sm font-medium text-gray-700">Highlight (kartu bergoyang di toko)</span>
           </label>
@@ -517,9 +517,37 @@ export default function ProductForm({ initialData, categories = [], productOptio
           </div>
         </CardSection>
       )}
+      {/* Bentuk kartu */}
+      <CardSection title="Bentuk Kartu di Toko">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          {CARD_LAYOUTS.map((layout) => {
+            const active = form.card_layout === layout.value
+            const bar = 'rounded-[3px] bg-current opacity-60'
+            return (
+              <button
+                key={layout.value}
+                type="button"
+                aria-pressed={active}
+                onClick={() => updateField('card_layout', layout.value)}
+                className={`flex flex-col items-center gap-1.5 rounded-xl border p-2 transition-colors ${active ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500' : 'border-gray-200 bg-white text-gray-400 hover:border-gray-300'}`}
+              >
+                <span className="flex h-14 w-full flex-col justify-center gap-1 rounded-lg bg-gray-50 p-1.5">
+                  {layout.value === 'compact' && [0, 1, 2].map((i) => <span key={i} className="flex items-center gap-1"><span className={`h-2.5 w-2.5 ${bar}`} /><span className={`h-1.5 flex-1 ${bar}`} /></span>)}
+                  {layout.value === 'landscape' && [0, 1].map((i) => <span key={i} className="flex items-center gap-1"><span className={`h-4 w-4 ${bar}`} /><span className={`h-2 flex-1 ${bar}`} /></span>)}
+                  {layout.value === 'square' && <span className="grid grid-cols-3 gap-1">{[0, 1, 2, 3, 4, 5].map((i) => <span key={i} className={`aspect-square ${bar}`} />)}</span>}
+                  {layout.value === 'portrait' && <span className="grid grid-cols-3 gap-1">{[0, 1, 2].map((i) => <span key={i} className={`h-9 ${bar}`} />)}</span>}
+                  {layout.value === 'wide' && <><span className={`h-6 ${bar}`} /><span className={`h-1.5 w-2/3 ${bar}`} /></>}
+                </span>
+                <span className={`text-[11px] font-semibold ${active ? 'text-emerald-700' : 'text-gray-600'}`}>{layout.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      </CardSection>
+
       <details className="group rounded-2xl border border-gray-200 bg-white/60 p-1 open:bg-transparent">
         <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between rounded-xl px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50">
-          <span>Pengaturan lanjutan <span className="font-normal text-gray-500">— stok, bentuk kartu, SEO{form.type === 'paid' ? ', flash sale, bundle' : ''}</span></span>
+          <span>Pengaturan lanjutan <span className="font-normal text-gray-500">— stok, SEO{form.type === 'paid' ? ', flash sale, bundle' : ''}</span></span>
           <span aria-hidden="true" className="transition-transform group-open:rotate-180">▾</span>
         </summary>
         <div className="mt-3 space-y-5">
@@ -644,47 +672,6 @@ export default function ProductForm({ initialData, categories = [], productOptio
         )}
       </CardSection>
 
-      {/* Tata Letak Blok */}
-      <CardSection title="Tata Letak Blok">
-        <p className="text-xs text-gray-500 -mt-2 mb-2">
-          Persegi & Tegak tampil 3 per baris; lainnya selebar layar.
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {CARD_LAYOUTS.map((layout) => {
-            const active = form.card_layout === layout.value
-            return (
-              <button
-                key={layout.value}
-                type="button"
-                onClick={() => updateField('card_layout', layout.value)}
-                className={`rounded-xl border-2 p-3 text-left transition-all ${
-                  active
-                    ? 'border-[#0ea5a0] bg-teal-50 ring-2 ring-[#0ea5a0]/20'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                }`}
-              >
-                <div className="h-12 mb-2 flex items-end justify-center gap-1">
-                  {layout.value === 'compact' ? (
-                    <div className="w-full h-6 rounded bg-gray-300" />
-                  ) : layout.value === 'square' ? (
-                    <div className="w-10 h-10 rounded bg-gray-300" />
-                  ) : layout.value === 'portrait' ? (
-                    <div className="w-8 h-11 rounded bg-gray-300" />
-                  ) : layout.value === 'wide' ? (
-                    <div className="w-full h-5 rounded bg-gray-300" />
-                  ) : (
-                    <div className="w-full h-8 rounded bg-gray-300" />
-                  )}
-                </div>
-                <p className={`text-[11px] font-bold ${active ? 'text-[#0ea5a0]' : 'text-gray-700'}`}>
-                  {layout.label}
-                </p>
-              </button>
-            )
-          })}
-        </div>
-      </CardSection>
-
       {/* SEO */}
       <CardSection title="SEO">
         <div>
@@ -744,12 +731,12 @@ export default function ProductForm({ initialData, categories = [], productOptio
       {/* Publish */}
       <CardSection title="Publikasi">
         <label className="flex items-center gap-3 cursor-pointer">
-          <input type="checkbox" checked={form.is_active} onChange={e => updateField('is_active', e.target.checked)} className="h-5 w-5 rounded text-[#0ea5a0] focus:ring-[#0ea5a0]" />
-          <span className="text-sm font-medium text-gray-700">{form.is_active ? 'Aktif' : 'Draft'}</span>
+          <span className="flex-1 text-sm text-gray-700"><span className="font-medium">{form.is_active ? 'Aktif' : 'Draft'}</span><span className="block text-xs text-gray-500">Draft tidak terlihat pembeli.</span></span>
+          <input type="checkbox" checked={form.is_active} onChange={e => updateField('is_active', e.target.checked)} className="peer relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-gray-200 transition-colors before:absolute before:left-0.5 before:top-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow before:transition-transform checked:bg-emerald-500 checked:before:translate-x-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300" />
         </label>
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" checked={form.show_on_home !== false} onChange={e => updateField('show_on_home', e.target.checked)} className="mt-0.5 h-5 w-5 rounded text-[#0ea5a0] focus:ring-[#0ea5a0]" />
-          <span className="text-sm text-gray-700"><span className="font-medium">Tampil di Beranda</span><span className="block text-xs text-gray-500">Matikan supaya produk hanya muncul di halaman Produk, Kategori, dan pencarian.</span></span>
+        <label className="flex items-center gap-3 cursor-pointer">
+          <span className="flex-1 text-sm text-gray-700"><span className="font-medium">Tampil di Beranda</span><span className="block text-xs text-gray-500">Matikan supaya hanya muncul di Produk, Kategori, dan pencarian.</span></span>
+          <input type="checkbox" checked={form.show_on_home !== false} onChange={e => updateField('show_on_home', e.target.checked)} className="peer relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-gray-200 transition-colors before:absolute before:left-0.5 before:top-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow before:transition-transform checked:bg-emerald-500 checked:before:translate-x-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300" />
         </label>
       </CardSection>
 
@@ -825,8 +812,8 @@ export default function ProductForm({ initialData, categories = [], productOptio
 
 function CardSection({ title, children }) {
   return (
-    <div className="bg-white rounded-xl shadow-card p-6">
-      <h3 className="text-sm font-bold text-gray-900 mb-4 pb-3 border-b border-gray-100">{title}</h3>
+    <div className="rounded-2xl border border-gray-100 bg-white p-5">
+      <h3 className="mb-4 text-base font-bold text-gray-800">{title}</h3>
       <div className="space-y-4">{children}</div>
     </div>
   )

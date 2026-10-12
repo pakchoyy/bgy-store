@@ -77,20 +77,19 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
       {open && (
         <div className="fixed inset-0 z-50">
           <button type="button" aria-label="Tutup menu admin" onClick={() => setOpen(false)} className="absolute inset-0 bg-slate-950/45" />
-          <aside className="absolute inset-y-0 left-0 flex w-[min(20rem,86vw)] flex-col overflow-hidden bg-gradient-to-b from-[#27bf82] via-[#43cfa0] to-[#66ddb8] text-white shadow-2xl">
-            <div className="pointer-events-none absolute -left-14 -top-16 h-40 w-40 rounded-full bg-white/12" />
-            <div className="relative flex min-h-16 items-center gap-3 px-4">
-              <button type="button" onClick={() => setOpen(false)} aria-label="Tutup menu admin" className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 transition-transform duration-150 active:scale-[0.96]">
+          <aside className="absolute inset-y-0 left-0 flex w-[min(20rem,86vw)] flex-col overflow-hidden bg-white text-slate-700 shadow-2xl">
+                        <div className="relative flex min-h-16 items-center gap-3 px-4">
+              <button type="button" onClick={() => setOpen(false)} aria-label="Tutup menu admin" className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 transition-transform duration-150 active:scale-[0.96]">
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18 18 6M6 6l12 12" />
                 </svg>
               </button>
-              <p className="text-xl font-extrabold tracking-tight">Admin</p>
+              <img src="/logo-kreacy.svg" alt="" className="h-7 w-7" /><p className="text-lg font-extrabold tracking-tight text-slate-800">Kreacy</p>
             </div>
             <nav aria-label="Menu admin" className="relative flex-1 space-y-1 overflow-y-auto px-3 pb-5">
               {allGroups.map((group) => (
                 <div key={group.label}>
-                  <div className="px-3 pb-1 pt-4 text-[11px] font-bold uppercase tracking-[0.8px] text-white/70">
+                  <div className="px-3 pb-1 pt-4 text-[11px] font-bold uppercase tracking-[0.8px] text-slate-400">
                     {group.label}
                   </div>
                   {group.items.map((item) => {
@@ -101,7 +100,7 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
                         key={item.href}
                         href={item.href}
                         onClick={() => setOpen(false)}
-                        className={`flex min-h-12 items-center gap-3 rounded-2xl px-3 text-sm font-semibold transition-colors ${active ? 'bg-white text-[#18a873] shadow-sm' : 'text-white/90 hover:bg-white/20 hover:text-white'}`}
+                        className={`flex min-h-12 items-center gap-3 rounded-2xl px-3 text-sm font-semibold transition-colors ${active ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50'}`}
                       >
                         <Icon name={item.icon} />
                         <span>{item.label}</span>
