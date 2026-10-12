@@ -29,7 +29,7 @@ const ENV_CHECKS = [
   { name: 'MAYAR_WEBHOOK_SECRET', label: 'Mayar webhook secret', required: false, why: 'Mempercepat konfirmasi; tanpa ini status tetap dicek lewat API' },
   { name: 'RESEND_API_KEY', label: 'Resend API key', required: false, why: 'Email link download ke pembeli' },
   { name: 'EMAIL_FROM', label: 'Alamat pengirim email', required: false, why: 'Contoh: Kreacy <noreply@kreacy.my.id> (domain harus sudah diverifikasi di Resend)' },
-  { name: 'ADMIN_NOTIFY_EMAIL', label: 'Email notifikasi admin', required: false, why: 'Kabar setiap ada pesanan lunas/traktir' },
+  { name: 'ADMIN_NOTIFY_EMAIL', label: 'Email notifikasi admin', required: false, why: 'Opsional. Kabar email tiap pesanan produk lunas (kosongkan untuk hemat kuota; notifikasi tetap ada di admin)' },
 ]
 
 const MIGRATIONS = [
