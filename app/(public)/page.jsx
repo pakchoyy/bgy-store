@@ -18,20 +18,10 @@ async function getData() {
   const shell = await fetchStoreShell()
   const products = (shell.products || []).filter((p) => p.show_on_home !== false).slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
 
-  const { createTrustedServerClient } = await import('@/lib/supabase-server')
-  const trusted = await createTrustedServerClient()
-  const reviewQuery = (columns) => trusted
-    .from('product_reviews')
-    .select(columns)
-    .eq('is_approved', true)
-    .gte('rating', 4)
-    .not('comment', 'is', null)
-    .order('created_at', { ascending: false })
-    .limit(8)
-  let { data: reviews, error } = await reviewQuery('id, reviewer_name, reviewer_institution, rating, comment, product:products(title)')
-  if (error) ({ data: reviews } = await reviewQuery('id, reviewer_name, rating, comment, product:products(title)'))
+  const { unstable_cache } = await import('next/cache')
+  const reviews = await unstable_cache(fetchHomeReviews, ['home-reviews-v1'], { revalidate: 300, tags: ['store'] })()
 
-  return { ...shell, products, reviews: (reviews || []).filter((r) => String(r.comment || '').trim().length >= 10) }
+  return { ...shell, products, reviews: reviews.filter((r) => String(r.comment || '').trim().length >= 10) }
 }
 
 export default async function HomePage() {
@@ -50,4 +40,23 @@ export default async function HomePage() {
       <Testimonials reviews={reviews} />
     </LynkShell>
   )
+}
+
+// Dibaca tanpa cookie lalu di-cache supaya Beranda bisa disajikan statis dari CDN.
+async function fetchHomeReviews() {
+  const { createClient } = await import('@supabase/supabase-js')
+  const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+  const reviewQuery = (columns) => db
+    .from('product_reviews')
+    .select(columns)
+    .eq('is_approved', true)
+    .gte('rating', 4)
+    .not('comment', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(8)
+  let { data, error } = await reviewQuery('id, reviewer_name, reviewer_institution, rating, comment, product:products(title)')
+  if (error) ({ data } = await reviewQuery('id, reviewer_name, rating, comment, product:products(title)'))
+  return data || []
 }

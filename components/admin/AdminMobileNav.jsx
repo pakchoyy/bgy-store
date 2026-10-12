@@ -119,12 +119,12 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
         </div>
       )}
 
-      <nav aria-label="Menu cepat admin" className="fixed inset-x-0 bottom-0 z-40 border-t border-emerald-100 bg-white/95 px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-12px_30px_rgba(15,23,42,0.10)] backdrop-blur">
+      <nav aria-label="Menu cepat admin" className="fixed inset-x-0 bottom-0 z-40 border-t border-emerald-100 bg-white/95 px-2 pb-[calc(0.25rem+env(safe-area-inset-bottom))] pt-1 shadow-[0_-4px_16px_rgba(15,23,42,0.06)] backdrop-blur">
         <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
           {bottomItems.map((item) => {
             const active = isActive(pathname, item.href, item.also);
             return (
-              <Link key={item.href} href={item.href} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-bold transition-colors ${active ? 'bg-[#0ea5a0] text-white shadow-sm' : 'text-slate-500 hover:bg-emerald-50 hover:text-[#0d7a8a]'}`}>
+              <Link key={item.href} href={item.href} className={`flex min-h-12 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition-colors ${active ? 'text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>
                 <span className="relative">
                   <Icon name={item.icon} className="h-5 w-5" />
                   {item.count > 0 && (
@@ -137,7 +137,7 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
               </Link>
             );
           })}
-          <button type="button" onClick={() => setOpen(true)} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[11px] font-bold text-slate-500 transition-colors hover:bg-emerald-50 hover:text-[#0d7a8a]" aria-label="Buka menu lainnya">
+          <button type="button" onClick={() => setOpen(true)} className="flex min-h-12 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-slate-400 transition-colors hover:text-slate-600" aria-label="Buka menu lainnya">
             <Icon name="menu" className="h-5 w-5" />
             <span>More</span>
           </button>

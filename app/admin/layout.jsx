@@ -48,7 +48,7 @@ export default async function AdminLayout({ children }) {
 
   return (
     <AdminProvider>
-      <div className="flex min-h-screen flex-col bg-[#edf8f5] bg-[radial-gradient(circle_at_top_left,rgba(46,204,146,0.20),transparent_34rem),linear-gradient(180deg,#f4fbf8_0%,#edf8f5_48%,#f8fafc_100%)] lg:flex-row">
+      <div className="flex min-h-screen flex-col bg-[#f4f7f6] lg:flex-row">
         <Sidebar counts={counts} />
         <div className="flex-1 lg:pl-64">
           <Header />

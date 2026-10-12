@@ -679,8 +679,8 @@ export default function ProductBuilder({ products: initialProducts, categories =
           )}
         </div>
 
-        {/* RIGHT: phone preview */}
-        <div className="xl:sticky xl:top-16">
+        {/* RIGHT: phone preview (desktop saja; di HP pakai tombol Lihat Toko) */}
+        <div className="hidden xl:sticky xl:top-16 xl:block">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
             Page Preview
           </p>
