@@ -8,6 +8,7 @@ export default function PageTabs({ items = [] }) {
   const pathname = usePathname()
   const seen = new Set()
   const baseItems = [
+    { id: 'fallback-home', label: 'Beranda', target_url: '/', is_visible: true },
     ...(items || []),
     { id: 'fallback-faq', label: 'FAQ', target_url: '/halaman/faq', is_visible: true },
   ]

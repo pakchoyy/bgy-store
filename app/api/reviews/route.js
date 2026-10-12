@@ -1,5 +1,6 @@
 import { rateLimited, tooMany } from '@/lib/rate-limit'
 import { createServiceClient } from '@/lib/supabase-server'
+import { revalidateTag } from 'next/cache'
 
 // POST /api/reviews - Create new review
 export async function POST(request) {
@@ -68,7 +69,7 @@ export async function POST(request) {
       reviewer_email: order.buyer_email || null,
       rating,
       comment: sanitizedComment,
-      is_approved: false,
+      is_approved: true, // hanya pembeli dengan order valid; admin cukup hapus jika spam
     }
     let { data: review, error: reviewError } = await supabase
       .from('product_reviews')
@@ -92,10 +93,11 @@ export async function POST(request) {
       )
     }
 
+    revalidateTag('store')
     return Response.json({
       success: true,
       review: { id: review.id, rating: review.rating, is_approved: review.is_approved },
-      message: 'Review submitted. Waiting for approval.',
+      message: 'Review published.',
     })
   } catch (error) {
     console.error('[API] Reviews POST error:', error)

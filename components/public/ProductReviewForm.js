@@ -41,7 +41,7 @@ export default function ProductReviewForm({ productId, orderId, onSuccess }) {
 
       setMessage({
         type: 'success',
-        text: 'Terima kasih! Review Anda sedang menunggu persetujuan admin.',
+        text: 'Terima kasih! Review kamu sudah tampil di halaman produk.',
       })
 
       // Reset form

@@ -1,3 +1,4 @@
+import MobileTableLabels from '@/components/admin/MobileTableLabels'
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase-server';
@@ -48,7 +49,8 @@ export default async function AdminLayout({ children }) {
 
   return (
     <AdminProvider>
-      <div className="flex min-h-screen flex-col bg-[#f4f7f6] lg:flex-row">
+      <div className="admin-root flex min-h-screen flex-col bg-[#f4f7f6] lg:flex-row">
+        <MobileTableLabels />
         <Sidebar counts={counts} />
         <div className="flex-1 lg:pl-64">
           <Header />

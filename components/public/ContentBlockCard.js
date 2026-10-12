@@ -37,7 +37,7 @@ export default function ContentBlockCard({ block }) {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex min-h-14 items-center gap-3 bg-white rounded-2xl shadow-sm hover:shadow-md border border-white/60 transition-all p-4 active:scale-[0.98]"
+        className="flex items-center gap-3 rounded-2xl bg-white p-2.5 shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
       >
         <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[#0d7a8a]">
           ↗
@@ -56,12 +56,12 @@ export default function ContentBlockCard({ block }) {
     const transparent = blockBg(block) === 'transparent'
     return (
       <div
-        className={`rounded-2xl p-4 ${transparent ? '' : 'shadow-sm'}`}
+        className={`rounded-lg px-4 py-3 ${transparent ? '' : 'shadow-sm'}`}
         style={transparent ? undefined : { backgroundColor: blockBg(block) }}
       >
         {block.title && <h2 className="text-sm font-bold text-gray-900 mb-1">{block.title}</h2>}
         <div
-          className="rich-content text-sm text-gray-700 leading-relaxed"
+          className="rich-content text-sm leading-snug text-gray-700 [&_*]:!my-0 [&_h1]:!text-[15px] [&_h2]:!text-[15px] [&_h3]:!text-sm [&_p+p]:!mt-1"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </div>
