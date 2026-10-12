@@ -79,7 +79,7 @@ export default function ProductCard({ product, onSelect, className = '' }) {
     <span className={`flex items-center ${layout.value === 'compact' ? 'gap-2.5' : 'gap-3'}`}>
       <Thumb product={product} isFree={isFree} className={layout.value === 'compact' ? 'h-11 w-11 rounded-lg' : 'h-14 w-14 rounded-xl'} />
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
+        <span className="text-sm font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
         <DownloadCount product={product} isFree={isFree} />
       </span>
       <PricePill product={product} isFree={isFree} isSoldOut={isSoldOut} />
@@ -91,7 +91,7 @@ export default function ProductCard({ product, onSelect, className = '' }) {
       </span>
       <span className={`flex flex-1 gap-1.5 p-2 ${layout.value === 'wide' ? 'items-center' : 'flex-col'}`}>
         <span className="min-w-0 flex-1">
-          <span className="block text-xs font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
+          <span className="text-xs font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
           <DownloadCount product={product} isFree={isFree} />
         </span>
         <PricePill product={product} isFree={isFree} isSoldOut={isSoldOut} className={layout.value === 'wide' ? '' : 'items-start'} />

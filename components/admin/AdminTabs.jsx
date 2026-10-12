@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function AdminTabs({ tabs, active }) {
   return (
-    <nav aria-label="Sub menu" className="mb-6 flex w-full gap-1 overflow-x-auto rounded-xl bg-white/80 p-1 shadow-sm ring-1 ring-slate-100 sm:w-fit">
+    <nav aria-label="Sub menu" className="mb-4 flex w-full flex-wrap gap-1 rounded-xl bg-white/80 p-1 shadow-sm ring-1 ring-slate-100 sm:w-fit">
       {tabs.map((tab) => {
         const current = tab.id === active;
         return (

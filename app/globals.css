@@ -110,14 +110,14 @@ body {
 
 /* Admin di HP: tabel jadi kartu supaya tidak perlu geser ke kanan */
 @media (max-width: 767px) {
-  .admin-root table:not(.keep-table) { display: block; width: 100%; min-width: 0 !important; }
-  .admin-root table:not(.keep-table) thead { display: none; }
-  .admin-root table:not(.keep-table) tbody { display: block; }
-  .admin-root table:not(.keep-table) tr { display: block; margin: 0 0 10px; padding: 10px 12px; border-radius: 14px; background: #fff; box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06); border: 0; }
-  .admin-root table:not(.keep-table) td { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 5px 0 !important; border: 0 !important; text-align: right; white-space: normal !important; width: auto !important; min-width: 0 !important; max-width: none !important; }
-  .admin-root table:not(.keep-table) td > * { min-width: 0; }
-  .admin-root table:not(.keep-table) td[data-label]::before { content: attr(data-label); flex-shrink: 0; color: #94a3b8; font-size: 12px; font-weight: 600; text-align: left; }
-  .admin-root table:not(.keep-table) td[data-label=""]::before { content: none; }
-  .admin-root table:not(.keep-table) td:first-child { text-align: left; }
+  .admin-root table:not(.keep-table):not(.sr-only) { display: block; width: 100%; min-width: 0 !important; }
+  .admin-root table:not(.keep-table):not(.sr-only) thead { display: none; }
+  .admin-root table:not(.keep-table):not(.sr-only) tbody { display: block; }
+  .admin-root table:not(.keep-table):not(.sr-only) tr { display: block; margin: 0 0 10px; padding: 10px 12px; border-radius: 14px; background: #fff; box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06); border: 0; }
+  .admin-root table:not(.keep-table):not(.sr-only) td { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 5px 0 !important; border: 0 !important; text-align: right; white-space: normal !important; width: auto !important; min-width: 0 !important; max-width: none !important; }
+  .admin-root table:not(.keep-table):not(.sr-only) td > * { min-width: 0; }
+  .admin-root table:not(.keep-table):not(.sr-only) td[data-label]::before { content: attr(data-label); flex-shrink: 0; color: #94a3b8; font-size: 12px; font-weight: 600; text-align: left; }
+  .admin-root table:not(.keep-table):not(.sr-only) td[data-label=""]::before { content: none; }
+  .admin-root table:not(.keep-table):not(.sr-only) td:first-child { text-align: left; }
   .admin-root .overflow-x-auto:has(> table) { overflow: visible; }
 }

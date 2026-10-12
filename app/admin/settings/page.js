@@ -73,7 +73,7 @@ export default async function AdminSettings({ searchParams }) {
       </div>
       {isDemo && <DemoBadge />}
       <ToastBar toast={toast} />
-      <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-full overflow-x-auto sm:w-fit">
+      <div className="mb-4 flex w-full flex-wrap gap-1 rounded-lg bg-gray-100 p-1 sm:w-fit">
         {tabs.map(tab => (
           <a
             key={tab.id}

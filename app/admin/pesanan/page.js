@@ -176,7 +176,7 @@ export default async function AdminPesanan({ searchParams }) {
       </div>
       <AdminToast toast={toast === 'read' || toast === 'deleted' ? 'success' : toast} message={toast === 'read' ? 'Pesanan ditandai sudah dibaca' : toast === 'deleted' ? 'Pesanan dihapus' : toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="flex max-w-full gap-1.5 overflow-x-auto [scrollbar-width:none]">
+        <div className="flex flex-wrap gap-1.5">
           {statuses.map(s => (
             <a
               key={s}
@@ -187,7 +187,7 @@ export default async function AdminPesanan({ searchParams }) {
             </a>
           ))}
         </div>
-        <div className="flex max-w-full gap-1.5 overflow-x-auto [scrollbar-width:none]">
+        <div className="flex flex-wrap gap-1.5">
           {types.map(t => (
             <a
               key={t}
