@@ -4,7 +4,7 @@ import FreePageClient from './FreePageClient'
 import { fetchStoreShell, demoShellDataWithProducts, hasSupabase } from '@/lib/store-shell'
 import { demoProducts, demoCategories } from '@/lib/demo-data'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 30
 
 export const metadata = {
   title: 'Produk Gratis | Bantu Guru Yuk',

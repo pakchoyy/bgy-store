@@ -15,6 +15,7 @@ import { redirect } from 'next/navigation'
 import { whatsappUrl, parsePreviewImages, formatRupiah } from '@/lib/utils'
 import ProductStack from '@/components/public/ProductStack'
 import FlashCountdown from '@/components/public/FlashCountdown'
+import { SITE_URL } from '@/lib/site'
 
 async function getProduct(slug) {
   if (!hasSupabase()) {
@@ -120,7 +121,7 @@ export default async function ProdukDetailPage({ params }) {
   }
 
   const isSoldOut = product.stock_type === 'limited' && product.stock_qty <= 0
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
+  const siteUrl = SITE_URL
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -138,7 +139,7 @@ export default async function ProdukDetailPage({ params }) {
     ...(rating.count > 0 ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: rating.average, reviewCount: rating.count } } : {}),
   }
   const waUrl = whatsappUrl(appearance?.socialLinks)
-  const productUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bantuguruyuk.web.id'}/produk/${product.slug}`
+  const productUrl = `${SITE_URL}/produk/${product.slug}`
 
   return (
     <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement} pageHasHeading topBarTitle={product.title}>

@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache'
 import { createClient } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
 
@@ -36,6 +37,7 @@ export async function POST(request) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (!supabaseUrl || supabaseUrl === 'your_supabase_url') {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true })
     }
 
@@ -53,6 +55,7 @@ export async function POST(request) {
       if (error) return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true })
   } catch (e) {
     console.error('POST /api/admin/settings', e)

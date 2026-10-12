@@ -4,7 +4,7 @@ import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import { demoProducts } from '@/lib/demo-data'
 import Testimonials from '@/components/public/Testimonials'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 30
 
 async function getData() {
   if (!hasSupabase()) {

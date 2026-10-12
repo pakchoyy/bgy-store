@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache'
 import { createClient } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { generateSlug } from '@/lib/utils'
@@ -24,6 +25,7 @@ export async function POST(request) {
 
     if (isDemoMode()) {
       const page = sanitizePage(body)
+      revalidateTag('store')
       return Response.json({ success: true, demo: true, page: { ...page, id: 'demo-' + Date.now() } })
     }
 
@@ -42,6 +44,7 @@ export async function POST(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true, page: data })
   } catch (e) {
     console.error('POST /api/admin/pages unexpected error:', e)
@@ -59,6 +62,7 @@ export async function PUT(request) {
     }
 
     if (isDemoMode()) {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true })
     }
 
@@ -79,6 +83,7 @@ export async function PUT(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true, page: data })
   } catch (e) {
     console.error('PUT /api/admin/pages unexpected error:', e)
@@ -96,6 +101,7 @@ export async function PATCH(request) {
     }
 
     if (isDemoMode()) {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true })
     }
 
@@ -113,6 +119,7 @@ export async function PATCH(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true })
   } catch (e) {
     console.error('PATCH /api/admin/pages unexpected error:', e)
@@ -131,6 +138,7 @@ export async function DELETE(request) {
     }
 
     if (isDemoMode()) {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true })
     }
 
@@ -144,6 +152,7 @@ export async function DELETE(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true })
   } catch (e) {
     console.error('DELETE /api/admin/pages unexpected error:', e)

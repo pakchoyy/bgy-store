@@ -1,10 +1,11 @@
 import { fetchStoreShell, hasSupabase } from '@/lib/store-shell'
 import { demoProducts, demoCategories } from '@/lib/demo-data'
+import { SITE_URL } from '@/lib/site'
 
 export const dynamic = 'force-dynamic'
 
 export default async function sitemap() {
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app').replace(/\/$/, '')
+  const base = SITE_URL
   const { products = [], categories = [] } = hasSupabase()
     ? await fetchStoreShell()
     : { products: demoProducts.filter((p) => p.is_active), categories: demoCategories }

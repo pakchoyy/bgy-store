@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { SITE_HOST } from '@/lib/site'
 import Link from 'next/link'
 import { formatRupiah } from '@/lib/utils'
 import RevenueChart from '@/components/admin/RevenueChart'
@@ -123,7 +124,7 @@ export default async function AdminDashboard() {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#b8efcf] text-sm font-extrabold text-[#168f68]">BGY</div>
             <div className="min-w-0">
               <p className="font-bold text-slate-700">Bantu Guru Yuk</p>
-              <p className="truncate text-xs text-[#18a873]">bgy-store.vercel.app</p>
+              <p className="truncate text-xs text-[#18a873]">{SITE_HOST}</p>
             </div>
           </div>
           <p className="mt-4 text-xs font-semibold text-slate-500">Mulai kelola toko</p>

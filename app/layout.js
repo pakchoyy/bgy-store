@@ -1,5 +1,6 @@
 import { Outfit } from 'next/font/google'
 import './globals.css'
+import { SITE_URL } from '@/lib/site'
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -8,7 +9,7 @@ const outfit = Outfit({
   display: 'swap',
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
+const siteUrl = SITE_URL
 const siteDescription = 'Download modul ajar, ATP, media pembelajaran, tools guru, dan administrasi untuk guru dan pendidik.'
 
 export const metadata = {

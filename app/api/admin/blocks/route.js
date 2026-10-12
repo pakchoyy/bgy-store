@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache'
 import { createClient } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { safeUrl } from '@/lib/utils'
@@ -43,6 +44,7 @@ export async function POST(request) {
     }
 
     if (isDemo()) {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true, block: { ...block, id: 'demo-' + Date.now(), sort_order: body.sort_order || 0 } })
     }
 
@@ -65,6 +67,7 @@ export async function POST(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true, block: data })
   } catch (e) {
     console.error('POST /api/admin/blocks unexpected error:', e)
@@ -95,6 +98,7 @@ export async function PUT(request) {
     }
 
     if (isDemo()) {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true, block: { ...block, id } })
     }
 
@@ -116,6 +120,7 @@ export async function PUT(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true, block: data })
   } catch (e) {
     console.error('PUT /api/admin/blocks unexpected error:', e)
@@ -133,6 +138,7 @@ export async function PATCH(request) {
     }
 
     if (isDemo()) {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true })
     }
 
@@ -159,6 +165,7 @@ export async function PATCH(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true })
   } catch (e) {
     console.error('PATCH /api/admin/blocks unexpected error:', e)
@@ -176,6 +183,7 @@ export async function DELETE(request) {
     }
 
     if (isDemo()) {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true })
     }
 
@@ -189,6 +197,7 @@ export async function DELETE(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true })
   } catch (e) {
     console.error('DELETE /api/admin/blocks unexpected error:', e)

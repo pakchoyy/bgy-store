@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { randomSlug } from '@/lib/utils'
+import { revalidateTag } from 'next/cache'
 
 function normalizeFileUrl(value) {
   if (!value) return null
@@ -90,6 +91,7 @@ export async function POST(request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (!supabaseUrl || supabaseUrl === 'your_supabase_url') {
       const product = sanitizeProduct(body)
+      revalidateTag('store')
       return Response.json({ success: true, demo: true, product: { ...product, id: 'demo-' + Date.now() } })
     }
 
@@ -114,6 +116,7 @@ export async function POST(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true, product: data, warning })
   } catch (e) {
     console.error('POST /api/admin/products unexpected error:', e)
@@ -132,6 +135,7 @@ export async function PUT(request) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (!supabaseUrl || supabaseUrl === 'your_supabase_url') {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true })
     }
 
@@ -147,6 +151,7 @@ export async function PUT(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true, product: data, warning })
   } catch (e) {
     console.error('PUT /api/admin/products unexpected error:', e)
@@ -161,6 +166,7 @@ export async function PATCH(request) {
     if (body.restore) {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       if (!supabaseUrl || supabaseUrl === 'your_supabase_url') {
+        revalidateTag('store')
         return Response.json({ success: true, demo: true })
       }
       const supabase = await createClient()
@@ -172,6 +178,7 @@ export async function PATCH(request) {
         console.error('PATCH /api/admin/products restore error:', error)
         return Response.json({ error: error.message }, { status: 500 })
       }
+      revalidateTag('store')
       return Response.json({ success: true })
     }
 
@@ -183,6 +190,7 @@ export async function PATCH(request) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (!supabaseUrl || supabaseUrl === 'your_supabase_url') {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true })
     }
 
@@ -210,6 +218,7 @@ export async function PATCH(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true })
   } catch (e) {
     console.error('PATCH /api/admin/products unexpected error:', e)
@@ -229,6 +238,7 @@ export async function DELETE(request) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     if (!supabaseUrl || supabaseUrl === 'your_supabase_url') {
+      revalidateTag('store')
       return Response.json({ success: true, demo: true })
     }
 
@@ -245,6 +255,7 @@ export async function DELETE(request) {
       return Response.json({ error: error.message }, { status: 500 })
     }
 
+    revalidateTag('store')
     return Response.json({ success: true })
   } catch (e) {
     console.error('DELETE /api/admin/products unexpected error:', e)

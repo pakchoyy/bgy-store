@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { SITE_HOST } from '@/lib/site'
 import { demoSettings } from '@/lib/demo-data'
 
 async function saveSEO(formData) {
@@ -128,7 +129,7 @@ export default async function AdminSEO({ searchParams }) {
                   {metaTitle || 'Judul halaman akan tampil di sini'}
                 </div>
                 <div className="text-[#006621] text-sm font-medium mt-0.5">
-                  https://bantuguruyuk.web.id/
+                  https://{SITE_HOST}/
                 </div>
                 <div className="text-[#545454] text-sm mt-1 line-clamp-2">
                   {metaDesc || 'Deskripsi halaman akan tampil di sini...'}

@@ -1,5 +1,6 @@
 import { rateLimited, tooMany } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
+import { SITE_URL } from '@/lib/site'
 
 export async function POST(request) {
   if (rateLimited(request, 'checkout', 15, 10 * 60 * 1000)) return tooMany()
@@ -70,7 +71,7 @@ export async function POST(request) {
       amount = Math.max(0, amount - discountAmount)
     }
     const name = isCart ? `${items.length} produk: ${items.map((p) => p.title).join(', ')}`.slice(0, 200) : product.title
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
+    const siteUrl = SITE_URL
     const { hasMayarApiKey, createPaymentLink, extractMayarInvoice } = await import('@/lib/mayar')
 
     if (!hasMayarApiKey()) {

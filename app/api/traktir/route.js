@@ -1,5 +1,6 @@
 import { rateLimited, tooMany } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
+import { SITE_URL, SITE_HOST } from '@/lib/site'
 
 export async function POST(request) {
   if (rateLimited(request, 'traktir', 10, 10 * 60 * 1000)) return tooMany()
@@ -7,7 +8,7 @@ export async function POST(request) {
     const body = await request.json()
     const cleanAmount = Math.floor(Number(body.amount) || 0)
     const buyerName = String(body.buyer_name || '').trim().slice(0, 120) || 'Pendukung BGY'
-    const buyerEmail = String(body.buyer_email || '').trim().slice(0, 254) || process.env.TRAKTIR_DEFAULT_EMAIL || 'traktir@bantuguruyuk.web.id'
+    const buyerEmail = String(body.buyer_email || '').trim().slice(0, 254) || process.env.TRAKTIR_DEFAULT_EMAIL || `traktir@${SITE_HOST}`
     const fileId = /^[0-9a-f-]{36}$/i.test(String(body.product_id || '')) ? String(body.product_id) : ''
     const cleanWhatsapp = String(body.buyer_whatsapp || '').replace(/[^\d+]/g, '') || process.env.TRAKTIR_DEFAULT_PHONE || '081200000000'
 
@@ -49,7 +50,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Gagal membuat donasi' }, { status: 500 })
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bgy-store.vercel.app'
+    const siteUrl = SITE_URL
 
     try {
       const redirectUrl = `${siteUrl}/terima-kasih?order=${order.id}${fileId ? `&file=${fileId}` : ''}`
