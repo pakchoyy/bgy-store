@@ -34,7 +34,7 @@ export default function AdminDesktopSidebar({ menuGroups, counts = {} }) {
       <div className="pointer-events-none absolute -bottom-10 right-2 h-32 w-32 rounded-full bg-white/10" />
       <Link href="/admin" className="relative flex h-16 items-center gap-3 px-5 transition-colors hover:bg-white/10">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/95 shadow-sm">
-          <span className="text-xs font-extrabold text-[#18a873]">K</span>
+          <img src="/logo-kreacy.svg" alt="Kreacy" className="h-7 w-7" />
         </div>
         <span className="text-lg font-extrabold tracking-tight">Admin</span>
       </Link>

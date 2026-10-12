@@ -121,7 +121,7 @@ export default async function AdminDashboard() {
             <Link href="/" target="_blank" aria-label="Buka website" className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#10946b]">Share</Link>
           </div>
           <div className="mt-3 flex items-center gap-3 rounded-2xl bg-[#effbf6] p-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#b8efcf] text-sm font-extrabold text-[#168f68]">K</div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white ring-1 ring-emerald-100"><img src="/logo-kreacy.svg" alt="" className="h-8 w-8" /></div>
             <div className="min-w-0">
               <p className="font-bold text-slate-700">Kreacy</p>
               <p className="truncate text-xs text-[#18a873]">{SITE_HOST}</p>

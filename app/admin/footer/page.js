@@ -118,7 +118,7 @@ export default async function AdminFooter({ searchParams }) {
           <div className="bg-gray-50 rounded-2xl border border-gray-100 px-5 py-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <div className="w-7 h-7 bg-[#0ea5a0]/15 rounded-lg flex items-center justify-center">
-                <span className="text-[#0ea5a0] font-extrabold text-xs">K</span>
+                <img src="/logo-kreacy.svg" alt="" className="h-5 w-5" />
               </div>
               <span className="text-sm font-extrabold text-gray-900">Kreacy</span>
             </div>
