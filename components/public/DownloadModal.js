@@ -21,6 +21,11 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
   const [downloaded, setDownloaded] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
   const [confirmAgain, setConfirmAgain] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailState, setEmailState] = useState('idle');
+  const [emailError, setEmailError] = useState('');
 
   useEffect(() => {
     if (!confirmAgain) return;
@@ -42,6 +47,10 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
       setDownloadError('');
       setDownloaded(false);
       setConfirmAgain(false);
+      setLinkUrl('');
+      setLinkCopied(false);
+      setEmailState('idle');
+      setEmailError('');
     }
   }, [isOpen]);
 
@@ -67,7 +76,9 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.url) throw new Error(data.error || 'File belum dapat diunduh.');
-      window.location.assign(data.url);
+      // Produk berupa tautan: tampilkan link-nya (bisa disalin / dikirim ke email), jangan langsung pindah halaman.
+      if (data.kind === 'link') setLinkUrl(data.url);
+      else window.location.assign(data.url);
       setDownloaded(true);
       setDownloading(false);
     } catch (e) {
@@ -109,6 +120,25 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
       setTipBusy(false);
     }
   }, [tipAmount, product]);
+
+  const sendLinkEmail = useCallback(async (event) => {
+    event.preventDefault();
+    setEmailState('sending');
+    setEmailError('');
+    try {
+      const response = await fetch('/api/download/free/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: product.id, email }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Email gagal dikirim.');
+      setEmailState('sent');
+    } catch (e) {
+      setEmailError(e.message);
+      setEmailState('idle');
+    }
+  }, [product, email]);
 
   const handleBackdropClick = useCallback((e) => {
     if (e.target === e.currentTarget && (phase === 1 || downloaded)) {
@@ -277,12 +307,35 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
             </div>
 
             <h3 role="status" className="text-lg font-bold text-gray-900 mb-2">
-              {downloaded
+              {linkUrl ? 'Link produk siap ✓' : downloaded
                 ? product.is_link ? 'Link produk dibuka ✓' : 'Download dimulai ✓'
                 : downloading ? (product.is_link ? 'Membuka link...' : 'Mengunduh...') : product.is_link ? 'Link Siap Dibuka' : 'Download Siap'}
             </h3>
 
-            {downloaded ? (
+            {linkUrl ? (
+              <div className="mb-4 space-y-3 text-left">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <p className="text-xs font-semibold text-gray-500">Link {product.title}</p>
+                  <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block break-all text-sm font-semibold text-emerald-700 underline underline-offset-2">{linkUrl}</a>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-10 items-center justify-center rounded-lg bg-emerald-700 px-3 text-sm font-bold text-white hover:bg-emerald-800">Buka link</a>
+                    <button type="button" onClick={() => { navigator.clipboard?.writeText(linkUrl).then(() => setLinkCopied(true)).catch(() => {}); }} className="min-h-10 rounded-lg border border-emerald-300 bg-white px-3 text-sm font-bold text-emerald-700 hover:bg-emerald-50">{linkCopied ? 'Tersalin ✓' : 'Salin link'}</button>
+                  </div>
+                </div>
+                {emailState === 'sent' ? (
+                  <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">Link sudah dikirim ke {email}. Cek juga folder spam.</p>
+                ) : (
+                  <form onSubmit={sendLinkEmail} className="rounded-xl border border-gray-200 p-3">
+                    <label htmlFor="free-link-email" className="text-xs font-semibold text-gray-600">Takut lupa? Kirim link ke email (opsional)</label>
+                    <div className="mt-1.5 flex gap-2">
+                      <input id="free-link-email" type="email" required autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nama@email.com" className="h-10 min-w-0 flex-1 rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
+                      <button type="submit" disabled={emailState === 'sending'} className="h-10 shrink-0 rounded-lg bg-slate-900 px-3 text-sm font-bold text-white disabled:opacity-60">{emailState === 'sending' ? 'Mengirim...' : 'Kirim'}</button>
+                    </div>
+                    {emailError && <p role="alert" className="mt-1.5 text-xs font-semibold text-red-600">{emailError}</p>}
+                  </form>
+                )}
+              </div>
+            ) : downloaded ? (
               <p className="mb-4 text-sm text-gray-600">
                 {product.is_link ? (
                   <>Simpan atau bookmark link produk supaya mudah dibuka lagi.</>
@@ -346,7 +399,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                 >
                   Selesai
                 </button>
-                <button
+                {!linkUrl && <button
                   type="button"
                   onClick={() => {
                     if (!confirmAgain) { setConfirmAgain(true); return }
@@ -358,7 +411,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
                   {confirmAgain
                     ? (product.is_link ? 'Yakin buka link lagi? Klik sekali lagi' : 'File mungkin sudah ada di HP kamu. Klik lagi untuk tetap download')
                     : (product.is_link ? 'Buka link lagi' : 'File tidak ketemu? Download ulang')}
-                </button>
+                </button>}
               </div>
             ) : !downloading && (downloadError || countdown === 0) ? (
               <button

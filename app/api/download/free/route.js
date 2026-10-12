@@ -45,7 +45,7 @@ export async function POST(request) {
 
     await supabase.rpc('increment_download_count', { p_product_id: product.id });
 
-    return NextResponse.json({ url: downloadUrl }, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ url: downloadUrl, kind: product.file_url ? 'link' : 'file' }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
     console.error('free download error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
