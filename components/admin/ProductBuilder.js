@@ -1,5 +1,6 @@
 'use client'
 
+import { SITE_HOST } from '@/lib/site'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { formatRupiah } from '@/lib/utils'
@@ -363,55 +364,26 @@ export default function ProductBuilder({ products: initialProducts, categories =
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold">My Produk</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            {orderDirty ? 'Urutan berubah — klik Simpan Urutan' : 'Atur urutan dengan ▲▼ · Preview HP realtime'}
-          </p>
+      {/* Header ala Lynk */}
+      <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-2 rounded-xl bg-emerald-50/70 px-3 py-2.5 text-sm">
+          <span className="text-slate-500">Toko:</span>
+          <span className="min-w-0 flex-1 truncate font-medium text-slate-800">{SITE_HOST}/produk</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <a href="/produk" target="_blank">
-              Share
-            </a>
-          </Button>
-          <Button onClick={handleSaveOrder} disabled={saving}>
-            {saving ? 'Menyimpan...' : orderDirty ? 'Simpan Urutan •' : 'Simpan Urutan'}
-          </Button>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Button variant="outline" asChild><a href="/produk" target="_blank" rel="noopener noreferrer">↗ Lihat Toko</a></Button>
+          <Button asChild><Link href="/admin/produk/baru">+ Tambah Produk</Link></Button>
         </div>
       </div>
-
-      {/* URL bar */}
-      <Card>
-        <CardContent className="flex flex-wrap items-center gap-2 p-4">
-          <span className="text-xs text-slate-500 font-semibold shrink-0">Toko:</span>
-          <code className="flex-1 min-w-0 text-sm text-teal-600 font-medium truncate bg-teal-50 px-3 py-1.5 rounded-lg">
-            /produk · /free
-          </code>
-          <Button asChild size="sm">
-            <Link href="/admin/produk/baru">
-              + Tambah Produk
-            </Link>
-          </Button>
-        </CardContent>
-      </Card>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5 items-start">
         {/* LEFT */}
         <div className="space-y-4 min-w-0">
           {/* Tabs & Search */}
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant={tab === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setTab('all')}>
-              Semua
-            </Button>
-            <Button variant={tab === 'free' ? 'default' : 'outline'} size="sm" onClick={() => setTab('free')}>
-              Gratis
-            </Button>
-            <Button variant={tab === 'paid' ? 'default' : 'outline'} size="sm" onClick={() => setTab('paid')}>
-              Berbayar
-            </Button>
+            {[['all', 'Semua'], ['free', 'Gratis'], ['paid', 'Berbayar']].map(([key, label]) => (
+              <button key={key} type="button" onClick={() => setTab(key)} className={`h-9 rounded-full px-4 text-sm font-semibold transition-colors ${tab === key ? 'bg-emerald-500 text-white shadow-sm' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>{label}</button>
+            ))}
             <div className="flex-1" />
             <Input
               value={search}
@@ -422,13 +394,16 @@ export default function ProductBuilder({ products: initialProducts, categories =
           </div>
 
           {/* Add block button */}
-          <Button
-            onClick={() => setShowBlockPicker(true)}
-            className="w-full"
-            size="lg"
-          >
-            + Add new block
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setShowBlockPicker(true)} className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-400" size="lg">
+              <span className="mr-2 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white text-sm leading-none">+</span> Tambah Blok
+            </Button>
+            {orderDirty && (
+              <Button onClick={handleSaveOrder} disabled={saving} variant="outline" size="lg" className="px-4">
+                {saving ? 'Menyimpan...' : 'Simpan Urutan'}
+              </Button>
+            )}
+          </div>
 
           {/* Block picker dialog */}
           {showBlockPicker && (
@@ -480,21 +455,21 @@ export default function ProductBuilder({ products: initialProducts, categories =
           )}
 
           {/* Block list */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <h2 className="text-sm font-bold">Block List</h2>
-              <span className="text-xs text-slate-500">{mergedList.length} item</span>
-            </CardHeader>
-            <CardContent className="p-0">{mergedList.length === 0 ? (
+          <div>
+            <div className="flex items-center justify-between px-1 pb-2">
+              <h2 className="text-lg font-semibold text-slate-600">Daftar Blok</h2>
+              <span className="text-xs text-slate-400">{mergedList.length} item · ▲▼ untuk urutkan</span>
+            </div>
+            <div>{mergedList.length === 0 ? (
               <div className="px-4 py-12 text-center text-sm text-slate-500">
                 Belum ada produk. Klik <strong>Add new block</strong>.
               </div>
             ) : (
-              <div className="space-y-2 p-2 sm:p-3">{mergedList.map((item, idx) => {
+              <div className="space-y-2.5">{mergedList.map((item, idx) => {
                   if (item._kind === 'block') {
                     return (
                       <div key={`block-${item.id}`}>
-                        <div className="relative flex items-center gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+                        <div className="relative flex items-center gap-3 rounded-2xl bg-white px-2 py-3 shadow-[0_2px_10px_rgba(15,23,42,0.06)]">
                           <div className="flex flex-col items-center shrink-0">
                             <button
                               type="button"
@@ -516,7 +491,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                             </button>
                           </div>
 
-                          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-teal-50 ring-1 ring-black/5 flex items-center justify-center text-sm font-bold text-teal-600">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-emerald-50 text-lg font-black text-emerald-500">
                             {item.block_type === 'image' && item.image_path ? (
                               <img src={item.image_path} alt="" className="h-full w-full object-cover" />
                             ) : (
@@ -525,28 +500,22 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 truncate leading-snug">
+                            <p className="truncate text-[15px] font-medium leading-snug text-slate-700">
                               {item.title || (item.block_type === 'link' ? item.url : item.block_type === 'text' ? (item.text_content || '').replace(/<[^>]*>/g, '').trim().slice(0, 60) || 'Text' : 'Image')}
                             </p>
                             <span className="text-[10px] text-slate-500 capitalize">{item.block_type} block</span>
                           </div>
 
                           <div className="flex shrink-0 items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setEditingBlock(item)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            <button type="button" onClick={() => setEditingBlock(item)} aria-label="Edit blok" className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100">✎</button>
+                            <button
+                              type="button"
+                              aria-label="Hapus blok"
+                              className="flex h-9 w-9 items-center justify-center rounded-lg text-red-500 hover:bg-red-50"
                               onClick={async () => { const ok = await confirm({ title: 'Hapus block ini?', message: 'Block akan dihapus dari halaman.', confirmLabel: 'Ya, hapus', danger: true }); if (ok) deleteBlock(item.id) }}
                             >
-                              Hapus
-                            </Button>
+                              🗑
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -577,8 +546,8 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           setOverId(null)
                         }}
                         onClick={() => setSelectedId(p.id)}
-                        className={`relative flex cursor-pointer items-center gap-2 rounded-2xl border px-2 py-2.5 shadow-sm transition-all ${
-                          active ? 'border-[#0ea5a0]/30 bg-[rgba(14,165,160,0.07)]' : 'border-gray-100 bg-white hover:bg-gray-50/80'
+                        className={`relative flex cursor-pointer items-center gap-3 rounded-2xl bg-white px-2 py-3 shadow-[0_2px_10px_rgba(15,23,42,0.06)] transition-all ${
+                          active ? 'ring-2 ring-emerald-400/60' : 'hover:bg-slate-50'
                         } ${isOver ? 'ring-2 ring-inset ring-[#0ea5a0]/40' : ''} ${
                           dragId === p.id ? 'opacity-40' : ''
                         } ${p.is_featured ? 'bgy-highlight-block ring-2 ring-amber-300/80 shadow-[0_0_22px_rgba(251,191,36,0.22)]' : ''}
@@ -614,15 +583,15 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         </button>
                       </div>
 
-                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-gray-100 ring-1 ring-black/5">
+                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-orange-50">
                         {p.cover_path ? (
                           <img src={p.cover_path} alt="" className="h-full w-full object-cover" />
                         ) : (
                           <div
                             className={`flex h-full w-full items-center justify-center text-xs font-bold text-white ${
                               p.type === 'free'
-                                ? 'bg-gradient-to-br from-sky-400 to-sky-600'
-                                : 'bg-gradient-to-br from-amber-400 to-orange-500'
+                                ? 'bg-gradient-to-br from-emerald-300 to-emerald-500'
+                                : 'bg-gradient-to-br from-orange-300 to-orange-500'
                             }`}
                           >
                             {p.type === 'free' ? '↓' : 'Rp'}
@@ -631,13 +600,11 @@ export default function ProductBuilder({ products: initialProducts, categories =
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-900 line-clamp-2 break-words leading-snug">
+                        <p className="line-clamp-2 break-words text-[15px] font-medium leading-snug text-slate-700">
                           {p.title}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                          <Badge variant={p.type === 'free' ? 'secondary' : 'default'} className="text-[10px]">
-                            {priceLabel(p)}
-                          </Badge>
+                          <span className={`text-xs font-semibold ${p.type === 'free' ? 'text-emerald-600' : 'text-slate-500'}`}>{priceLabel(p)}</span>
                           {cat && (
                             <span className="text-[10px] text-slate-500">{cat.name}</span>
                           )}
@@ -650,22 +617,25 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         </div>
                       </div>
 
-                      <Button
-                        size="sm"
-                        className="h-8 shrink-0 px-2 text-[11px]"
-                        variant={p.is_active ? 'default' : 'outline'}
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={!!p.is_active}
+                        aria-label={`${p.is_active ? 'Matikan' : 'Aktifkan'} ${p.title}`}
                         onClick={(e) => {
                           e.stopPropagation()
                           toggleActive(p.id)
                         }}
+                        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${p.is_active ? 'bg-emerald-500' : 'bg-slate-200'}`}
                       >
-                        {p.is_active ? 'ON' : 'OFF'}
-                      </Button>
+                        <span className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${p.is_active ? 'translate-x-5' : ''}`} />
+                      </button>
 
                       <div className="relative shrink-0">
                         <Button
                           size="icon"
-                          className="h-8 w-8"
+                          variant="ghost"
+                          className="h-9 w-8 text-xl text-slate-500"
                           onClick={(e) => {
                             e.stopPropagation()
                             setOpenMenuId((current) => (current === p.id ? null : p.id))
@@ -674,7 +644,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           aria-haspopup="dialog"
                           aria-expanded={openMenuId === p.id}
                         >
-                          ⋯
+                          ⋮
                         </Button>
                       </div>
                       </div>
@@ -683,8 +653,8 @@ export default function ProductBuilder({ products: initialProducts, categories =
                 })}
               </div>
             )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Selected detail mini */}
           {selected && (
