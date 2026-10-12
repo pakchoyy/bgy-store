@@ -148,7 +148,7 @@ export default async function AdminPesanan({ searchParams }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-lg font-extrabold text-gray-900">
           Kelola Pesanan
           {unreadCount > 0 && <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 align-middle text-xs font-bold text-white">{unreadCount} baru</span>}
@@ -157,7 +157,7 @@ export default async function AdminPesanan({ searchParams }) {
         {unreadCount > 0 && (
           <form action={markRead}>
             <input type="hidden" name="back" value={baseQuery({ toast: '' })} />
-            <button type="submit" className="rounded-lg bg-[#0ea5a0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d7a8a]">
+            <button type="submit" className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600">
               ✓ Tandai semua dibaca
             </button>
           </form>
@@ -165,7 +165,7 @@ export default async function AdminPesanan({ searchParams }) {
         <form method="GET" action="/api/admin/orders-export">
           <input type="hidden" name="status" value={statusFilter} />
           <input type="hidden" name="type" value={typeFilter} />
-          <button type="submit" className="bg-gray-100 text-gray-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2">
+          <button type="submit" className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -175,24 +175,24 @@ export default async function AdminPesanan({ searchParams }) {
         </div>
       </div>
       <AdminToast toast={toast === 'read' || toast === 'deleted' ? 'success' : toast} message={toast === 'read' ? 'Pesanan ditandai sudah dibaca' : toast === 'deleted' ? 'Pesanan dihapus' : toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex max-w-full gap-1 overflow-x-auto bg-gray-100 rounded-lg p-1">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="flex max-w-full gap-1.5 overflow-x-auto [scrollbar-width:none]">
           {statuses.map(s => (
             <a
               key={s}
               href={`/admin/pesanan?${baseQuery({ status: s })}`}
-              className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${statusFilter === s ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition-colors ${statusFilter === s ? 'bg-emerald-500 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
             >
               {s === 'all' ? 'Semua' : statusLabels[s]}
             </a>
           ))}
         </div>
-        <div className="flex max-w-full gap-1 overflow-x-auto bg-gray-100 rounded-lg p-1">
+        <div className="flex max-w-full gap-1.5 overflow-x-auto [scrollbar-width:none]">
           {types.map(t => (
             <a
               key={t}
               href={`/admin/pesanan?${baseQuery({ type: t })}`}
-              className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${typeFilter === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition-colors ${typeFilter === t ? 'bg-slate-800 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
             >
               {t === 'all' ? 'Semua Tipe' : typeLabels[t]}
             </a>
@@ -206,14 +206,36 @@ export default async function AdminPesanan({ searchParams }) {
             name="search"
             defaultValue={search}
             placeholder="Cari nama, WA, atau email..."
-            className="border border-gray-200 rounded-lg px-4 py-2 bg-gray-50 w-full text-sm"
+            className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm"
           />
         </form>
       </div>
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="overflow-hidden rounded-2xl bg-white shadow-card ring-1 ring-white/70">
+      <div className="space-y-2 md:hidden">
+        {filtered.map(order => (
+          <a
+            key={order.id}
+            href={`/admin/pesanan?${baseQuery({ selected: order.id, toast: '' })}`}
+            className={`flex items-center gap-3 rounded-xl bg-white px-3 py-2.5 shadow-sm ${selectedOrder?.id === order.id ? 'ring-2 ring-emerald-400' : ''}`}
+          >
+            <span className="min-w-0 flex-1">
+              <span className={`flex items-center gap-1.5 truncate text-sm ${order.unread ? 'font-bold text-gray-950' : 'font-medium text-gray-800'}`}>
+                {order.unread && <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" aria-label="Belum dibaca" />}
+                <span className="truncate">{order.buyer_name}</span>
+              </span>
+              <span className="block truncate text-xs text-gray-500">{order.type === 'produk' ? order.product_title : typeLabels[order.type]} · {order.date}</span>
+            </span>
+            <span className="flex shrink-0 flex-col items-end gap-1">
+              <span className="text-sm font-semibold text-gray-900">{order.price === 0 ? 'Gratis' : formatRupiah(order.price)}</span>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColors[order.status] || 'bg-gray-100 text-gray-600'}`}>{statusLabels[order.status] || order.status}</span>
+            </span>
+          </a>
+        ))}
+        {filtered.length === 0 && <div className="rounded-xl bg-white p-6 text-center text-sm text-gray-400">Tidak ada pesanan ditemukan</div>}
+      </div>
+      <div className="hidden overflow-hidden rounded-2xl bg-white shadow-card ring-1 ring-white/70 md:block">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="keep-table w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase">Pembeli</th>
@@ -292,11 +314,14 @@ export default async function AdminPesanan({ searchParams }) {
           <div className="p-8 text-center text-sm text-gray-400">Tidak ada pesanan ditemukan</div>
         )}
       </div>
-      <aside className="hidden space-y-4 xl:block">
+      <aside className={`${selectedOrder ? 'order-first xl:order-none' : 'hidden'} space-y-4 xl:block`}>
         <div className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-white/70">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-900">Order Details</h2>
+            <h2 className="text-sm font-bold text-gray-900">Detail Pesanan</h2>
+            <div className="flex items-center gap-2">
+            <a href={`/admin/pesanan?${baseQuery({ selected: '', toast: '' })}`} className="rounded-lg px-2 py-1 text-xs font-semibold text-gray-500 hover:bg-gray-100 xl:hidden">✕ Tutup</a>
             <PrintButton className="inline-flex items-center gap-1.5 rounded-xl border border-[#0ea5a0] px-3 py-1.5 text-xs font-bold text-[#0ea5a0] transition-colors hover:bg-emerald-50" />
+            </div>
           </div>
           {selectedOrder ? (
             <div className="space-y-3 text-sm">
