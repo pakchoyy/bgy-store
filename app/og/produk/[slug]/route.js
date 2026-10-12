@@ -25,7 +25,7 @@ async function loadProduct(slug) {
 
 export async function GET(request, { params }) {
   const product = await loadProduct(params.slug)
-  const title = plain(product?.title) || 'Bantu Guru Yuk'
+  const title = plain(product?.title) || 'Kreacy'
   const isFree = product?.type === 'free' || !Number(product?.sale_price)
   const hasDiscount = !isFree && Number(product?.original_price) > Number(product?.sale_price)
   const cover = /^https:\/\//.test(product?.cover_path || '') ? product.cover_path : null

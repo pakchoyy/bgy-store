@@ -7,7 +7,7 @@ export async function POST(request) {
   try {
     const body = await request.json()
     const cleanAmount = Math.floor(Number(body.amount) || 0)
-    const buyerName = String(body.buyer_name || '').trim().slice(0, 120) || 'Pendukung BGY'
+    const buyerName = String(body.buyer_name || '').trim().slice(0, 120) || 'Pendukung Kreacy'
     const buyerEmail = String(body.buyer_email || '').trim().slice(0, 254) || process.env.TRAKTIR_DEFAULT_EMAIL || `traktir@${SITE_HOST}`
     const fileId = /^[0-9a-f-]{36}$/i.test(String(body.product_id || '')) ? String(body.product_id) : ''
     const cleanWhatsapp = String(body.buyer_whatsapp || '').replace(/[^\d+]/g, '') || process.env.TRAKTIR_DEFAULT_PHONE || '081200000000'
@@ -57,7 +57,7 @@ export async function POST(request) {
       const mayarResponse = await createPaymentLink({
         amount: cleanAmount,
         name: 'Traktir Kopi',
-        description: 'Traktir Kopi untuk Pak Choy - Bantu Guru Yuk',
+        description: 'Traktir Kopi untuk Pak Choy - Kreacy',
         redirectUrl,
         customer: { name: buyerName, email: buyerEmail, phone: cleanWhatsapp },
       })

@@ -163,7 +163,7 @@ export default async function AdminVoucher({ searchParams }) {
           </label>
           <label className="block">
             <span className="text-sm font-semibold text-slate-700">Kode voucher</span>
-            <input name="code" required placeholder="Contoh: BGYHEMAT" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100 font-bold uppercase" />
+            <input name="code" required placeholder="Contoh: KREACYHEMAT" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100 font-bold uppercase" />
             <span className="mt-1 block text-xs text-slate-500">Yang diketik pembeli. Huruf besar, tanpa spasi.</span>
           </label>
           <label className="block">

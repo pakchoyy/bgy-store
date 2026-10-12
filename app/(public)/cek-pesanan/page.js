@@ -6,8 +6,8 @@ import { whatsappUrl } from '@/lib/utils'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
-  title: 'Cek Pesanan | Bantu Guru Yuk',
-  description: 'Cek pembelian dan download ulang file yang sudah dibeli di Bantu Guru Yuk.',
+  title: 'Cek Pesanan | Kreacy',
+  description: 'Cek pembelian dan download ulang file yang sudah dibeli di Kreacy.',
   robots: { index: false },
 }
 

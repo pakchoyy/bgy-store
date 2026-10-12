@@ -121,10 +121,10 @@ export default async function AdminTheme({ searchParams }) {
           <h2 className="text-sm font-bold text-gray-900">Logo Preview</h2>
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-[#0ea5a0] rounded-xl flex items-center justify-center">
-              <span className="text-white font-extrabold text-lg">BGY</span>
+              <span className="text-white font-extrabold text-lg">K</span>
             </div>
             <div className="text-sm text-gray-500">
-              <p>Logo saat ini: <strong>BGY</strong></p>
+              <p>Logo saat ini: <strong>K</strong></p>
               <p className="text-xs">(Ganti logo di Asset Manager)</p>
             </div>
           </div>

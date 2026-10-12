@@ -7,7 +7,7 @@ import { demoProducts, demoCategories } from '@/lib/demo-data'
 export const revalidate = 30
 
 export const metadata = {
-  title: 'Produk Gratis | Bantu Guru Yuk',
+  title: 'Produk Gratis | Kreacy',
   description: 'Download gratis modul ajar, ATP, dan media pembelajaran untuk guru dan pendidik.',
 }
 

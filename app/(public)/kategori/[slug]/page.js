@@ -28,9 +28,9 @@ async function getData(slug) {
 
 export async function generateMetadata({ params }) {
   const { category } = await getData(params.slug)
-  if (!category) return { title: 'Kategori tidak ditemukan | Bantu Guru Yuk', robots: { index: false } }
+  if (!category) return { title: 'Kategori tidak ditemukan | Kreacy', robots: { index: false } }
   return {
-    title: `${category.name} | Bantu Guru Yuk`,
+    title: `${category.name} | Kreacy`,
     description: `Kumpulan produk digital ${category.name} untuk guru dan pendidik.`,
   }
 }

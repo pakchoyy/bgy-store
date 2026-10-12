@@ -4,7 +4,7 @@ import PageTableClient from '@/components/admin/PageTableClient'
 import AdminTabs, { STRUCTURE_TABS } from '@/components/admin/AdminTabs'
 
 export const demoPages = [
-  { id: 'page-1', title: 'Tentang Kami', slug: 'tentang-kami', content: '<h1>Tentang Bantu Guru Yuk</h1>', is_active: true, created_at: '2026-01-15', updated_at: '2026-06-20' },
+  { id: 'page-1', title: 'Tentang Kami', slug: 'tentang-kami', content: '<h1>Tentang Kreacy</h1>', is_active: true, created_at: '2026-01-15', updated_at: '2026-06-20' },
   { id: 'page-2', title: 'Kebijakan Privasi', slug: 'kebijakan-privasi', content: '<h1>Kebijakan Privasi</h1>', is_active: true, created_at: '2026-01-15', updated_at: '2026-05-10' },
   { id: 'page-3', title: 'Syarat & Ketentuan', slug: 'syarat-dan-ketentuan', content: '<h1>Syarat & Ketentuan</h1>', is_active: true, created_at: '2026-01-15', updated_at: '2026-05-10' },
   { id: 'page-4', title: 'FAQ', slug: 'faq', content: '<h1>FAQ</h1>', is_active: true, created_at: '2026-02-01', updated_at: '2026-06-15' },

@@ -1,7 +1,7 @@
 export default function manifest() {
   return {
-    name: 'Bantu Guru Yuk',
-    short_name: 'Bantu Guru Yuk',
+    name: 'Kreacy',
+    short_name: 'Kreacy',
     description: 'Bahan ajar, tools guru, dan administrasi kelas siap pakai.',
     start_url: '/',
     scope: '/',

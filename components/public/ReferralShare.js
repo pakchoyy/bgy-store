@@ -5,7 +5,7 @@ import { useState } from 'react'
 export default function ReferralShare({ code, percent, text }) {
   const [copied, setCopied] = useState(false)
   const link = typeof window === 'undefined' ? '' : `${window.location.origin}/?v=${code}`
-  const message = `${text || `Aku pakai Bantu Guru Yuk buat bahan ajar & tools guru, praktis banget!`} Pakai kodeku *${code}* biar dapat diskon ${percent}%: ${link || `/?v=${code}`}`
+  const message = `${text || `Aku pakai Kreacy buat bahan ajar & tools guru, praktis banget!`} Pakai kodeku *${code}* biar dapat diskon ${percent}%: ${link || `/?v=${code}`}`
 
   return (
     <section aria-labelledby="referral-title" className="rounded-2xl bg-white/95 p-5 shadow-sm">

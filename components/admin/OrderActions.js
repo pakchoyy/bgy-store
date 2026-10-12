@@ -28,7 +28,7 @@ export function FollowUpButton({ order }) {
     const phone = waPhone(order.whatsapp)
     if (!phone) return
     const message = order.status === 'paid'
-      ? `Halo ${order.buyer_name}, terima kasih sudah membeli *${order.product_title}* di Bantu Guru Yuk 🙏${order.download_token ? `\n\nFile bisa diunduh di sini (berlaku 7 hari):\n${thankYouLink(order.download_token)}` : ''}\n\nKalau ada kendala, balas pesan ini ya.`
+      ? `Halo ${order.buyer_name}, terima kasih sudah membeli *${order.product_title}* di Kreacy 🙏${order.download_token ? `\n\nFile bisa diunduh di sini (berlaku 7 hari):\n${thankYouLink(order.download_token)}` : ''}\n\nKalau ada kendala, balas pesan ini ya.`
       : `Halo ${order.buyer_name}, pesanan *${order.product_title}* kamu masih menunggu pembayaran. Ada yang bisa kami bantu?`
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
   }

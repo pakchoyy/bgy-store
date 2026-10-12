@@ -29,7 +29,7 @@ export default function AppearanceBuilder({
   initialAppearance,
   navItems = [],
   products = [],
-  siteName = 'BGY',
+  siteName = 'Kreacy',
 }) {
   const router = useRouter()
   const { addToast } = useToast()
@@ -364,7 +364,7 @@ export default function AppearanceBuilder({
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xs font-extrabold">
-                        {(form.profile_name || 'BGY').slice(0, 3).toUpperCase()}
+                        {(form.profile_name || 'Kreacy').slice(0, 3).toUpperCase()}
                       </div>
                     )}
                   </div>

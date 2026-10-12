@@ -46,7 +46,7 @@ export default async function AdminFooter({ searchParams }) {
   const copyright = getConfig(
     configs,
     'copyright_text',
-    '© 2026 Bantu Guru Yuk. All rights reserved.'
+    '© 2026 Kreacy. All rights reserved.'
   )
   const desc = getConfig(configs, 'description', '')
 
@@ -55,7 +55,7 @@ export default async function AdminFooter({ searchParams }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-lg font-extrabold text-gray-900">Footer</h1>
-          <p className="text-sm text-gray-500">Penjelasan BGY + copyright saja</p>
+          <p className="text-sm text-gray-500">Penjelasan Kreacy + copyright saja</p>
         </div>
       </div>
 
@@ -87,14 +87,14 @@ export default async function AdminFooter({ searchParams }) {
           <h2 className="text-sm font-bold text-gray-900">Pengaturan Footer</h2>
           <div>
             <label className="text-sm font-medium text-gray-700 mb-1 block">
-              Penjelasan BGY
+              Penjelasan Kreacy
             </label>
             <textarea
               name="description"
               rows={4}
               defaultValue={desc}
               className="border border-gray-200 rounded-lg px-4 py-2.5 bg-gray-50 w-full text-sm resize-y"
-              placeholder="Deskripsi singkat tentang Bantu Guru Yuk..."
+              placeholder="Deskripsi singkat tentang Kreacy..."
             />
           </div>
           <div>
@@ -118,9 +118,9 @@ export default async function AdminFooter({ searchParams }) {
           <div className="bg-gray-50 rounded-2xl border border-gray-100 px-5 py-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <div className="w-7 h-7 bg-[#0ea5a0]/15 rounded-lg flex items-center justify-center">
-                <span className="text-[#0ea5a0] font-extrabold text-xs">BGY</span>
+                <span className="text-[#0ea5a0] font-extrabold text-xs">K</span>
               </div>
-              <span className="text-sm font-extrabold text-gray-900">Bantu Guru Yuk</span>
+              <span className="text-sm font-extrabold text-gray-900">Kreacy</span>
             </div>
             <p className="text-xs text-gray-500 leading-relaxed">
               {desc || 'Deskripsi footer akan tampil di sini'}

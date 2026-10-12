@@ -11,9 +11,9 @@ import { getAnnouncement, hasSupabase } from '@/lib/store-shell'
 const demoPages = {
   'tentang-kami': {
     slug: 'tentang-kami',
-    title: 'Tentang Bantu Guru Yuk',
+    title: 'Tentang Kreacy',
     content: `<h2>Teman Praktis untuk Guru dan Pendidik</h2>
-<p>Bantu Guru Yuk hadir untuk membantu guru menyelesaikan berbagai kebutuhan pembelajaran dan administrasi dengan cara yang lebih praktis, sederhana, dan siap digunakan.</p>
+<p>Kreacy hadir untuk membantu guru menyelesaikan berbagai kebutuhan pembelajaran dan administrasi dengan cara yang lebih praktis, sederhana, dan siap digunakan.</p>
 <h2>Apa yang Tersedia?</h2>
 <p>Guru dapat menemukan modul ajar, ATP, media pembelajaran, administrasi kelas, dan file pendukung lain dalam format digital. Sebagian materi tersedia gratis, sebagian lain berbayar untuk mendukung pengembangan konten yang lebih lengkap.</p>
 <h2>Untuk Siapa?</h2>
@@ -24,7 +24,7 @@ const demoPages = {
     slug: 'syarat-dan-ketentuan',
     title: 'Syarat & Ketentuan',
     content: `<h2>Produk Digital</h2>
-<p>Semua produk Bantu Guru Yuk berupa file digital. Tautan unduhan dikirim otomatis setelah pembayaran berhasil dikonfirmasi.</p>
+<p>Semua produk Kreacy berupa file digital. Tautan unduhan dikirim otomatis setelah pembayaran berhasil dikonfirmasi.</p>
 <h2>Penggunaan</h2>
 <p>File boleh digunakan dan disesuaikan untuk kebutuhan pembelajaran dan administrasi pribadi atau sekolah Anda. File tidak boleh dijual ulang, dibagikan secara massal, atau diakui sebagai karya sendiri.</p>
 <h2>Pembayaran</h2>
@@ -135,11 +135,11 @@ async function getData(slug) {
 export async function generateMetadata({ params }) {
   const { slug } = params
   const { page } = await getData(slug)
-  if (!page) return { title: 'Halaman tidak ditemukan | Bantu Guru Yuk', robots: { index: false } }
+  if (!page) return { title: 'Halaman tidak ditemukan | Kreacy', robots: { index: false } }
   return {
-    title: `${page.title} | Bantu Guru Yuk`,
+    title: `${page.title} | Kreacy`,
     description: slug === 'tentang-kami'
-      ? 'Bantu Guru Yuk adalah teman praktis untuk guru dan pendidik: bahan pembelajaran, tools guru, dan kebutuhan administrasi kelas yang siap digunakan.'
+      ? 'Kreacy adalah teman praktis untuk guru dan pendidik: bahan pembelajaran, tools guru, dan kebutuhan administrasi kelas yang siap digunakan.'
       : (page.content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160),
   }
 }

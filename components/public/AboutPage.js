@@ -37,12 +37,12 @@ export default function AboutPage() {
   return (
     <div className="space-y-3">
       <section aria-labelledby="about-title" className="rounded-2xl bg-white/95 p-5 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0d7a8a]">Tentang Bantu Guru Yuk</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0d7a8a]">Tentang Kreacy</p>
         <h1 id="about-title" className="mt-2 text-[1.6rem] font-bold leading-tight text-slate-900">
           Teman Praktis untuk Guru dan Pendidik
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
-          Bantu Guru Yuk hadir untuk membantu guru menyelesaikan berbagai kebutuhan pembelajaran dan administrasi dengan cara yang lebih praktis, sederhana, dan siap digunakan.
+          Kreacy hadir untuk membantu guru menyelesaikan berbagai kebutuhan pembelajaran dan administrasi dengan cara yang lebih praktis, sederhana, dan siap digunakan.
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
           <PrimaryCta />
@@ -75,13 +75,13 @@ export default function AboutPage() {
         </span>
         <h2 id="about-story" className="mt-3 text-lg font-semibold leading-snug">Dibuat dari Masalah Nyata di Sekolah</h2>
         <p className="mt-2 text-sm leading-relaxed text-white/85">
-          Bantu Guru Yuk dikembangkan berdasarkan kebutuhan yang benar-benar ditemui dalam aktivitas guru sehari-hari. Tujuannya sederhana: mengurangi pekerjaan yang bisa dibuat lebih praktis, supaya guru bisa lebih fokus pada pembelajaran.
+          Kreacy dikembangkan berdasarkan kebutuhan yang benar-benar ditemui dalam aktivitas guru sehari-hari. Tujuannya sederhana: mengurangi pekerjaan yang bisa dibuat lebih praktis, supaya guru bisa lebih fokus pada pembelajaran.
         </p>
       </section>
 
       <section aria-labelledby="about-audience" className="rounded-2xl bg-white/95 p-5 shadow-sm">
         <h2 id="about-audience" className="text-lg font-semibold text-slate-900">Untuk Siapa?</h2>
-        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Pengguna Bantu Guru Yuk">
+        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Pengguna Kreacy">
           {audiences.map((item) => (
             <li key={item} className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200">
               {item}

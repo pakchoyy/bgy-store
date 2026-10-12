@@ -126,7 +126,7 @@ export default async function AdminSettings({ searchParams }) {
                 <input name="referral_discount_percent" type="number" min="0" max="90" defaultValue={settings.referral_discount_percent || ''} placeholder="Contoh: 10" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
               </label>
               <label className="mt-3 block text-sm font-medium text-gray-700">Teks ajakan <span className="font-normal text-gray-400">(opsional)</span>
-                <input name="referral_share_text" defaultValue={settings.referral_share_text || ''} placeholder="Contoh: Aku langganan bahan ajar di Bantu Guru Yuk, praktis!" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
+                <input name="referral_share_text" defaultValue={settings.referral_share_text || ''} placeholder="Contoh: Aku langganan bahan ajar di Kreacy, praktis!" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
               </label>
             </div>
           </div>

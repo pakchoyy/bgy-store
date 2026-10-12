@@ -116,7 +116,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
       const response = await fetch(`/api/admin/products/file?id=${encodeURIComponent(product.id)}`)
       const data = await response.json().catch(() => ({}))
       if (!response.ok || !data.url) throw new Error(data.error || 'Gagal mengambil link file.')
-      const message = `Halo, terima kasih sudah membeli *${product.title}* di Bantu Guru Yuk 🙏\n\nBerikut ${data.kind === 'link' ? 'link produknya' : 'link download filenya (berlaku 7 hari)'}:\n${data.url}`
+      const message = `Halo, terima kasih sudah membeli *${product.title}* di Kreacy 🙏\n\nBerikut ${data.kind === 'link' ? 'link produknya' : 'link download filenya (berlaku 7 hari)'}:\n${data.url}`
       if (target === 'wa') {
         waWindow.location.href = `https://wa.me/?text=${encodeURIComponent(message)}`
       } else {
@@ -130,7 +130,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
   }
   const previewProducts = useMemo(() => products.filter((p) => p.is_active).sort(bySortOrder), [products])
   const previewBlocks = useMemo(() => blocks.filter((b) => b.is_active !== false), [blocks])
-  const profileName = appearance.profileName || 'Bantu Guru Yuk'
+  const profileName = appearance.profileName || 'Kreacy'
   const previewBg = appearance.bgStyle === 'flat'
     ? { backgroundColor: appearance.bgColor || '#0ea5a0' }
     : { backgroundImage: `linear-gradient(180deg, ${appearance.bgColor || '#0ea5a0'} 0%, ${appearance.bgColor || '#0ea5a0'}cc 35%, #f0fdfa 70%, #f8fafc 100%)` }

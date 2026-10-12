@@ -185,7 +185,7 @@ export default function PageForm({ initialData }) {
               type="text"
               value={form.meta_title}
               onChange={e => updateField('meta_title', e.target.value)}
-              placeholder="{title} — Bantu Guru Yuk"
+              placeholder="{title} — Kreacy"
             />
           </div>
           <div>

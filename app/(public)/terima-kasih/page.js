@@ -142,7 +142,7 @@ export default async function TerimaKasihPage({ searchParams }) {
               <StatusIcon tone="green">{checkPath}</StatusIcon>
               <h1 className="text-lg font-bold text-gray-900">Terima kasih sudah traktir kopi! ☕</h1>
               <p className="mt-1 text-sm text-gray-600">
-                Dukunganmu bikin Pak Choy makin semangat berkarya{order.buyer_name && order.buyer_name !== 'Pendukung BGY' ? `, ${order.buyer_name}` : ''}.
+                Dukunganmu bikin Pak Choy makin semangat berkarya{order.buyer_name && !['Pendukung Kreacy', 'Pendukung BGY'].includes(order.buyer_name) ? `, ${order.buyer_name}` : ''}.
               </p>
               {freeFile && <DownloadReady freeProductId={freeFile.id} title={freeFile.title} storageKey={`dl-${order.id}`} {...deliveryOf(freeFileInfo)} />}
             </>

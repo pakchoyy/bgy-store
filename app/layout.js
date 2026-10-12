@@ -14,17 +14,18 @@ const siteDescription = 'Download modul ajar, ATP, media pembelajaran, tools gur
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'Bantu Guru Yuk — Teman Praktis Guru dan Pendidik',
+  title: 'Kreacy — Teman Praktis Guru dan Pendidik',
   description: siteDescription,
   openGraph: {
     type: 'website',
     locale: 'id_ID',
-    siteName: 'Bantu Guru Yuk',
-    title: 'Bantu Guru Yuk — Teman Praktis Guru dan Pendidik',
+    siteName: 'Kreacy',
+    title: 'Kreacy — Teman Praktis Guru dan Pendidik',
     description: siteDescription,
   },
   twitter: { card: 'summary_large_image' },
-  appleWebApp: { capable: true, title: 'Bantu Guru Yuk', statusBarStyle: 'default' },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } } : {}),
+  appleWebApp: { capable: true, title: 'Kreacy', statusBarStyle: 'default' },
 }
 
 export const viewport = {

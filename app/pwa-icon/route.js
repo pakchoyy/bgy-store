@@ -18,13 +18,13 @@ export function GET(request) {
           background: 'linear-gradient(135deg, #10b981 0%, #0ea5a0 45%, #123b35 100%)',
           borderRadius: maskable ? 0 : size * 0.22,
           color: '#ffffff',
-          fontSize: size * (maskable ? 0.26 : 0.32),
+          fontSize: size * (maskable ? 0.4 : 0.5),
           fontWeight: 800,
           letterSpacing: -size * 0.01,
           fontFamily: 'sans-serif',
         }}
       >
-        BGY
+        K
       </div>
     ),
     { width: size, height: size, headers: { 'Cache-Control': 'public, max-age=604800, immutable' } },

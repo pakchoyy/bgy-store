@@ -52,7 +52,7 @@ export default async function AdminAppearance() {
       initialAppearance={getAppearance(settings)}
       navItems={navItems}
       products={products}
-      siteName={settings.site_name || 'BGY'}
+      siteName={settings.site_name || 'Kreacy'}
     />
     </>
   )

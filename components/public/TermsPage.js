@@ -38,7 +38,7 @@ export default function TermsPage({ waUrl }) {
       <section aria-labelledby="terms-title" className="rounded-2xl bg-white/95 p-5 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0d7a8a]">Syarat & Ketentuan</p>
         <h1 id="terms-title" className="mt-2 text-[1.6rem] font-bold leading-tight text-slate-900">
-          Aturan Singkat Belanja di Bantu Guru Yuk
+          Aturan Singkat Belanja di Kreacy
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
           Kami buat sesingkat mungkin supaya mudah dipahami. Dengan membeli atau mengunduh produk, Anda menyetujui poin-poin di bawah ini.
@@ -88,7 +88,7 @@ export default function TermsPage({ waUrl }) {
 
       <section aria-labelledby="terms-contact" className="rounded-2xl bg-[#123b35] p-5 text-center text-white shadow-sm">
         <h2 id="terms-contact" className="text-base font-semibold">Ada pertanyaan atau kendala?</h2>
-        <p className="mt-1 text-sm text-white/80">Tim Bantu Guru Yuk siap membantu.</p>
+        <p className="mt-1 text-sm text-white/80">Tim Kreacy siap membantu.</p>
         {waUrl ? (
           <a
             href={waUrl}

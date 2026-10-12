@@ -162,7 +162,7 @@ export default function LynkShell({
                     <div key={item.id} className="mb-2 flex items-center gap-2 rounded-xl border border-slate-200 p-2.5 last:mb-0">
                       <a href={item.slug ? `/produk/${item.slug}` : '/produk'} className="flex min-w-0 flex-1 items-center gap-3 rounded-lg transition-colors hover:bg-slate-50">
                         <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-teal-50 text-[10px] font-bold text-[#0d7a8a]">
-                          {item.cover_path ? <img src={item.cover_path} alt="" className="h-full w-full object-cover" /> : 'BGY'}
+                          {item.cover_path ? <img src={item.cover_path} alt="" className="h-full w-full object-cover" /> : 'Kreacy'}
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm font-semibold leading-snug text-slate-900 line-clamp-2">{item.title}</span>
@@ -213,7 +213,7 @@ export default function LynkShell({
               <img src={profileAvatarUrl} alt={profileName} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xl font-semibold">
-                {(profileName || 'BGY').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase() || 'BGY'}
+                {(profileName || 'Kreacy').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase() || 'Kreacy'}
               </div>
             )}
           </div>

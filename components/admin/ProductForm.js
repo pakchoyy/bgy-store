@@ -693,7 +693,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
             value={form.meta_title}
             onChange={e => updateField('meta_title', e.target.value)}
             className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
-            placeholder="{title} — Bantu Guru Yuk"
+            placeholder="{title} — Kreacy"
           />
         </div>
         <div>

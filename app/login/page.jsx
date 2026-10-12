@@ -54,9 +54,9 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-white/15 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-white font-extrabold text-xl">BGY</span>
+            <span className="text-white font-extrabold text-xl">K</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-white">Bantu Guru Yuk</h1>
+          <h1 className="text-2xl font-extrabold text-white">Kreacy</h1>
           <p className="text-sm text-white/70 mt-1">Masuk ke dashboard admin</p>
         </div>
 
@@ -119,7 +119,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-xs text-white/50 text-center mt-5">
-          Hanya untuk admin Bantu Guru Yuk
+          Hanya untuk admin Kreacy
         </p>
       </div>
     </div>

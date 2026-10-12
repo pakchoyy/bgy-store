@@ -115,7 +115,7 @@ export default function CheckoutPage({ products, waUrl }) {
               {products.map((item) => (
                 <li key={item.id} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
                   <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-emerald-50 ring-1 ring-slate-200">
-                    {item.cover_path ? <img src={item.cover_path} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs font-black text-emerald-700">BGY</div>}
+                    {item.cover_path ? <img src={item.cover_path} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs font-black text-emerald-700">K</div>}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="line-clamp-2 text-sm font-semibold leading-snug sm:text-base">{item.title}</p>

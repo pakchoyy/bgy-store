@@ -60,7 +60,7 @@ export async function GET(request) {
   const statusLabel = { paid: 'Lunas', pending: 'Pending', failed: 'Gagal', expired: 'Kedaluwarsa' }
 
   const lines = [
-    row('Laporan Bulanan Bantu Guru Yuk', monthLabel),
+    row('Laporan Bulanan Kreacy', monthLabel),
     '',
     row('RINGKASAN'),
     row('Pendapatan produk', sum(productOrders)),

@@ -113,7 +113,7 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
                   {product.cover_path ? (
                     <img src={product.cover_path} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-xs font-black text-emerald-700">BGY</div>
+                    <div className="flex h-full items-center justify-center text-xs font-black text-emerald-700">K</div>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">

@@ -130,7 +130,7 @@ export async function POST(request) {
       const mayarResponse = await createPaymentLink({
         amount,
         name,
-        description: isCart ? `Pembelian ${items.length} produk Bantu Guru Yuk` : `Pembelian ${name}`,
+        description: isCart ? `Pembelian ${items.length} produk Kreacy` : `Pembelian ${name}`,
         redirectUrl,
         customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: cleanWhatsapp },
       })

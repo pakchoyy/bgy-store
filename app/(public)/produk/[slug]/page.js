@@ -76,7 +76,7 @@ async function getProduct(slug) {
 export async function generateMetadata({ params }) {
   const { product } = await getProduct(params.slug)
   if (!product) return { title: 'Produk tidak ditemukan', robots: { index: false } }
-  const title = product.meta_title || `${product.title} | Bantu Guru Yuk`
+  const title = product.meta_title || `${product.title} | Kreacy`
   const description = product.meta_description || (product.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
   return {
     title,
@@ -128,7 +128,7 @@ export default async function ProdukDetailPage({ params }) {
     name: product.title,
     description: (product.meta_description || product.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300) || product.title,
     image: [product.cover_path || `${siteUrl}/og/produk/${product.slug}`],
-    brand: { '@type': 'Brand', name: 'Bantu Guru Yuk' },
+    brand: { '@type': 'Brand', name: 'Kreacy' },
     offers: {
       '@type': 'Offer',
       url: `${siteUrl}/produk/${product.slug}`,
