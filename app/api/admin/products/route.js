@@ -105,7 +105,7 @@ export async function POST(request) {
 
     let result
     for (let attempt = 0; attempt < 5; attempt++) {
-      result = await withoutMissingBundleColumn((row) => supabase.from('products').insert(row).select().single(), { ...product, slug: randomSlug(10) })
+      result = await withoutMissingBundleColumn((row) => supabase.from('products').insert(row).select().single(), { ...product, slug: randomSlug(8) })
       if (result.error?.code !== '23505') break
     }
     const { data, error, warning } = result
