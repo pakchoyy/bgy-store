@@ -33,6 +33,7 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
   const [imagePath, setImagePath] = useState('')
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [collapseAfter, setCollapseAfter] = useState('')
 
   useEffect(() => {
     if (initialBlock) {
@@ -43,6 +44,7 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
       setTransparent(bg === 'transparent')
       setBgColor(bg === 'transparent' ? '#ffffff' : bg)
       setImagePath(initialBlock.image_path || '')
+      setCollapseAfter(initialBlock.collapse_after ? String(initialBlock.collapse_after) : '')
     }
   }, [initialBlock?.id])
 
@@ -90,6 +92,7 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
         text_content: textContent,
         background_color: finalBg,
         image_path: imagePath,
+        collapse_after: collapseAfter === '' ? null : Number(collapseAfter),
       }
       const isEditMode = !!initialBlock?.id
       const res = await fetch('/api/admin/blocks', {
@@ -207,6 +210,15 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
               </div>
             </div>
           )}
+
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+            <label htmlFor="collapse-after" className="block text-sm font-medium text-gray-700">Produk di bawah blok ini</label>
+            <select id="collapse-after" value={collapseAfter} onChange={(e) => setCollapseAfter(e.target.value)} className="mt-1 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm">
+              <option value="">Tampilkan semua</option>
+              {[2, 3, 4, 5, 6, 8, 10].map((n) => <option key={n} value={n}>Tampilkan {n} dulu, sisanya &quot;Lihat selengkapnya&quot;</option>)}
+            </select>
+            <p className="mt-1 text-xs text-gray-500">Berlaku untuk produk sampai blok berikutnya. Butuh SQL 020.</p>
+          </div>
 
           <div className="flex gap-3 pt-1">
             <Button variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>

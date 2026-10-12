@@ -16,7 +16,7 @@ async function getData() {
   }
 
   const shell = await fetchStoreShell()
-  const products = (shell.products || []).slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+  const products = (shell.products || []).filter((p) => p.show_on_home !== false).slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
 
   const { createTrustedServerClient } = await import('@/lib/supabase-server')
   const trusted = await createTrustedServerClient()

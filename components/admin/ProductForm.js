@@ -185,6 +185,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
       meta_title: form.meta_title || null,
       meta_description: form.meta_description || null,
       is_active: form.is_active,
+      show_on_home: form.show_on_home !== false,
       ...(isEditing ? { id: initialData.id } : {}),
     }
     try {
@@ -745,6 +746,10 @@ export default function ProductForm({ initialData, categories = [], productOptio
         <label className="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" checked={form.is_active} onChange={e => updateField('is_active', e.target.checked)} className="h-5 w-5 rounded text-[#0ea5a0] focus:ring-[#0ea5a0]" />
           <span className="text-sm font-medium text-gray-700">{form.is_active ? 'Aktif' : 'Draft'}</span>
+        </label>
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" checked={form.show_on_home !== false} onChange={e => updateField('show_on_home', e.target.checked)} className="mt-0.5 h-5 w-5 rounded text-[#0ea5a0] focus:ring-[#0ea5a0]" />
+          <span className="text-sm text-gray-700"><span className="font-medium">Tampil di Beranda</span><span className="block text-xs text-gray-500">Matikan supaya produk hanya muncul di halaman Produk, Kategori, dan pencarian.</span></span>
         </label>
       </CardSection>
 

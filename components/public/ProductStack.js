@@ -2,6 +2,7 @@ import ProductCard from '@/components/public/ProductCard'
 import ContentBlockCard from '@/components/public/ContentBlockCard'
 import { getCardLayout } from '@/lib/utils'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import ShowMore from '@/components/public/ShowMore'
 
 function StaticWrap({ className, children }) {
   return <div className={className}>{children}</div>
@@ -39,26 +40,37 @@ export default function ProductStack({ products = [], contentBlocks = [], emptyT
     )
   }
 
-  return (
-    <div className="grid grid-cols-6 gap-2.5">
-      {items.map((item, index) => {
-        if (item._kind === 'block') {
-          return (
-            <Wrap key={`block-${item.id}`} className="col-span-6" delay={Math.min(index, 8) * 45}>
-              <ContentBlockCard block={item} />
-            </Wrap>
-          )
-        }
+  // Kelompokkan per blok: blok dengan collapse_after hanya menampilkan N produk pertama di bawahnya.
+  const nodes = []
+  let limit = null
+  let shown = 0
+  let hidden = []
+  const flush = () => {
+    if (hidden.length) nodes.push(<ShowMore key={`more-${nodes.length}`} count={hidden.length}>{hidden}</ShowMore>)
+    hidden = []
+  }
 
-        const layout = getCardLayout(item.card_layout)
-        const span = layout.grid
+  items.forEach((item, index) => {
+    if (item._kind === 'block') {
+      flush()
+      limit = item.collapse_after || null
+      shown = 0
+      nodes.push(
+        <Wrap key={`block-${item.id}`} className="col-span-6" delay={Math.min(index, 8) * 45}>
+          <ContentBlockCard block={item} />
+        </Wrap>
+      )
+      return
+    }
+    const node = (
+      <Wrap key={`product-${item.id}`} className={getCardLayout(item.card_layout).grid} delay={Math.min(index, 8) * 45}>
+        <ProductCard product={item} />
+      </Wrap>
+    )
+    if (limit && shown >= limit) hidden.push(node)
+    else { nodes.push(node); shown++ }
+  })
+  flush()
 
-        return (
-          <Wrap key={`product-${item.id}`} className={span} delay={Math.min(index, 8) * 45}>
-            <ProductCard product={item} />
-          </Wrap>
-        )
-      })}
-    </div>
-  )
+  return <div className="grid grid-cols-6 gap-2.5">{nodes}</div>
 }

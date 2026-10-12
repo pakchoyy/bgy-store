@@ -14,6 +14,7 @@ function sanitizeBlock(body) {
     background_color: bg === 'transparent' || /^#[0-9a-f]{3,8}$/i.test(bg) ? bg : '#ffffff',
     image_path: safeUrl(body.image_path),
     is_active: body.is_active !== false,
+    ...('collapse_after' in body ? { collapse_after: Number.isInteger(Number(body.collapse_after)) && Number(body.collapse_after) >= 1 && body.collapse_after !== '' && body.collapse_after !== null ? Math.min(50, Number(body.collapse_after)) : null } : {}),
   }
 }
 
@@ -61,6 +62,9 @@ export async function POST(request) {
       .insert({ ...block, sort_order: nextSort })
       .select()
       .single()
+      .then(async (res) => (res.error && /collapse_after/.test(res.error.message || '')
+        ? supabase.from('content_blocks').insert({ ...block, collapse_after: undefined, sort_order: nextSort }).select().single()
+        : res))
 
     if (error) {
       console.error('POST /api/admin/blocks insert error:', error)
@@ -114,6 +118,11 @@ export async function PUT(request) {
       .eq('id', id)
       .select()
       .single()
+      .then(async (res) => {
+        if (!res.error || !/collapse_after/.test(res.error.message || '')) return res
+        delete update.collapse_after
+        return supabase.from('content_blocks').update(update).eq('id', id).select().single()
+      })
 
     if (error) {
       console.error('PUT /api/admin/blocks update error:', error)
