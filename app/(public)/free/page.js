@@ -5,6 +5,8 @@ import { fetchStoreShell, demoShellDataWithProducts, hasSupabase } from '@/lib/s
 import { demoProducts, demoCategories } from '@/lib/demo-data'
 
 export const revalidate = 30
+// Data toko sama untuk semua pengunjung; tanpa ini fetch Supabase membuat halaman selalu dinamis.
+export const dynamic = 'force-static'
 
 export const metadata = {
   title: 'Produk Gratis | Kreacy',

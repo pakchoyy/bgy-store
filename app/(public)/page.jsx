@@ -5,6 +5,8 @@ import { demoProducts } from '@/lib/demo-data'
 import Testimonials from '@/components/public/Testimonials'
 
 export const revalidate = 30
+// Data toko sama untuk semua pengunjung; tanpa ini fetch Supabase membuat halaman selalu dinamis.
+export const dynamic = 'force-static'
 
 async function getData() {
   if (!hasSupabase()) {
