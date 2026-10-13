@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { isAdmin, isConfiguredAdminEmail } from '@/lib/admin-role';
 import { createServiceClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
-import { rateLimited, tooMany, clientIp } from '@/lib/rate-limit';
+import { rateLimitedShared, tooMany, clientIp } from '@/lib/rate-limit';
 
 function createAuthClient(request, response) {
   const supabase = createServerClient(
@@ -25,7 +25,7 @@ function createAuthClient(request, response) {
 
 export async function POST(request) {
   // Anti brute force: maks 8 percobaan / 15 menit per IP.
-  if (rateLimited(request, 'login', 8, 15 * 60 * 1000)) {
+  if (await rateLimitedShared(request, 'login', 8, 15 * 60 * 1000)) {
     console.warn('[security] login rate-limited', { ip: clientIp(request) });
     return tooMany();
   }
