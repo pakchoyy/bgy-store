@@ -1,9 +1,11 @@
+import { assertAdminAction } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { demoSettings } from '@/lib/demo-data'
 
 async function saveAnnouncement(formData) {
   'use server'
+  await assertAdminAction()
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/announcement?toast=demo')

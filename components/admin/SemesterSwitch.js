@@ -1,9 +1,11 @@
+import { assertAdminAction } from '@/lib/admin-auth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 
 async function toggleSemester(formData) {
   'use server'
+  await assertAdminAction()
   const semester = formData.get('semester') === '2' ? 2 : 1
   const hide = formData.get('hide') === 'true'
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/produk')

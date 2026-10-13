@@ -1,3 +1,4 @@
+import { assertAdminAction } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import crypto from 'crypto'
@@ -7,6 +8,7 @@ import { PrintButton, FollowUpButton, CopyLinkButton, ConfirmSubmitButton } from
 
 async function generateLink(formData) {
   'use server'
+  await assertAdminAction()
   const id = formData.get('id')
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/pesanan?toast=success&selected=${id}`)
@@ -24,6 +26,7 @@ async function generateLink(formData) {
 
 async function markRead(formData) {
   'use server'
+  await assertAdminAction()
   const id = formData.get('id')
   const back = formData.get('back') || ''
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/pesanan?${back}`)
@@ -37,6 +40,7 @@ async function markRead(formData) {
 
 async function deleteOrder(formData) {
   'use server'
+  await assertAdminAction()
   const id = formData.get('id')
   const back = formData.get('back') || ''
   if (!id || !process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/pesanan?${back}`)

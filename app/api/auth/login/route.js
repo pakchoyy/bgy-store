@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { isAdmin, isConfiguredAdminEmail } from '@/lib/admin-role';
 import { createServiceClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
+import { rateLimited, tooMany, clientIp } from '@/lib/rate-limit';
 
 function createAuthClient(request, response) {
   const supabase = createServerClient(
@@ -23,6 +24,11 @@ function createAuthClient(request, response) {
 }
 
 export async function POST(request) {
+  // Anti brute force: maks 8 percobaan / 15 menit per IP.
+  if (rateLimited(request, 'login', 8, 15 * 60 * 1000)) {
+    console.warn('[security] login rate-limited', { ip: clientIp(request) });
+    return tooMany();
+  }
   try {
     const { email, password } = await request.json();
     if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password || email.length > 254 || password.length > 1024) return NextResponse.json({ error: 'Masukkan email dan password yang valid.' }, { status: 400 });
@@ -33,7 +39,10 @@ export async function POST(request) {
     );
     const supabase = createAuthClient(request, response);
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (error) return NextResponse.json({ error: 'Email atau password salah.' }, { status: 401 });
+    if (error) {
+      console.warn('[security] login gagal', { ip: clientIp(request), email: email.trim().toLowerCase().slice(0, 3) + '***' });
+      return NextResponse.json({ error: 'Email atau password salah.' }, { status: 401 });
+    }
     const result = await supabase.auth.getUser();
     let user = result.data?.user;
     if (!result.error && user && !isAdmin(user) && isConfiguredAdminEmail(user.email)) {

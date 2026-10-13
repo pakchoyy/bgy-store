@@ -1,3 +1,4 @@
+import { assertAdminAction } from '@/lib/admin-auth'
 import AdminTabs, { STRUCTURE_TABS } from '@/components/admin/AdminTabs'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
@@ -5,6 +6,7 @@ import { demoNavItems } from '@/lib/demo-data'
 
 async function saveNav(formData) {
   'use server'
+  await assertAdminAction()
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/navigation?toast=demo')
@@ -24,6 +26,7 @@ async function saveNav(formData) {
 
 async function deleteNav(formData) {
   'use server'
+  await assertAdminAction()
   const id = formData.get('id')
   const supabase = await createClient()
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/navigation?toast=demo')

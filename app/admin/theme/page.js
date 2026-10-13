@@ -1,3 +1,4 @@
+import { assertAdminAction } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { demoSettings } from '@/lib/demo-data'
@@ -5,6 +6,7 @@ import AdminTabs, { APPEARANCE_TABS } from '@/components/admin/AdminTabs'
 
 async function saveTheme(formData) {
   'use server'
+  await assertAdminAction()
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/theme?toast=demo')

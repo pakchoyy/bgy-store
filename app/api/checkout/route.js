@@ -154,7 +154,7 @@ export async function POST(request) {
     } catch (e) {
       console.error('checkout mayar error:', e)
       await supabase.from('orders').update({ status: 'failed' }).eq('id', order.id)
-      return NextResponse.json({ error: e.message || 'Gagal membuat pembayaran Mayar' }, { status: 502 })
+      console.error('[mayar] create payment failed:', e); return NextResponse.json({ error: 'Pembayaran belum bisa dibuat. Coba lagi sebentar lagi.' }, { status: 502 })
     }
   } catch (err) {
     console.error('checkout error:', err)

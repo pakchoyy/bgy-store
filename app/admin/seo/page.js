@@ -1,3 +1,4 @@
+import { assertAdminAction } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { SITE_HOST } from '@/lib/site'
@@ -5,6 +6,7 @@ import { demoSettings } from '@/lib/demo-data'
 
 async function saveSEO(formData) {
   'use server'
+  await assertAdminAction()
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/seo?tab=${raw._tab || 'global'}&toast=demo`)

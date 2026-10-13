@@ -1,3 +1,4 @@
+import { assertAdminAction } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { demoProducts } from '@/lib/demo-data'
@@ -5,6 +6,7 @@ import AdminTabs, { PAGE_404_TABS } from '@/components/admin/AdminTabs'
 
 async function saveCustom404(formData) {
   'use server'
+  await assertAdminAction()
   const raw = Object.fromEntries(formData)
   const supabase = await createClient()
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/custom-404?toast=demo')

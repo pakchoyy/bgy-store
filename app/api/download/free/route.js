@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
+import { rateLimited, tooMany } from '@/lib/rate-limit';
 import { demoProducts } from '@/lib/demo-data';
 import { resolveProductDownloadUrl } from '@/lib/product-download';
 
 export async function POST(request) {
+  if (rateLimited(request, 'free-download', 30, 10 * 60 * 1000)) return tooMany();
   try {
     const body = await request.json().catch(() => ({}));
     const { product_id } = body;

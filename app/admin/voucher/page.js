@@ -1,3 +1,4 @@
+import { assertAdminAction } from '@/lib/admin-auth'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { formatRupiah } from '@/lib/utils'
@@ -6,6 +7,7 @@ import AdminTabs, { VOUCHER_TABS } from '@/components/admin/AdminTabs'
 
 async function createVoucher(formData) {
   'use server'
+  await assertAdminAction()
   const supabase = await createClient()
   const code = String(formData.get('code') || '').trim().toUpperCase()
   const name = String(formData.get('name') || '').trim()
@@ -34,6 +36,7 @@ async function createVoucher(formData) {
 
 async function toggleVoucher(formData) {
   'use server'
+  await assertAdminAction()
   const supabase = await createClient()
   const id = formData.get('id')
   const isActive = formData.get('is_active') === 'true'
@@ -43,6 +46,7 @@ async function toggleVoucher(formData) {
 
 async function deleteVoucher(formData) {
   'use server'
+  await assertAdminAction()
   const supabase = await createClient()
   const id = formData.get('id')
   const { error } = await supabase.from('vouchers').delete().eq('id', id)
@@ -51,6 +55,7 @@ async function deleteVoucher(formData) {
 
 async function saveKupon(formData) {
   'use server'
+  await assertAdminAction()
   const supabase = await createClient()
   const rows = [
     { key: 'promo_after_download_code', value: String(formData.get('code') || '').trim().toUpperCase() },
