@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { resolveProductDownloadUrl } from '@/lib/product-download';
+import { resolveProductDownloadUrl, fillOrderPlaceholders } from '@/lib/product-download';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,6 +76,8 @@ export async function GET(request) {
       if (!product) return fail('Produk tidak ditemukan', 404);
       target = product;
     }
+
+    if (target.file_url) target = { ...target, file_url: fillOrderPlaceholders(target.file_url, order.id) };
 
     const watermarked = await tryWatermarkedPdf(supabase, target, order);
     if (watermarked) return watermarked;
