@@ -121,3 +121,15 @@ body {
   .admin-root table:not(.keep-table):not(.sr-only) td:first-child { text-align: left; }
   .admin-root .overflow-x-auto:has(> table) { overflow: visible; }
 }
+
+/* Animasi dimatikan dari Admin > Tampilan Toko */
+[data-motion='off'] *,
+[data-motion='off'] *::before,
+[data-motion='off'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0s !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+[data-motion='off'] .bgy-highlight-block { animation: none !important; }

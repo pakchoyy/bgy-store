@@ -18,7 +18,7 @@ export default function ScrollToTopButton() {
     <button
       type="button"
       aria-label="Gulir ke atas"
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      onClick={() => window.scrollTo({ top: 0, behavior: document.querySelector('[data-motion="off"]') ? 'auto' : 'smooth' })}
       className="fixed bottom-20 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 text-white shadow-xl shadow-slate-950/20 ring-1 ring-white/10 transition-transform duration-150 active:scale-[0.96] md:bottom-6 md:right-6"
     >
       <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

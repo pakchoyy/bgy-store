@@ -186,6 +186,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
       meta_description: form.meta_description || null,
       is_active: form.is_active,
       show_on_home: form.show_on_home !== false,
+      sold_manual: Number(form.sold_manual) || 0,
       ...(isEditing ? { id: initialData.id } : {}),
     }
     try {
@@ -670,6 +671,17 @@ export default function ProductForm({ initialData, categories = [], productOptio
             )}
           </div>
         )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tambahan terjual (di luar toko)</label>
+          <input
+            type="number"
+            min="0"
+            value={form.sold_manual ?? 0}
+            onChange={e => updateField('sold_manual', Math.max(0, parseInt(e.target.value) || 0))}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+          />
+          <p className="text-xs text-gray-400 mt-1">Dijumlahkan dengan pesanan lunas di toko, tampil di kartu sebagai &quot;N× terjual&quot;. Isi bila ada penjualan di luar toko ini. Butuh SQL 022.</p>
+        </div>
       </CardSection>
 
       {/* SEO */}

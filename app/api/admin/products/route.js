@@ -48,6 +48,7 @@ function sanitizeProduct(body) {
           flash_ends_at: body.type === 'paid' && body.flash_ends_at ? toWibIso(body.flash_ends_at) : null,
         }
       : {}),
+    ...('sold_manual' in body ? { sold_manual: Math.max(0, Math.min(10000000, Math.round(Number(body.sold_manual) || 0))) } : {}),
     ...('show_on_home' in body ? { show_on_home: body.show_on_home !== false } : {}),
     ...('semester' in body ? { semester: [1, 2].includes(Number(body.semester)) ? Number(body.semester) : null } : {}),
     ...(Array.isArray(body.bundle_product_ids)
@@ -68,6 +69,7 @@ const OPTIONAL_COLUMNS = [
   { key: 'flash_ends_at', sql: '017', label: 'Flash sale' },
   { key: 'semester', sql: '018', label: 'Semester' },
   { key: 'show_on_home', sql: '020', label: 'Tampil di Beranda' },
+  { key: 'sold_manual', sql: '022', label: 'Tambahan terjual' },
 ]
 
 async function withoutMissingBundleColumn(run, product) {

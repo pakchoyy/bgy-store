@@ -40,6 +40,7 @@ export default function AppearanceBuilder({
     profile_avatar_url: initialAppearance.profileAvatarUrl || '',
     banner_url: initialAppearance.bannerUrl || '',
     banner_enabled: initialAppearance.bannerEnabled !== false,
+    animations_enabled: initialAppearance.animationsEnabled !== false,
     bg_color: initialAppearance.bgColor || '#0ea5a0',
     bg_style: initialAppearance.bgStyle || 'gradient',
     bg_image_url: initialAppearance.bgImageUrl || '',
@@ -113,6 +114,7 @@ export default function AppearanceBuilder({
             profile_avatar_url: form.profile_avatar_url,
             banner_url: form.banner_url,
             banner_enabled: form.banner_enabled ? 'true' : 'false',
+            animations_enabled: form.animations_enabled ? 'true' : 'false',
             bg_color: form.bg_color,
             bg_style: form.bg_style,
             bg_image_url: form.bg_image_url,
@@ -214,6 +216,22 @@ export default function AppearanceBuilder({
               </label>
             </div>
             <ImageUpload label="Banner (1200 x 628 disarankan)" value={form.banner_url} uploading={uploading === 'banner_url'} onChange={(e) => handleImageUpload(e, 'banner_url')} onRemove={() => update('banner_url', '')} />
+          </section>
+
+          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <label className="flex cursor-pointer items-center gap-3">
+              <span className="flex-1">
+                <span className="block text-sm font-bold text-gray-900">Animasi di toko</span>
+                <span className="block text-xs text-gray-500">Matikan untuk menghentikan gerakan muncul perlahan dan kartu bergoyang. Toko jadi lebih ringan di HP lama.</span>
+              </span>
+              <input
+                type="checkbox"
+                role="switch"
+                checked={form.animations_enabled}
+                onChange={(e) => update('animations_enabled', e.target.checked)}
+                className="relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-gray-200 transition-colors before:absolute before:left-0.5 before:top-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow before:transition-transform checked:bg-emerald-500 checked:before:translate-x-5"
+              />
+            </label>
           </section>
 
           <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
