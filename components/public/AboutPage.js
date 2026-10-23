@@ -37,7 +37,7 @@ export default function AboutPage() {
   return (
     <div className="space-y-3">
       <section aria-labelledby="about-title" className="rounded-2xl bg-white/95 p-5 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0d7a8a]">Tentang Kreacy</p>
+        <p className="text-xs font-semibold text-[#0d7a8a]">Tentang Kreacy</p>
         <h1 id="about-title" className="mt-2 text-[1.6rem] font-bold leading-tight text-slate-900">
           Teman Praktis untuk Guru dan Pendidik
         </h1>

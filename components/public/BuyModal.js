@@ -154,7 +154,7 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
               {voucherOpen && (
                 <div className="mt-2 rounded-xl bg-emerald-50 p-2.5">
                   <div className="flex gap-2">
-                    <input id="voucher-code" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value.toUpperCase())} autoComplete="off" placeholder="Kode voucher" className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold uppercase outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
+                    <input id="voucher-code" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value.toUpperCase())} autoComplete="off" placeholder="Kode voucher" className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
                     <button type="button" onClick={() => applyVoucher()} disabled={voucherState.status === 'loading'} className="h-9 rounded-lg bg-emerald-600 px-3 text-xs font-bold text-white disabled:opacity-60">{voucherState.status === 'loading' ? 'Cek...' : 'Pakai'}</button>
                   </div>
                   {voucherState.message && (

@@ -101,7 +101,7 @@ export default async function AdminTheme({ searchParams }) {
               { value: 'square', label: 'Kotak', class: 'rounded-none' },
             ].map(r => (
               <label key={r.value} className="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="border_radius" value={r.value} defaultChecked={borderRadius === r.value} className="text-[#0ea5a0] focus:ring-[#0ea5a0]" />
+                <input type="radio" name="border_radius" value={r.value} defaultChecked={borderRadius === r.value} className="text-emerald-500 focus:ring-emerald-500" />
                 <div className={`w-8 h-8 border border-gray-300 ${r.class}`} />
                 <span className="text-sm text-gray-600">{r.label}</span>
               </label>
@@ -112,7 +112,7 @@ export default async function AdminTheme({ searchParams }) {
           <h2 className="text-sm font-bold text-gray-900">Font</h2>
           <div className="flex flex-wrap gap-4">
             {['Poppins', 'Inter', 'Plus Jakarta Sans', 'Nunito'].map(f => (
-              <label key={f} className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border cursor-pointer transition-colors ${font === f ? 'border-[#0ea5a0] bg-[rgba(14,165,160,0.08)]' : 'border-gray-200 bg-gray-50'}`}>
+              <label key={f} className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border cursor-pointer transition-colors ${font === f ? 'border-emerald-500 bg-[rgba(14,165,160,0.08)]' : 'border-gray-200 bg-gray-50'}`}>
                 <input type="radio" name="font" value={f} defaultChecked={font === f} className="sr-only" />
                 <span className="text-sm font-medium text-gray-700" style={{ fontFamily: f }}>{f}</span>
               </label>
@@ -122,7 +122,7 @@ export default async function AdminTheme({ searchParams }) {
         <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
           <h2 className="text-sm font-bold text-gray-900">Logo Preview</h2>
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-[#0ea5a0] rounded-xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-emerald-500 rounded-xl flex items-center justify-center">
               <span className="text-white font-extrabold text-lg">K</span>
             </div>
             <div className="text-sm text-gray-500">
@@ -132,7 +132,7 @@ export default async function AdminTheme({ searchParams }) {
           </div>
         </div>
         <div className="flex justify-end">
-          <button type="submit" className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
+          <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
             Simpan
           </button>
         </div>

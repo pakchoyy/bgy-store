@@ -235,7 +235,7 @@ export default async function TerimaKasihPage({ searchParams }) {
 
         {isPaid && order?.product && (
           <div>
-            <p className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+            <p className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold text-white">
               Bagikan Pengalaman
             </p>
             <ProductReviewForm
@@ -247,7 +247,7 @@ export default async function TerimaKasihPage({ searchParams }) {
 
         {recommended.length > 0 && (
           <div>
-            <p className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+            <p className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold text-white">
               Produk Lainnya
             </p>
             <ProductStack products={recommended} />

@@ -23,7 +23,7 @@ function uid() {
 }
 
 const inputCls =
-  'w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0]'
+  'w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500'
 
 export default function AppearanceBuilder({
   initialAppearance,
@@ -162,7 +162,7 @@ export default function AppearanceBuilder({
             type="button"
             onClick={handleSave}
             disabled={saving || !!uploading}
-            className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-bold px-5 py-2 rounded-xl hover:opacity-90 disabled:opacity-50"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-bold px-5 py-2 rounded-xl hover:opacity-90 disabled:opacity-50"
           >
             {saving ? 'Menyimpan...' : 'Simpan'}
           </button>
@@ -210,7 +210,7 @@ export default function AppearanceBuilder({
                   type="checkbox"
                   checked={form.banner_enabled}
                   onChange={(e) => update('banner_enabled', e.target.checked)}
-                  className="rounded text-[#0ea5a0]"
+                  className="rounded text-emerald-500"
                 />
                 Tampilkan
               </label>
@@ -297,7 +297,7 @@ export default function AppearanceBuilder({
                     key={p}
                     type="button"
                     onClick={() => addSocial(p)}
-                    className="text-[10px] font-bold px-2 py-1 rounded-full border border-gray-200 text-gray-600 hover:border-[#0ea5a0] hover:text-[#0ea5a0]"
+                    className="text-[10px] font-bold px-2 py-1 rounded-full border border-gray-200 text-gray-600 hover:border-emerald-500 hover:text-emerald-500"
                   >
                     + {p}
                   </button>
@@ -343,7 +343,7 @@ export default function AppearanceBuilder({
                 .map((n) => (
                   <span
                     key={n.id}
-                    className="px-3 py-1.5 rounded-full bg-teal-50 text-teal-700 text-xs font-bold"
+                    className="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold"
                   >
                     {n.label}
                   </span>
@@ -354,7 +354,7 @@ export default function AppearanceBuilder({
             </div>
             <a
               href="/admin/halaman"
-              className="inline-block mt-3 text-sm font-semibold text-[#0ea5a0] hover:underline"
+              className="inline-block mt-3 text-sm font-semibold text-emerald-500 hover:underline"
             >
               Kelola halaman & menu →
             </a>
@@ -424,7 +424,7 @@ export default function AppearanceBuilder({
                       <span
                         key={n.id}
                         className={`shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                          i === 0 ? 'bg-white text-teal-700' : 'bg-white/20 text-white'
+                          i === 0 ? 'bg-white text-emerald-700' : 'bg-white/20 text-white'
                         }`}
                       >
                         {n.label}
@@ -436,7 +436,7 @@ export default function AppearanceBuilder({
                   {previewProducts.map((p) => (
                     <div key={p.id} className="bg-white rounded-2xl p-3 shadow-sm">
                       <p className="text-[11px] font-bold text-gray-900 line-clamp-2">{p.title}</p>
-                      <p className="text-[10px] font-extrabold text-[#0ea5a0] mt-1">
+                      <p className="text-[10px] font-extrabold text-emerald-500 mt-1">
                         {p.type === 'free' ? 'GRATIS' : `Rp${(p.sale_price || 0).toLocaleString('id-ID')}`}
                       </p>
                     </div>

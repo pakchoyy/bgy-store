@@ -9,7 +9,7 @@ export default function ReferralShare({ code, percent, text }) {
 
   return (
     <section aria-labelledby="referral-title" className="rounded-2xl bg-white/95 p-5 shadow-sm">
-      <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">🤝 Ajak teman guru</p>
+      <p className="text-xs font-bold text-emerald-700">🤝 Ajak teman guru</p>
       <h2 id="referral-title" className="mt-1 text-base font-semibold text-gray-900">Temanmu dapat diskon {percent}% dengan kodemu</h2>
       <div className="mt-3 flex items-center gap-2">
         <code className="flex-1 rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-base font-black tracking-widest text-emerald-800 ring-1 ring-emerald-200">{code}</code>

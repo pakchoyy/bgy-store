@@ -84,7 +84,7 @@ export default async function AdminNavigation({ searchParams }) {
       <div className="flex items-center justify-between gap-3 mb-6">
         <p className="text-sm text-gray-500">Menu yang tampil di header website.</p>
         <details className="group relative">
-          <summary className="list-none whitespace-nowrap bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer">
+          <summary className="list-none whitespace-nowrap bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer">
             + Tambah Menu
           </summary>
           <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-card border border-gray-100 p-4 z-50">
@@ -108,7 +108,7 @@ export default async function AdminNavigation({ searchParams }) {
               </div>
               <input type="hidden" name="is_visible" value="true" />
               <input type="hidden" name="sort_order" value={items.length + 1} />
-              <button type="submit" className="w-full bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity">
+              <button type="submit" className="w-full bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity">
                 Simpan
               </button>
             </form>
@@ -163,13 +163,13 @@ export default async function AdminNavigation({ searchParams }) {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="hidden" name="is_visible" value="false" />
                       <input type="checkbox" name="is_visible" value="true" defaultChecked={item.is_visible} className="sr-only peer" />
-                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0ea5a0]" />
+                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500" />
                       <span className="ml-3 text-sm text-gray-600">Tampilkan</span>
                     </label>
                   </div>
                   <input type="hidden" name="sort_order" value={item.sort_order} />
                   <div className="flex items-center gap-2 pt-2">
-                    <button type="submit" className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                    <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
                       Simpan
                     </button>
                     <button type="submit" formAction={deleteNav} className="bg-red-50 text-red-600 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-100 transition-colors">

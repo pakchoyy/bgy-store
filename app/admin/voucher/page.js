@@ -148,7 +148,7 @@ export default async function AdminVoucher({ searchParams }) {
           <h1 className="text-xl font-extrabold text-slate-700">Vouchers</h1>
           <p className="mt-1 text-sm text-slate-500">Atur kode diskon untuk checkout toko.</p>
         </div>
-        <a href="/" target="_blank" className="rounded-xl border border-[#25bd83] bg-white px-4 py-2 text-sm font-bold text-[#10946b] shadow-sm">Share</a>
+        <a href="/" target="_blank" className="rounded-xl border border-[#25bd83] bg-white px-4 py-2 text-sm font-bold text-emerald-700 shadow-sm">Share</a>
       </div>
 
       {error && (
@@ -219,7 +219,7 @@ export default async function AdminVoucher({ searchParams }) {
             const kind = voucherKind(voucher, kuponCode)
             return (
               <div key={voucher.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-[#10946b]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2.2a2.8 2.8 0 0 0 0 5.6V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.2a2.8 2.8 0 0 0 0-5.6V7Zm8-1v12" />
                   </svg>
@@ -229,13 +229,13 @@ export default async function AdminVoucher({ searchParams }) {
                     <span className="min-w-0 break-words">{voucher.name}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${kind.cls}`}>{kind.label}</span>
                   </p>
-                  <p className="text-xs text-slate-400"><span className="font-bold text-[#10946b]">{voucher.code}</span> - Diskon {formatDiscount(voucher)}</p>
+                  <p className="text-xs text-slate-400"><span className="font-bold text-emerald-700">{voucher.code}</span> - Diskon {formatDiscount(voucher)}</p>
                 </div>
                 <span className="text-sm text-slate-400">{`Dipakai ${voucher.used_count || 0}×`} · {remaining === null ? 'Tanpa batas' : `Sisa ${remaining}`}{voucher.ends_at ? ` · s/d ${new Date(voucher.ends_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}` : ''}</span>
                 <form action={toggleVoucher}>
                   <input type="hidden" name="id" value={voucher.id} />
                   <input type="hidden" name="is_active" value={String(voucher.is_active)} />
-                  <button className={`rounded-xl px-3 py-1.5 text-xs font-bold ${voucher.is_active ? 'bg-emerald-50 text-[#10946b]' : 'bg-slate-100 text-slate-400'}`}>
+                  <button className={`rounded-xl px-3 py-1.5 text-xs font-bold ${voucher.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>
                     {voucher.is_active ? 'Aktif' : 'Off'}
                   </button>
                 </form>

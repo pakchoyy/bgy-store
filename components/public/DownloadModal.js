@@ -174,7 +174,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
               <div className="flex items-center gap-3 mb-2">
                 {product.category && (
                   <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase"
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: `${product.category.color}20`, color: product.category.color }}
                   >
                     {product.category.name}
@@ -374,7 +374,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
 
             {downloaded && settings?.promo_after_download_code && (
               <div className="mb-4 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-4 text-left">
-                <p className="text-xs font-bold uppercase tracking-wide text-amber-700">🎁 Hadiah untukmu</p>
+                <p className="text-xs font-bold text-amber-700">🎁 Hadiah untukmu</p>
                 <p className="mt-1 text-sm font-semibold text-gray-900">{settings.promo_after_download_text || 'Diskon khusus untuk produk premium'}</p>
                 <div className="mt-2 flex items-center gap-2">
                   <code className="flex-1 rounded-lg bg-white px-3 py-2 text-center text-base font-black tracking-widest text-amber-800 ring-1 ring-amber-200">{settings.promo_after_download_code}</code>

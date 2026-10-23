@@ -168,7 +168,7 @@ export default function PageTableClient({ pages: initialPages }) {
                     <td className="px-6 py-4">
                       <Link
                         href={`/admin/halaman/${page.id}/edit`}
-                        className="text-sm font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                        className="text-sm font-medium text-slate-900 hover:text-emerald-600 transition-colors"
                       >
                         {page.title}
                       </Link>

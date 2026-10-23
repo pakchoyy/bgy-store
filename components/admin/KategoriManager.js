@@ -243,7 +243,7 @@ export default function KategoriManager({ categories: initialCategories }) {
                       ) : (
                         <button
                           onClick={() => setEditing(`name-${cat.id}`)}
-                          className="text-sm font-medium text-gray-900 hover:text-[#0ea5a0] transition-colors text-left"
+                          className="text-sm font-medium text-gray-900 hover:text-emerald-500 transition-colors text-left"
                         >
                           {cat.name}
                         </button>
@@ -260,7 +260,7 @@ export default function KategoriManager({ categories: initialCategories }) {
                       ) : (
                         <button
                           onClick={() => setEditing(`slug-${cat.id}`)}
-                          className="text-xs font-mono text-slate-500 hover:text-teal-600 transition-colors bg-slate-50 px-2 py-1 rounded"
+                          className="text-xs font-mono text-slate-500 hover:text-emerald-600 transition-colors bg-slate-50 px-2 py-1 rounded"
                         >
                           {cat.slug}
                         </button>

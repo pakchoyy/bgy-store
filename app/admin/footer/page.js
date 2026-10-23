@@ -109,7 +109,7 @@ export default async function AdminFooter({ searchParams }) {
           </div>
           <button
             type="submit"
-            className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-5 py-2 rounded-lg hover:opacity-90"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-5 py-2 rounded-lg hover:opacity-90"
           >
             Simpan
           </button>
@@ -119,7 +119,7 @@ export default async function AdminFooter({ searchParams }) {
           <h2 className="text-sm font-bold text-gray-900 mb-4">Preview</h2>
           <div className="bg-gray-50 rounded-2xl border border-gray-100 px-5 py-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <div className="w-7 h-7 bg-[#0ea5a0]/15 rounded-lg flex items-center justify-center">
+              <div className="w-7 h-7 bg-emerald-500/15 rounded-lg flex items-center justify-center">
                 <img src="/logo-kreacy.svg" alt="" className="h-5 w-5" />
               </div>
               <span className="text-sm font-extrabold text-gray-900">Kreacy</span>

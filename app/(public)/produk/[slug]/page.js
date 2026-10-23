@@ -154,13 +154,13 @@ export default async function ProdukDetailPage({ params }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2zM9 13h6M9 17h4" />
               </svg>
               <p className="mt-3 line-clamp-3 text-lg font-bold leading-snug">{product.title}</p>
-              <p className="mt-1 text-xs font-bold uppercase tracking-widest text-white/75">{product.type === 'free' ? 'Gratis' : 'Premium'}</p>
+              <p className="mt-1 text-xs font-bold text-white/75">{product.type === 'free' ? 'Gratis' : 'Premium'}</p>
             </div>
           )}
           <div className="absolute top-3 left-3 flex flex-wrap gap-2">
             <ProductBadge badge={product.badge} badgeCustom={product.badge_custom} />
             {isSoldOut && (
-              <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase shadow-sm">
+              <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
                 Sold Out
               </span>
             )}
@@ -259,7 +259,7 @@ export default async function ProdukDetailPage({ params }) {
 
       {related.length > 0 && (
         <section aria-labelledby="related-title" className="-mt-16 mb-20">
-          <h2 id="related-title" className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+          <h2 id="related-title" className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold text-white">
             Guru lain juga melihat
           </h2>
           <ProductStack products={related} />

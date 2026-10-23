@@ -2,7 +2,7 @@ export default function Testimonials({ reviews = [] }) {
   if (!reviews.length) return null
   return (
     <section aria-labelledby="testimonials-title" className="mt-5">
-      <h2 id="testimonials-title" className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
+      <h2 id="testimonials-title" className="mb-2 inline-block rounded-full bg-[#123b35] px-3 py-1 text-[11px] font-bold text-white">
         Kata guru yang sudah beli
       </h2>
       <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

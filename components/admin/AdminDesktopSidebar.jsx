@@ -12,7 +12,7 @@ function SidebarLink({ href, also, icon, children, count }) {
       href={href}
       className={`flex min-h-12 items-center gap-3 rounded-2xl px-3 text-sm font-semibold transition-all duration-150 ${
         active
-          ? 'bg-white text-[#18a873] shadow-sm'
+          ? 'bg-white text-emerald-600 shadow-sm'
           : 'text-white/90 hover:bg-white/20 hover:text-white'
       }`}
     >

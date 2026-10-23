@@ -70,7 +70,7 @@ export default function NotificationList({ notifications: initial }) {
                   <p className={`text-sm ${!n.is_read ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{n.message}</p>
                   <p className="text-xs text-slate-500 mt-0.5">{formatDate(n.created_at)}</p>
                 </div>
-                {!n.is_read && <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0 mt-1.5" />}
+                {!n.is_read && <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-1.5" />}
               </button>
             ))}
           </div>

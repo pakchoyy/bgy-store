@@ -258,7 +258,7 @@ export default async function AdminPesanan({ searchParams }) {
               {filtered.map(order => (
                 <tr key={order.id} className={order.unread ? 'bg-emerald-50/70 hover:bg-emerald-50' : 'hover:bg-gray-50/50'}>
                   <td className="px-4 py-3">
-                    <a href={`/admin/pesanan?${baseQuery({ selected: order.id, toast: '' })}`} className={`inline-flex items-center gap-2 hover:text-[#0ea5a0] ${order.unread ? 'font-bold text-gray-950' : 'font-medium text-gray-900'}`}>
+                    <a href={`/admin/pesanan?${baseQuery({ selected: order.id, toast: '' })}`} className={`inline-flex items-center gap-2 hover:text-emerald-500 ${order.unread ? 'font-bold text-gray-950' : 'font-medium text-gray-900'}`}>
                       {order.unread && <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" aria-label="Belum dibaca" />}
                       {order.buyer_name}
                     </a>
@@ -295,7 +295,7 @@ export default async function AdminPesanan({ searchParams }) {
                       )}
                       <a
                         href={`/admin/pesanan?${baseQuery({ selected: order.id, toast: '' })}`}
-                        className="text-xs text-[#0ea5a0] hover:text-[#0d7a8a] font-medium"
+                        className="text-xs text-emerald-500 hover:text-emerald-700 font-medium"
                       >
                         Detail
                       </a>
@@ -327,7 +327,7 @@ export default async function AdminPesanan({ searchParams }) {
             <h2 className="text-sm font-bold text-gray-900">Detail Pesanan</h2>
             <div className="flex items-center gap-2">
             <a href={`/admin/pesanan?${baseQuery({ selected: '', toast: '' })}`} className="rounded-lg px-2 py-1 text-xs font-semibold text-gray-500 hover:bg-gray-100 xl:hidden">✕ Tutup</a>
-            <PrintButton className="inline-flex items-center gap-1.5 rounded-xl border border-[#0ea5a0] px-3 py-1.5 text-xs font-bold text-[#0ea5a0] transition-colors hover:bg-emerald-50" />
+            <PrintButton className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500 px-3 py-1.5 text-xs font-bold text-emerald-500 transition-colors hover:bg-emerald-50" />
             </div>
           </div>
           {selectedOrder ? (
@@ -350,7 +350,7 @@ export default async function AdminPesanan({ searchParams }) {
               </div>
               <form action={generateLink}>
                 <input type="hidden" name="id" value={selectedOrder.id} />
-                <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] px-4 py-2.5 text-sm font-bold text-white">
+                <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-700 px-4 py-2.5 text-sm font-bold text-white">
                   Generate Ulang Link
                 </button>
               </form>
@@ -431,7 +431,7 @@ export default async function AdminPesanan({ searchParams }) {
           <div className="mt-6 pt-4 border-t border-gray-100 flex flex-wrap gap-2">
             <form action={generateLink}>
               <input type="hidden" name="id" value={selectedOrder.id} />
-              <button type="submit" className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+              <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
                 Generate Ulang Link Download
               </button>
             </form>

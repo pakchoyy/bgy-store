@@ -435,17 +435,17 @@ export default function ProductBuilder({ products: initialProducts, categories =
                             setShowBlockPicker(false)
                             setBlockModalType(icon)
                           }}
-                          className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 text-left hover:border-teal-300 hover:bg-teal-50 transition-colors"
+                          className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 text-left hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
                         >
-                          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-sm font-bold text-teal-600">{BLOCK_ICON[icon]}</span>
+                          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-600">{BLOCK_ICON[icon]}</span>
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-slate-900">{title}</p>
                             <p className="text-xs text-slate-500">{description}</p>
                           </div>
                         </button>
                       ))}
-                      <Link href="/admin/produk/baru" onClick={() => setShowBlockPicker(false)} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 hover:border-teal-300 hover:bg-teal-50 transition-colors">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-sm font-bold text-teal-600">▣</span>
+                      <Link href="/admin/produk/baru" onClick={() => setShowBlockPicker(false)} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 hover:border-emerald-300 hover:bg-emerald-50 transition-colors">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-600">▣</span>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-slate-900">Digital Product</p>
                           <p className="text-xs text-slate-500">Sell files</p>
@@ -552,7 +552,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         onClick={() => setSelectedId(p.id)}
                         className={`relative flex cursor-pointer items-center gap-3 rounded-2xl bg-white px-2 py-3 shadow-[0_2px_10px_rgba(15,23,42,0.06)] transition-all ${
                           active ? 'ring-2 ring-emerald-400/60' : 'hover:bg-slate-50'
-                        } ${isOver ? 'ring-2 ring-inset ring-[#0ea5a0]/40' : ''} ${
+                        } ${isOver ? 'ring-2 ring-inset ring-emerald-500/40' : ''} ${
                           dragId === p.id ? 'opacity-40' : ''
                         } ${p.is_featured ? 'bgy-highlight-block ring-2 ring-amber-300/80 shadow-[0_0_22px_rgba(251,191,36,0.22)]' : ''}
                         `}
@@ -737,13 +737,13 @@ export default function ProductBuilder({ products: initialProducts, categories =
             <div className="py-1">
               <button type="button" className="flex min-h-12 w-full items-center justify-between px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { toggleActive(menuProduct.id); setOpenMenuId(null) }}>
                 <span>Tampilkan di toko</span>
-                <span className={`h-5 w-9 rounded-full p-0.5 ${menuProduct.is_active ? 'bg-teal-600' : 'bg-slate-200'}`}>
+                <span className={`h-5 w-9 rounded-full p-0.5 ${menuProduct.is_active ? 'bg-emerald-600' : 'bg-slate-200'}`}>
                   <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${menuProduct.is_active ? 'translate-x-4' : ''}`} />
                 </span>
               </button>
               <button type="button" className="flex min-h-12 w-full items-center justify-between px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { toggleHighlight(menuProduct.id); setOpenMenuId(null) }}>
                 <span>Highlight</span>
-                <span className={`h-5 w-9 rounded-full p-0.5 ${menuProduct.is_featured ? 'bg-teal-600' : 'bg-slate-200'}`}>
+                <span className={`h-5 w-9 rounded-full p-0.5 ${menuProduct.is_featured ? 'bg-emerald-600' : 'bg-slate-200'}`}>
                   <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${menuProduct.is_featured ? 'translate-x-4' : ''}`} />
                 </span>
               </button>

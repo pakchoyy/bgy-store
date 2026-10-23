@@ -4,7 +4,7 @@ export default function WhatsAppBuyButton({ waUrl, product, className = '' }) {
   const href = `${waUrl}${waUrl.includes('?') ? '&' : '?'}text=${encodeURIComponent(text)}`
   return (
     <div className={className}>
-      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400" aria-hidden="true">
+      <div className="flex items-center gap-3 text-[11px] font-semibold text-slate-400" aria-hidden="true">
         <span className="h-px flex-1 bg-slate-200" />atau<span className="h-px flex-1 bg-slate-200" />
       </div>
       <a

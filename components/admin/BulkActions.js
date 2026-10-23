@@ -7,7 +7,7 @@ export default function BulkActions({ selectedIds, actions = [] }) {
   if (selectedIds.length === 0) return null
 
   return (
-    <Alert className="bg-teal-50 border-teal-200">
+    <Alert className="bg-emerald-50 border-emerald-200">
       <AlertDescription className="flex items-center gap-3">
         <span className="text-sm font-medium text-slate-700">
           {selectedIds.length} terpilih

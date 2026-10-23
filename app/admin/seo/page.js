@@ -118,7 +118,7 @@ export default async function AdminSEO({ searchParams }) {
               </div>
             </div>
             <div className="flex justify-end">
-              <button type="submit" className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
+              <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
                 Simpan
               </button>
             </div>
@@ -163,7 +163,7 @@ export default async function AdminSEO({ searchParams }) {
             </div>
           </div>
           <div className="flex justify-end">
-            <button type="submit" className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
+            <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
               Simpan
             </button>
           </div>
@@ -182,7 +182,7 @@ export default async function AdminSEO({ searchParams }) {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="hidden" name="seo_robots_index" value="false" />
                 <input type="checkbox" name="seo_robots_index" value="true" defaultChecked={settings.seo_robots_index !== 'false'} className="sr-only peer" />
-                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0ea5a0]" />
+                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500" />
               </label>
             </div>
             <div className="flex items-center justify-between">
@@ -193,7 +193,7 @@ export default async function AdminSEO({ searchParams }) {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="hidden" name="seo_robots_follow" value="false" />
                 <input type="checkbox" name="seo_robots_follow" value="true" defaultChecked={settings.seo_robots_follow !== 'false'} className="sr-only peer" />
-                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0ea5a0]" />
+                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500" />
               </label>
             </div>
             <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs text-gray-500">
@@ -204,7 +204,7 @@ export default async function AdminSEO({ searchParams }) {
             </div>
           </div>
           <div className="flex justify-end">
-            <button type="submit" className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
+            <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
               Simpan
             </button>
           </div>

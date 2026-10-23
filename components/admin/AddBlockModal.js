@@ -136,7 +136,7 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
                 )}
                 <label className="mt-3 inline-block">
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={uploading} />
-                  <span className="inline-flex cursor-pointer items-center rounded-lg bg-[#0ea5a0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d9488]">
+                  <span className="inline-flex cursor-pointer items-center rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d9488]">
                     {uploading ? 'Mengunggah...' : 'Upload Image'}
                   </span>
                 </label>
@@ -200,7 +200,7 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
                       role="switch"
                       aria-checked={transparent}
                       onClick={() => setTransparent(!transparent)}
-                      className={`h-5 w-9 rounded-full p-0.5 transition-colors ${transparent ? 'bg-teal-600' : 'bg-slate-200'}`}
+                      className={`h-5 w-9 rounded-full p-0.5 transition-colors ${transparent ? 'bg-emerald-600' : 'bg-slate-200'}`}
                     >
                       <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${transparent ? 'translate-x-4' : ''}`} />
                     </button>

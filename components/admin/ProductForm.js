@@ -276,7 +276,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
             type="text"
             value={form.title}
             onChange={e => updateField('title', e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
             placeholder="Masukkan judul produk"
             required
           />
@@ -284,7 +284,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
       </CardSection>
 
       <CardSection title="Foto Produk">
-        <label className="group block cursor-pointer overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-50 transition-colors hover:border-[#0ea5a0] focus-within:ring-2 focus-within:ring-[#0ea5a0]">
+        <label className="group block cursor-pointer overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-50 transition-colors hover:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500">
           {coverImage ? (
             <div className="relative aspect-[4/3] bg-cover bg-center" style={{ backgroundImage: `url("${coverImage}")` }}>
               <span className="absolute inset-x-0 bottom-0 bg-black/55 px-3 py-2 text-center text-sm font-semibold text-white">Ganti cover</span>
@@ -294,7 +294,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
               <svg aria-hidden="true" className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2 1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span className="mt-2 text-sm font-semibold text-[#0d7a8a]">Tambah foto produk</span>
+              <span className="mt-2 text-sm font-semibold text-emerald-700">Tambah foto produk</span>
               <span className="mt-1 text-xs text-gray-500">JPG, PNG, WebP · otomatis dikompres</span>
             </div>
           )}
@@ -334,7 +334,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
               <button key={value} type="button" aria-pressed={value === 'upload' || value === 'pdf' ? deliveryMode === 'upload' && uploadKind === value : deliveryMode === 'link' && linkPlatform === value} onClick={() => {
                 if (value === 'upload' || value === 'pdf') { setDeliveryMode('upload'); setUploadKind(value); updateField('file_url', '') }
                 else { setDeliveryMode('link'); setLinkPlatform(value); updateField('file_path', '') }
-              }} className={`min-h-10 rounded-md px-2 text-xs font-semibold ${(value === 'upload' || value === 'pdf' ? deliveryMode === 'upload' && uploadKind === value : deliveryMode === 'link' && linkPlatform === value) ? 'bg-white text-teal-800 shadow-sm' : 'text-gray-600'}`}>
+              }} className={`min-h-10 rounded-md px-2 text-xs font-semibold ${(value === 'upload' || value === 'pdf' ? deliveryMode === 'upload' && uploadKind === value : deliveryMode === 'link' && linkPlatform === value) ? 'bg-white text-emerald-800 shadow-sm' : 'text-gray-600'}`}>
                 {label}
               </button>
             ))}
@@ -342,18 +342,18 @@ export default function ProductForm({ initialData, categories = [], productOptio
           {deliveryMode === 'link' ? (
             <div>
               <label htmlFor="product-delivery-link" className="mb-1 block text-sm font-medium text-gray-700">Tautan file / materi</label>
-              <input id="product-delivery-link" type="url" inputMode="url" value={form.file_url || ''} onChange={e => updateField('file_url', e.target.value)} placeholder={linkPlatform === 'gdrive' ? 'https://drive.google.com/...' : 'https://...'} className="w-full rounded-lg border border-gray-200 bg-[var(--input-bg)] px-3 py-2.5 text-sm focus:border-[#0ea5a0] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20" />
+              <input id="product-delivery-link" type="url" inputMode="url" value={form.file_url || ''} onChange={e => updateField('file_url', e.target.value)} placeholder={linkPlatform === 'gdrive' ? 'https://drive.google.com/...' : 'https://...'} className="w-full rounded-lg border border-gray-200 bg-[var(--input-bg)] px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
               <p className="mt-1 text-xs text-gray-500">Pastikan akses tautan dibuka untuk pembeli.</p>
             </div>
           ) : <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">File Produk</label>
-            <label className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-[#0ea5a0] transition-colors cursor-pointer block">
+            <label className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-emerald-500 transition-colors cursor-pointer block">
               {form.file_path ? (
                 <div>
-                  <svg className="w-8 h-8 mx-auto text-[#0ea5a0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 mx-auto text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <p className="text-sm text-[#0ea5a0] font-medium mt-2">Ganti File</p>
+                  <p className="text-sm text-emerald-500 font-medium mt-2">Ganti File</p>
                   <p className="text-xs text-gray-400 mt-1">{form.file_size || 'File tersimpan'}</p>
                 </div>
               ) : (
@@ -379,7 +379,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
             <select
               value={form.category_id}
               onChange={e => updateField('category_id', e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
             >
               <option value="">Pilih kategori</option>
               {categories.map(cat => (
@@ -397,7 +397,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                   value="free"
                   checked={form.type === 'free'}
                   onChange={e => updateField('type', e.target.value)}
-                  className="text-[#0ea5a0] focus:ring-[#0ea5a0]"
+                  className="text-emerald-500 focus:ring-emerald-500"
                 />
                 <span className="text-sm font-medium text-gray-700">Free</span>
               </label>
@@ -408,7 +408,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                   value="paid"
                   checked={form.type === 'paid'}
                   onChange={e => updateField('type', e.target.value)}
-                  className="text-[#0ea5a0] focus:ring-[#0ea5a0]"
+                  className="text-emerald-500 focus:ring-emerald-500"
                 />
                 <span className="text-sm font-medium text-gray-700">Paid</span>
               </label>
@@ -424,7 +424,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 key={value || 'none'}
                 type="button"
                 onClick={() => updateField('semester', value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${form.semester === value ? 'bg-[#0ea5a0] text-white border-[#0ea5a0] shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${form.semester === value ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
               >
                 {label}
               </button>
@@ -443,7 +443,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 onClick={() => toggleBadge(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                   form.badges.includes(opt.value)
-                    ? 'bg-[#0ea5a0] text-white border-[#0ea5a0] shadow-sm'
+                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
                     : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                 }`}
               >
@@ -456,7 +456,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
               type="text"
               value={form.badge_custom}
               onChange={e => updateField('badge_custom', e.target.value)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
               placeholder="Custom badge (opsional)"
             />
           </div>
@@ -485,7 +485,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 type="number"
                 value={form.sale_price}
                 onChange={e => updateField('sale_price', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                 min="0"
               />
               <p className={`mt-1 text-xs ${Number(form.sale_price) > 0 && Number(form.sale_price) < 1000 ? 'font-semibold text-red-600' : 'text-gray-500'}`}>
@@ -498,7 +498,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 type="number"
                 value={form.original_price}
                 onChange={e => updateField('original_price', e.target.value ? parseInt(e.target.value) : '')}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                 min="0"
                 placeholder="Contoh: 50000"
               />
@@ -568,7 +568,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 value={form.flash_price}
                 onChange={e => updateField('flash_price', e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
                 placeholder="Contoh: 15000"
-                className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0]"
+                className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               />
             </label>
             <label className="block text-sm font-medium text-gray-700">
@@ -578,7 +578,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 value={form.flash_ends_at}
                 required={form.flash_price !== ''}
                 onChange={e => updateField('flash_ends_at', e.target.value)}
-                className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0]"
+                className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               />
             </label>
           </div>
@@ -640,7 +640,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
               value="unlimited"
               checked={form.stock_type === 'unlimited'}
               onChange={e => updateField('stock_type', e.target.value)}
-              className="text-[#0ea5a0] focus:ring-[#0ea5a0]"
+              className="text-emerald-500 focus:ring-emerald-500"
             />
             <span className="text-sm font-medium text-gray-700">Unlimited</span>
           </label>
@@ -651,7 +651,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
               value="limited"
               checked={form.stock_type === 'limited'}
               onChange={e => updateField('stock_type', e.target.value)}
-              className="text-[#0ea5a0] focus:ring-[#0ea5a0]"
+              className="text-emerald-500 focus:ring-emerald-500"
             />
             <span className="text-sm font-medium text-gray-700">Limited</span>
           </label>
@@ -663,7 +663,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
               type="number"
               value={form.stock_qty}
               onChange={e => updateField('stock_qty', parseInt(e.target.value) || 0)}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
               min="0"
             />
             {initialData?.stock_type === 'limited' && (
@@ -678,7 +678,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
             min="0"
             value={form.sold_manual ?? 0}
             onChange={e => updateField('sold_manual', Math.max(0, parseInt(e.target.value) || 0))}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
           />
           <p className="text-xs text-gray-400 mt-1">Dijumlahkan dengan pesanan lunas di toko, tampil di kartu sebagai &quot;N× terjual&quot;. Isi bila ada penjualan di luar toko ini. Butuh SQL 022.</p>
         </div>
@@ -692,7 +692,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
             type="text"
             value={form.meta_title}
             onChange={e => updateField('meta_title', e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
             placeholder="{title} — Kreacy"
           />
         </div>
@@ -702,7 +702,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
             value={form.meta_description}
             onChange={e => updateField('meta_description', e.target.value)}
             rows={2}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20 focus:border-[#0ea5a0] transition-all"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
             placeholder="Deskripsi singkat untuk SEO..."
           />
         </div>
@@ -733,7 +733,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
           </div>
         )}
         {(form.preview_images?.length || 0) < 6 && (
-          <label className="mt-3 flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 px-3 text-sm font-semibold text-[#0d7a8a] hover:border-[#0ea5a0]">
+          <label className="mt-3 flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 px-3 text-sm font-semibold text-emerald-700 hover:border-emerald-500">
             + Tambah gambar pratinjau
             <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={e => handleUpload(e, 'preview')} className="sr-only" />
           </label>
@@ -756,7 +756,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Preview kartu di toko</p>
           <div
-            className="grid grid-cols-6 gap-2 rounded-2xl bg-gradient-to-b from-[#0ea5a0] to-[#e8f7f6] p-3"
+            className="grid grid-cols-6 gap-2 rounded-2xl bg-gradient-to-b from-emerald-500 to-[#e8f7f6] p-3"
             onClickCapture={(e) => { if (e.target.closest('a')) e.preventDefault() }}
           >
             <div className={getCardLayout(form.card_layout).grid}>
@@ -780,7 +780,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
         {form.type === 'paid' && (
           <div>
             <label htmlFor="purchase-button-label" className="block text-sm font-medium text-gray-700 mb-1">Teks tombol beli</label>
-            <select id="purchase-button-label" value={form.purchase_button_label} onChange={e => updateField('purchase_button_label', e.target.value)} className="w-full rounded-lg border border-gray-200 bg-[var(--input-bg)] px-3 py-2.5 text-sm focus:border-[#0ea5a0] focus:outline-none focus:ring-2 focus:ring-[#0ea5a0]/20">
+            <select id="purchase-button-label" value={form.purchase_button_label} onChange={e => updateField('purchase_button_label', e.target.value)} className="w-full rounded-lg border border-gray-200 bg-[var(--input-bg)] px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
               <option value="Beli Sekarang">Beli Sekarang</option>
               <option value="Pesan Sekarang">Pesan Sekarang</option>
               <option value="Dapatkan Sekarang">Dapatkan Sekarang</option>
@@ -805,7 +805,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
           <button
             type="button"
             disabled={!initialData?.is_active} title="Membuka versi produk yang sudah diterbitkan" onClick={handlePreview}
-            className="whitespace-nowrap rounded-xl border border-[#0ea5a0] bg-white px-3.5 py-2.5 text-sm font-semibold text-[#0d7a8a] transition-colors hover:bg-teal-50 disabled:border-gray-200 disabled:text-gray-400 disabled:hover:bg-white"
+            className="whitespace-nowrap rounded-xl border border-emerald-500 bg-white px-3.5 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:border-gray-200 disabled:text-gray-400 disabled:hover:bg-white"
           >
             Lihat Terbitan
           </button>

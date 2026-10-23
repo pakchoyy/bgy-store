@@ -116,7 +116,7 @@ export default async function AdminCustom404({ searchParams }) {
                       name="product_ids"
                       value={product.id}
                       defaultChecked={checked}
-                      className="text-[#0ea5a0] focus:ring-[#0ea5a0] rounded"
+                      className="text-emerald-500 focus:ring-emerald-500 rounded"
                     />
                     <span className="text-sm text-gray-700">{product.title}</span>
                   </label>
@@ -125,7 +125,7 @@ export default async function AdminCustom404({ searchParams }) {
             </div>
           </div>
           <div className="flex justify-end">
-            <button type="submit" className="bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
+            <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
               Simpan
             </button>
           </div>
@@ -138,7 +138,7 @@ export default async function AdminCustom404({ searchParams }) {
                 <div className="text-6xl font-extrabold text-gray-200 mb-2">404</div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
                 <p className="text-sm text-gray-500 mb-4 max-w-md mx-auto">{description}</p>
-                <div className="inline-block bg-gradient-to-r from-[#0ea5a0] to-[#0d7a8a] text-white text-sm font-semibold px-5 py-2.5 rounded-lg">
+                <div className="inline-block bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg">
                   {ctaText}
                 </div>
               </div>

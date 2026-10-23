@@ -76,7 +76,7 @@ export function ConfirmProvider({ children }) {
               <span
                 aria-hidden="true"
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg ${
-                  dialog.danger ? 'bg-red-50 text-red-600' : 'bg-teal-50 text-teal-700'
+                  dialog.danger ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-700'
                 }`}
               >
                 {dialog.type === 'prompt' ? '✎' : dialog.danger ? '!' : '?'}

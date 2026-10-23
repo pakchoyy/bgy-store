@@ -108,7 +108,7 @@ export default function LynkShell({
             </span>
           </summary>
           <div className="absolute left-0 top-12 w-56 overflow-hidden rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-black/5">
-            <p className="border-b border-slate-100 px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Pages</p>
+            <p className="border-b border-slate-100 px-4 py-3 text-[11px] font-semibold text-slate-400">Pages</p>
             <nav className="max-h-72 overflow-y-auto py-1">
               {menuItems.map((item) => (
                 <a key={item.key} href={item.href} className="block px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50">

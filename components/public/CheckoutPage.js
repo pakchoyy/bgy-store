@@ -110,7 +110,7 @@ export default function CheckoutPage({ products, waUrl }) {
       <form onSubmit={submitCheckout} aria-busy={busy} className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-3 px-3 pt-3 sm:px-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,.92fr)]">
         <div className="space-y-3">
           <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80 sm:p-4">
-            {isCart && <p className="mb-2 text-[11px] font-bold uppercase tracking-[.12em] text-slate-400">{products.length} produk di keranjang</p>}
+            {isCart && <p className="mb-2 text-[11px] font-bold text-slate-400">{products.length} produk di keranjang</p>}
             <ul className="divide-y divide-slate-100">
               {products.map((item) => (
                 <li key={item.id} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
@@ -128,7 +128,7 @@ export default function CheckoutPage({ products, waUrl }) {
           </section>
 
           <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80 sm:p-4">
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-[.12em] text-slate-400">Data pembeli</p>
+            <p className="mb-2 text-[11px] font-bold text-slate-400">Data pembeli</p>
             <div className="grid gap-2.5 sm:grid-cols-2">
               <label className="text-sm font-semibold text-slate-700 sm:col-span-2"><span className="text-red-500">*</span> Email
                 <input name="buyer_email" type="email" autoComplete="email" required maxLength={254} placeholder="nama@email.com" className="mt-1 block h-10 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
@@ -150,7 +150,7 @@ export default function CheckoutPage({ products, waUrl }) {
             </div>
             <input type="hidden" name="voucher_code" value={voucherCode} />
             <button type="button" onClick={() => setVoucherOpen((value) => !value)} aria-expanded={voucherOpen} className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-emerald-500 px-4 text-xs font-bold text-emerald-700 transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-200"><span aria-hidden="true">%</span>{voucherState.status === 'success' ? 'Ubah voucher' : 'Tambah voucher'}</button>
-            {voucherOpen && <div className="mt-2 rounded-xl bg-emerald-50 p-2.5"><div className="flex gap-2"><input id="voucher-code" value={voucherCode} onChange={(event) => setVoucherCode(event.target.value.toUpperCase())} autoComplete="off" placeholder="Kode voucher" className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold uppercase outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" /><button type="button" onClick={() => applyVoucher()} disabled={voucherState.status === 'loading'} className="h-9 rounded-lg bg-emerald-600 px-3 text-xs font-bold text-white disabled:opacity-60">{voucherState.status === 'loading' ? 'Cek...' : 'Pakai'}</button></div>{voucherState.message && <p role={voucherState.status === 'error' ? 'alert' : 'status'} className={`mt-1.5 text-xs font-semibold ${voucherState.status === 'error' ? 'text-red-600' : 'text-emerald-700'}`}>{voucherState.message}</p>}</div>}
+            {voucherOpen && <div className="mt-2 rounded-xl bg-emerald-50 p-2.5"><div className="flex gap-2"><input id="voucher-code" value={voucherCode} onChange={(event) => setVoucherCode(event.target.value.toUpperCase())} autoComplete="off" placeholder="Kode voucher" className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" /><button type="button" onClick={() => applyVoucher()} disabled={voucherState.status === 'loading'} className="h-9 rounded-lg bg-emerald-600 px-3 text-xs font-bold text-white disabled:opacity-60">{voucherState.status === 'loading' ? 'Cek...' : 'Pakai'}</button></div>{voucherState.message && <p role={voucherState.status === 'error' ? 'alert' : 'status'} className={`mt-1.5 text-xs font-semibold ${voucherState.status === 'error' ? 'text-red-600' : 'text-emerald-700'}`}>{voucherState.message}</p>}</div>}
           </section>
         </div>
 

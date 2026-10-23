@@ -36,7 +36,7 @@ export default function TermsPage({ waUrl }) {
   return (
     <div className="space-y-3">
       <section aria-labelledby="terms-title" className="rounded-2xl bg-white/95 p-5 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0d7a8a]">Syarat & Ketentuan</p>
+        <p className="text-xs font-semibold text-[#0d7a8a]">Syarat & Ketentuan</p>
         <h1 id="terms-title" className="mt-2 text-[1.6rem] font-bold leading-tight text-slate-900">
           Aturan Singkat Belanja di Kreacy
         </h1>
@@ -53,7 +53,7 @@ export default function TermsPage({ waUrl }) {
       <Card icon={ShieldCheck} id="terms-usage" title="Penggunaan File">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl bg-emerald-50 p-3.5">
-            <p className="text-xs font-bold uppercase tracking-wide text-emerald-800">Boleh</p>
+            <p className="text-xs font-bold text-emerald-800">Boleh</p>
             <ul className="mt-2 space-y-1.5">
               {allowed.map((item) => (
                 <li key={item} className="flex gap-2 text-emerald-900">
@@ -64,7 +64,7 @@ export default function TermsPage({ waUrl }) {
             </ul>
           </div>
           <div className="rounded-xl bg-red-50 p-3.5">
-            <p className="text-xs font-bold uppercase tracking-wide text-red-800">Tidak boleh</p>
+            <p className="text-xs font-bold text-red-800">Tidak boleh</p>
             <ul className="mt-2 space-y-1.5">
               {notAllowed.map((item) => (
                 <li key={item} className="flex gap-2 text-red-900">

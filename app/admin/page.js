@@ -82,8 +82,8 @@ export default async function AdminDashboard() {
       title: 'Total Produk Aktif',
       value: activeProducts.length,
       icon: 'package',
-      color: 'from-[#0ea5a0] to-[#0d7a8a]',
-      bg: 'bg-[#0ea5a0]/5',
+      color: 'from-emerald-500 to-emerald-700',
+      bg: 'bg-emerald-500/5',
     },
     {
       title: 'Total Download',
@@ -112,19 +112,19 @@ export default async function AdminDashboard() {
     <div className="mx-auto max-w-5xl space-y-4">
       <div className="flex items-center justify-between px-1">
         <h1 className="text-xl font-extrabold text-slate-700">Home</h1>
-        <Link href="/admin/produk/baru" className="rounded-xl border border-[#25bd83] bg-white px-4 py-2 text-sm font-bold text-[#10946b] shadow-sm transition-transform active:scale-[0.96]">+ Produk</Link>
+        <Link href="/admin/produk/baru" className="rounded-xl border border-[#25bd83] bg-white px-4 py-2 text-sm font-bold text-emerald-700 shadow-sm transition-transform active:scale-[0.96]">+ Produk</Link>
       </div>
       <section className="grid gap-3 lg:grid-cols-[1.35fr_0.9fr]">
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-emerald-100/80">
           <div className="flex items-center justify-between text-sm text-slate-500">
             <span>Account</span>
-            <Link href="/" target="_blank" aria-label="Buka website" className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#10946b]">Share</Link>
+            <Link href="/" target="_blank" aria-label="Buka website" className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">Share</Link>
           </div>
           <div className="mt-3 flex items-center gap-3 rounded-2xl bg-[#effbf6] p-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white ring-1 ring-emerald-100"><img src="/logo-kreacy.svg" alt="" className="h-8 w-8" /></div>
             <div className="min-w-0">
               <p className="font-bold text-slate-700">Kreacy</p>
-              <p className="truncate text-xs text-[#18a873]">{SITE_HOST}</p>
+              <p className="truncate text-xs text-emerald-600">{SITE_HOST}</p>
             </div>
           </div>
           <p className="mt-4 text-xs font-semibold text-slate-500">Mulai kelola toko</p>
@@ -153,7 +153,7 @@ export default async function AdminDashboard() {
             </div>
             <Link href="/admin/pesanan" className="ml-auto flex h-10 w-10 items-center justify-center rounded-xl bg-white/18 text-xl font-bold text-white shadow-sm" aria-label="Lihat pesanan">↗</Link>
           </div>
-          <div className="relative mt-5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#10946b]">{paidOrders.length} transaksi lunas tercatat</div>
+          <div className="relative mt-5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-emerald-700">{paidOrders.length} transaksi lunas tercatat</div>
         </div>
       </section>
 
@@ -207,8 +207,8 @@ export default async function AdminDashboard() {
             {orders.slice(0, 5).map((order, i) => (
               <div key={order.id || i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#0ea5a0]/10 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-[#0ea5a0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -242,7 +242,7 @@ export default async function AdminDashboard() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-semibold text-[#0ea5a0]">{product.download_count}</p>
+                  <p className="text-sm font-semibold text-emerald-500">{product.download_count}</p>
                   <p className="text-xs text-gray-400">download</p>
                 </div>
               </div>
