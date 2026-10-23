@@ -34,7 +34,13 @@ export async function POST(request) {
       .eq('id', order_id)
       .single()
 
-    if (orderError || !order || order.status !== 'paid' || order.product_id !== product_id) {
+    // Pesanan keranjang menyimpan produk pertama di orders.product_id; produk lain ada di order_items.
+    let inOrder = order?.product_id === product_id
+    if (order && !inOrder) {
+      const { data: item } = await supabase.from('order_items').select('id').eq('order_id', order.id).eq('product_id', product_id).maybeSingle()
+      inOrder = !!item
+    }
+    if (orderError || !order || order.status !== 'paid' || !inOrder) {
       return Response.json(
         { error: 'Review hanya untuk pesanan yang sudah dibayar.' },
         { status: 403 }

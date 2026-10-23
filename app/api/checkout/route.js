@@ -40,8 +40,6 @@ export async function POST(request) {
       .is('deleted_at', null)
     let { data: found, error: productError } = await productQuery('id, title, type, sale_price, stock_type, stock_qty, flash_price, flash_ends_at')
     if (productError) ({ data: found, error: productError } = await productQuery('id, title, type, sale_price, stock_type, stock_qty'))
-    const { effectivePrice } = await import('@/lib/utils')
-    found = (found || []).map((p) => ({ ...p, sale_price: effectivePrice(p).price }))
 
     const items = requestedIds.map((id) => (found || []).find((p) => p.id === id)).filter(Boolean)
     if (productError || items.length !== requestedIds.length) {
@@ -54,31 +52,27 @@ export async function POST(request) {
     const product = items[0]
     const isCart = items.length > 1
 
-    let amount = items.reduce((sum, p) => sum + Number(p.sale_price || 0), 0)
+    let voucher = null
     let voucherCode = null
-    let discountAmount = 0
     if (voucher_code) {
       voucherCode = String(voucher_code).trim().toUpperCase().slice(0, 64)
-      const { data: voucher } = await supabase.from('vouchers').select('*').eq('code', voucherCode).eq('is_active', true).maybeSingle()
-      if (!voucher) return NextResponse.json({ error: 'Voucher tidak ditemukan atau sudah tidak aktif' }, { status: 400 })
+      const { data } = await supabase.from('vouchers').select('*').eq('code', voucherCode).eq('is_active', true).maybeSingle()
+      if (!data) return NextResponse.json({ error: 'Voucher tidak ditemukan atau sudah tidak aktif' }, { status: 400 })
       const { isOwnReferral } = await import('@/lib/referral')
-      if (isOwnReferral(voucher, buyer_email)) return NextResponse.json({ error: 'Kode referral tidak bisa dipakai untuk pembelianmu sendiri. Bagikan ke teman ya!' }, { status: 400 })
-      const now = new Date()
-      if ((voucher.starts_at && new Date(voucher.starts_at) > now) || (voucher.ends_at && new Date(voucher.ends_at) < now) || (voucher.max_uses && voucher.used_count >= voucher.max_uses)) return NextResponse.json({ error: 'Voucher sudah tidak berlaku' }, { status: 400 })
-      if (amount < Number(voucher.min_order_amount || 0)) return NextResponse.json({ error: 'Minimal belanja untuk voucher belum terpenuhi' }, { status: 400 })
-      const discount = voucher.discount_type === 'fixed' ? Number(voucher.discount_value) : Math.floor(amount * Number(voucher.discount_value) / 100)
-      discountAmount = Math.min(amount, discount)
-      amount = Math.max(0, amount - discountAmount)
+      if (isOwnReferral(data, buyer_email)) return NextResponse.json({ error: 'Kode referral tidak bisa dipakai untuk pembelianmu sendiri. Bagikan ke teman ya!' }, { status: 400 })
+      voucher = data
     }
+    const { computeTotal, effectivePrice } = await import('@/lib/pricing.mjs')
+    const totals = computeTotal(items, voucher)
+    if (totals.error) return NextResponse.json({ error: totals.error }, { status: 400 })
+    const amount = totals.total
+    const discountAmount = totals.discount
     const name = isCart ? `${items.length} produk: ${items.map((p) => p.title).join(', ')}`.slice(0, 200) : product.title
     const siteUrl = SITE_URL
     const { hasMayarApiKey, createPaymentLink, extractMayarInvoice } = await import('@/lib/mayar')
 
     if (!hasMayarApiKey()) {
       return NextResponse.json({ error: 'Pembayaran belum dikonfigurasi. Hubungi admin.' }, { status: 500 })
-    }
-    if (amount > 0 && amount < 1000) {
-      return NextResponse.json({ error: 'Total pembayaran online minimal Rp1.000. Voucher ini membuat total terlalu kecil.' }, { status: 400 })
     }
 
     const { data: order, error: orderError } = await supabase
@@ -105,7 +99,7 @@ export async function POST(request) {
     if (isCart) {
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(items.map((p) => ({ order_id: order.id, product_id: p.id, title: p.title, price: Number(p.sale_price || 0) })))
+        .insert(items.map((p) => ({ order_id: order.id, product_id: p.id, title: p.title, price: effectivePrice(p).price })))
       if (itemsError) {
         console.error('checkout order_items insert error:', itemsError)
         await supabase.from('orders').delete().eq('id', order.id)

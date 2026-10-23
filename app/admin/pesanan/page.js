@@ -93,6 +93,9 @@ export default async function AdminPesanan({ searchParams }) {
 
   let orders = []
   if (!isDemo) {
+    // Pesanan yang tidak dibayar lebih dari 48 jam ditandai kedaluwarsa supaya daftar Pending tetap bersih.
+    // Bila pembeli ternyata membayar belakangan, webhook / cek status tetap mengubahnya jadi lunas.
+    await supabase.from('orders').update({ status: 'expired' }).eq('status', 'pending').lt('created_at', new Date(Date.now() - 48 * 3600 * 1000).toISOString())
     const { data } = await supabase.from('orders').select('*, product:products(title)').order('created_at', { ascending: false })
     const { data: itemRows, error: itemsError } = await supabase.from('order_items').select('order_id, title')
     const itemsByOrder = {}

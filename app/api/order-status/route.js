@@ -13,7 +13,7 @@ export async function GET(request) {
   const supabase = await createTrustedServerClient()
   const { data } = await supabase.from('orders').select('status').eq('id', orderId).maybeSingle()
   let status = data?.status || 'unknown'
-  if (status === 'pending' && hasServiceRole()) {
+  if ((status === 'pending' || status === 'expired') && hasServiceRole()) {
     const { syncOrderWithMayar } = await import('@/lib/orders')
     status = (await syncOrderWithMayar(supabase, orderId).catch(() => status)) || status
   }
