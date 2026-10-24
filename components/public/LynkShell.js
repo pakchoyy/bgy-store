@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import AnnouncementBar from '@/components/public/AnnouncementBar'
 import Footer from '@/components/public/Footer'
 import PageTabs from '@/components/public/PageTabs'
@@ -24,6 +24,17 @@ export default function LynkShell({
   topBarTitle = 'Home',
   pageHasHeading = false,
 }) {
+  // Pintu rahasia admin: ketuk judul header 5x dalam 3 detik. Tetap wajib login.
+  const taps = useRef([])
+  const secretAdminTap = () => {
+    const now = Date.now()
+    taps.current = [...taps.current.filter((t) => now - t < 3000), now]
+    if (taps.current.length >= 5) {
+      taps.current = []
+      window.location.href = '/admin'
+    }
+  }
+
   const {
     profileName,
     profileHandle,
@@ -118,7 +129,7 @@ export default function LynkShell({
             </nav>
           </div>
         </details>
-        <p className="mx-2 min-w-0 flex-1 truncate text-center text-lg font-semibold">{topBarTitle}</p>
+        <p onClick={secretAdminTap} className="mx-2 min-w-0 flex-1 cursor-default select-none truncate text-center text-lg font-semibold">{topBarTitle}</p>
         <div className="flex items-center gap-1">
           <details className="relative">
             <summary aria-label="Cari produk" className="flex h-10 w-10 list-none items-center justify-center rounded-full hover:bg-white/10 [&::-webkit-details-marker]:hidden">
