@@ -137,7 +137,6 @@ export default function ProductBuilder({ products: initialProducts, categories =
     return items.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
   }, [filtered, filteredBlocks])
 
-  const selected = products.find((p) => p.id === selectedId) || null
   const menuProduct = openMenuId ? products.find((p) => p.id === openMenuId) || null : null
 
   async function shareProductFile(product, target) {
@@ -674,27 +673,6 @@ export default function ProductBuilder({ products: initialProducts, categories =
             </div>
           </div>
 
-          {/* Selected detail mini */}
-          {selected && (
-            <Card>
-              <CardContent className="flex flex-wrap items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-slate-500 font-semibold">Dipilih</p>
-                  <p className="text-sm font-bold text-slate-900 truncate">{selected.title}</p>
-                </div>
-                <Button asChild>
-                  <Link href={`/admin/produk/${selected.id}/edit`}>
-                    Edit Produk
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href={`/produk/${selected.slug}`} target="_blank">
-                    Lihat
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
         {/* RIGHT: preview langsung (di HP muncul di bawah daftar) */}

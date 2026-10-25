@@ -46,5 +46,5 @@ export const PAGE_404_TABS = [
 
 export const VOUCHER_TABS = [
   { id: 'voucher', label: '🎟️ Voucher', href: '/admin/voucher' },
-  { id: 'kupon', label: '🎁 Kupon Download', href: '/admin/voucher?tab=kupon' },
+  { id: 'kupon', label: '🎁 Kupon & Download', href: '/admin/voucher?tab=kupon' },
 ];

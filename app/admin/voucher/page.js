@@ -65,6 +65,17 @@ async function saveKupon(formData) {
   redirect(`/admin/voucher?tab=kupon&toast=${error ? 'error' : 'success'}`)
 }
 
+async function saveDownloadSettings(formData) {
+  'use server'
+  await assertAdminAction()
+  const supabase = await createClient()
+  const keys = ['pdf_watermark_enabled', 'referral_discount_percent', 'referral_share_text']
+  // checkbox: hidden "false" lalu checkbox "true" -> ambil nilai terakhir
+  const rows = keys.map((key) => ({ key, value: String(formData.getAll(key).pop() ?? '') }))
+  const { error } = await supabase.from('settings').upsert(rows, { onConflict: 'key' })
+  redirect(`/admin/voucher?tab=kupon&toast=${error ? 'error' : 'success'}`)
+}
+
 function voucherKind(voucher, kuponCode) {
   if (kuponCode && voucher.code === kuponCode) return { label: '🎁 Kupon download', cls: 'bg-amber-100 text-amber-800' }
   if (String(voucher.name || '').startsWith('Referral:')) return { label: '🤝 Referral', cls: 'bg-sky-100 text-sky-800' }
@@ -82,7 +93,7 @@ export default async function AdminVoucher({ searchParams }) {
   const tab = searchParams?.tab === 'kupon' ? 'kupon' : 'voucher'
   const [{ data, error }, { data: promoRows }] = await Promise.all([
     supabase.from('vouchers').select('*').order('created_at', { ascending: false }),
-    supabase.from('settings').select('key, value').in('key', ['promo_after_download_code', 'promo_after_download_text']),
+    supabase.from('settings').select('key, value').in('key', ['promo_after_download_code', 'promo_after_download_text', 'pdf_watermark_enabled', 'referral_discount_percent', 'referral_share_text']),
   ])
 
   const vouchers = data || []
@@ -134,6 +145,33 @@ export default async function AdminVoucher({ searchParams }) {
             </button>
           </form>
         </section>
+
+        <form action={saveDownloadSettings} className="space-y-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          <h2 className="text-lg font-extrabold text-slate-700">Pengaturan Download & Referral</h2>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <label className="flex items-start justify-between gap-4">
+                <span>
+                  <span className="block text-sm font-bold text-gray-900">🔒 Watermark nama pembeli di PDF</span>
+                  <span className="mt-1 block text-xs text-gray-600">File PDF produk berbayar otomatis diberi tulisan &ldquo;Lisensi pribadi: nama – email&rdquo; di setiap halaman saat diunduh. Berlaku untuk PDF yang di-upload (bukan link) dengan ukuran maksimal 4 MB; file lebih besar dikirim tanpa watermark.</span>
+                </span>
+                <input type="hidden" name="pdf_watermark_enabled" value="false" />
+                <input type="checkbox" name="pdf_watermark_enabled" value="true" defaultChecked={promo.pdf_watermark_enabled === 'true'} className="mt-1 h-5 w-5 shrink-0 accent-emerald-600" />
+              </label>
+            </div>
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <h2 className="text-sm font-bold text-gray-900">🤝 Referral pembeli</h2>
+              <p className="mt-1 text-xs text-gray-600">Setiap pembeli produk berbayar otomatis dapat kode pribadi (contoh REFBUDI1A2B) di halaman Terima Kasih untuk dibagikan. Temannya dapat diskon. Lihat siapa yang paling sering mengajak di menu Voucher (&ldquo;Dipakai X×&rdquo;), lalu beri hadiah. Isi 0 untuk menonaktifkan.</p>
+              <label className="mt-3 block text-sm font-medium text-gray-700">Diskon untuk teman (%)
+                <input name="referral_discount_percent" type="number" min="0" max="90" defaultValue={promo.referral_discount_percent || ''} placeholder="Contoh: 10" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
+              </label>
+              <label className="mt-3 block text-sm font-medium text-gray-700">Teks ajakan <span className="font-normal text-gray-400">(opsional)</span>
+                <input name="referral_share_text" defaultValue={promo.referral_share_text || ''} placeholder="Contoh: Aku langganan bahan ajar di Kreacy, praktis!" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
+              </label>
+            </div>
+          <button className="w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-extrabold text-white shadow-sm transition-transform hover:bg-emerald-800 active:scale-[0.98]">
+            Simpan
+          </button>
+        </form>
       </div>
     )
   }

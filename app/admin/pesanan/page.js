@@ -88,6 +88,9 @@ export default async function AdminPesanan({ searchParams }) {
   const statusFilter = searchParams?.status || 'all'
   const typeFilter = searchParams?.type || 'all'
   const search = searchParams?.search || ''
+  const isDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || '')
+  const from = isDate(searchParams?.from) ? searchParams.from : ''
+  const to = isDate(searchParams?.to) ? searchParams.to : ''
   const selected = searchParams?.selected
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
 
@@ -116,7 +119,8 @@ export default async function AdminPesanan({ searchParams }) {
               : (o.product_title || o.product?.title || 'Produk dihapus'),
           price: o.price || o.amount || 0,
           status: o.status || 'pending',
-          date: o.created_at ? o.created_at.slice(0, 10) : '2026-01-01',
+          // tanggal WIB (UTC+7)
+          date: o.created_at ? new Date(new Date(o.created_at).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 10) : '2026-01-01',
           download_token: o.download_token || null,
           unread: o.admin_read_at === null,
         }
@@ -131,6 +135,8 @@ export default async function AdminPesanan({ searchParams }) {
   if (typeFilter !== 'all') {
     filtered = filtered.filter(o => o.type === typeFilter)
   }
+  if (from) filtered = filtered.filter(o => o.date >= from)
+  if (to) filtered = filtered.filter(o => o.date <= to)
   if (search) {
     const q = search.toLowerCase()
     filtered = filtered.filter(o =>
@@ -145,7 +151,7 @@ export default async function AdminPesanan({ searchParams }) {
   const statuses = ['all', 'pending', 'paid', 'failed', 'expired']
   const types = ['all', 'produk', 'donasi']
   const baseQuery = (overrides = {}) => {
-    const base = { status: statusFilter, type: typeFilter, search, ...overrides }
+    const base = { status: statusFilter, type: typeFilter, search, from, to, ...overrides }
     const params = new URLSearchParams()
     for (const [key, value] of Object.entries(base)) {
       if (value) params.set(key, value)
@@ -205,7 +211,7 @@ export default async function AdminPesanan({ searchParams }) {
             </a>
           ))}
         </div>
-        <form method="GET" action="/admin/pesanan" className="w-full sm:w-auto sm:flex-1 sm:max-w-xs">
+        <form method="GET" action="/admin/pesanan" className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-1 sm:flex-wrap sm:items-end">
           <input type="hidden" name="status" value={statusFilter} />
           <input type="hidden" name="type" value={typeFilter} />
           <input
@@ -213,9 +219,24 @@ export default async function AdminPesanan({ searchParams }) {
             name="search"
             defaultValue={search}
             placeholder="Cari nama, WA, atau email..."
-            className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm"
+            className="col-span-2 h-11 w-full rounded-xl border border-gray-300 bg-white px-3 text-sm sm:max-w-xs"
           />
+          <label className="text-xs font-semibold text-gray-500">Dari tanggal
+            <input type="date" name="from" defaultValue={from} className="mt-1 block h-11 w-full rounded-xl border border-gray-300 bg-white px-2 text-sm text-gray-900" />
+          </label>
+          <label className="text-xs font-semibold text-gray-500">Sampai tanggal
+            <input type="date" name="to" defaultValue={to} className="mt-1 block h-11 w-full rounded-xl border border-gray-300 bg-white px-2 text-sm text-gray-900" />
+          </label>
+          <button type="submit" className="h-11 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800">Terapkan</button>
+          {(from || to || search) && (
+            <a href={`/admin/pesanan?${baseQuery({ from: '', to: '', search: '' })}`} className="flex h-11 items-center justify-center rounded-xl bg-white px-4 text-sm font-semibold text-gray-600 ring-1 ring-gray-200">Reset</a>
+          )}
         </form>
+        {(from || to) && (
+          <p className="w-full text-xs text-gray-500">
+            {filtered.length} pesanan · lunas {formatRupiah(filtered.filter(o => o.status === 'paid').reduce((sum, o) => sum + Number(o.price || 0), 0))}
+          </p>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-2 md:hidden">

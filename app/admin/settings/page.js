@@ -36,7 +36,7 @@ function ToastBar({ toast }) {
   const isSuccess = toast === 'success'
   const isDemo = toast === 'demo'
   const bg = isDemo ? 'bg-yellow-50 border-yellow-200 text-yellow-800' : isSuccess ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'
-  const msg = isDemo ? 'Mode Demo — Data tidak disimpan' : isSuccess ? 'Pengaturan berhasil disimpan!' : 'Gagal menyimpan pengaturan'
+  const msg = isDemo ? 'Mode Demo — Data tidak disimpan' : isSuccess ? 'Berhasil disimpan!' : 'Gagal menyimpan pengaturan'
   return (
     <div className={`${bg} border rounded-lg px-4 py-2 text-sm flex items-center gap-2 mb-6`}>
       <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,6 +51,7 @@ export default async function AdminSettings({ searchParams }) {
   const supabase = await createClient()
   const toast = searchParams?.toast
   const activeTab = searchParams?.tab || 'umum'
+  if (activeTab === 'download') redirect('/admin/voucher?tab=kupon')
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
   let settings = {}
   if (!isDemo) {
@@ -63,7 +64,6 @@ export default async function AdminSettings({ searchParams }) {
 
   const tabs = [
     { id: 'umum', label: 'Umum' },
-    { id: 'download', label: 'Download' },
     { id: 'maintenance', label: 'Maintenance' },
     { id: 'sistem', label: 'Cek Sistem' },
   ]
@@ -71,7 +71,7 @@ export default async function AdminSettings({ searchParams }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-extrabold text-gray-900">Pengaturan Website</h1>
+        <h1 className="text-lg font-extrabold text-gray-900">Sistem</h1>
       </div>
       {isDemo && <DemoBadge />}
       <ToastBar toast={toast} />
@@ -97,39 +97,6 @@ export default async function AdminSettings({ searchParams }) {
             <div>
               <label className="text-sm font-medium text-gray-700 mb-1 block">Tagline</label>
               <input name="site_tagline" defaultValue={settings.site_tagline || ''} className="border border-gray-200 rounded-lg px-4 py-2.5 bg-gray-50 w-full text-sm" />
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
-              Simpan
-            </button>
-          </div>
-        </form>
-      )}
-      {activeTab === 'download' && (
-        <form action={saveSettings} className="max-w-2xl space-y-6">
-          <input type="hidden" name="_tab" value="download" />
-          <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
-            <p className="rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-900">🎁 Kupon setelah download gratis sekarang diatur di menu <a href="/admin/voucher?tab=kupon" className="font-bold underline">Voucher & Kupon → Kupon Download</a>.</p>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <label className="flex items-start justify-between gap-4">
-                <span>
-                  <span className="block text-sm font-bold text-gray-900">🔒 Watermark nama pembeli di PDF</span>
-                  <span className="mt-1 block text-xs text-gray-600">File PDF produk berbayar otomatis diberi tulisan &ldquo;Lisensi pribadi: nama – email&rdquo; di setiap halaman saat diunduh. Berlaku untuk PDF yang di-upload (bukan link) dengan ukuran maksimal 4 MB; file lebih besar dikirim tanpa watermark.</span>
-                </span>
-                <input type="hidden" name="pdf_watermark_enabled" value="false" />
-                <input type="checkbox" name="pdf_watermark_enabled" value="true" defaultChecked={settings.pdf_watermark_enabled === 'true'} className="mt-1 h-5 w-5 shrink-0 accent-emerald-600" />
-              </label>
-            </div>
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-              <h2 className="text-sm font-bold text-gray-900">🤝 Referral pembeli</h2>
-              <p className="mt-1 text-xs text-gray-600">Setiap pembeli produk berbayar otomatis dapat kode pribadi (contoh REFBUDI1A2B) di halaman Terima Kasih untuk dibagikan. Temannya dapat diskon. Lihat siapa yang paling sering mengajak di menu Voucher (&ldquo;Dipakai X×&rdquo;), lalu beri hadiah. Isi 0 untuk menonaktifkan.</p>
-              <label className="mt-3 block text-sm font-medium text-gray-700">Diskon untuk teman (%)
-                <input name="referral_discount_percent" type="number" min="0" max="90" defaultValue={settings.referral_discount_percent || ''} placeholder="Contoh: 10" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
-              </label>
-              <label className="mt-3 block text-sm font-medium text-gray-700">Teks ajakan <span className="font-normal text-gray-400">(opsional)</span>
-                <input name="referral_share_text" defaultValue={settings.referral_share_text || ''} placeholder="Contoh: Aku langganan bahan ajar di Kreacy, praktis!" className="mt-1 border border-gray-200 rounded-lg px-4 py-2.5 bg-white w-full text-sm" />
-              </label>
             </div>
           </div>
           <div className="flex justify-end">
