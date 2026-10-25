@@ -80,7 +80,7 @@ function Sidebar({ counts }) {
     {
       label: 'Tampilan',
       items: [
-        { href: '/admin/homepage', label: 'Tampilan Toko', icon: 'home', also: ['/admin/theme'] },
+        { href: '/admin/homepage', label: 'Tampilan Toko', icon: 'palette', also: ['/admin/theme'] },
         { href: '/admin/footer', label: 'Footer', icon: 'rectangle' },
         { href: '/admin/announcement', label: 'Pengumuman', icon: 'megaphone' },
       ],

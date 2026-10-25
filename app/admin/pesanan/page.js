@@ -164,7 +164,7 @@ export default async function AdminPesanan({ searchParams }) {
         {unreadCount > 0 && (
           <form action={markRead}>
             <input type="hidden" name="back" value={baseQuery({ toast: '' })} />
-            <button type="submit" className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600">
+            <button type="submit" className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800">
               ✓ Tandai semua dibaca
             </button>
           </form>
@@ -188,7 +188,7 @@ export default async function AdminPesanan({ searchParams }) {
             <a
               key={s}
               href={`/admin/pesanan?${baseQuery({ status: s })}`}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition-colors ${statusFilter === s ? 'bg-emerald-500 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
+              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition-colors ${statusFilter === s ? 'bg-emerald-700 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
             >
               {s === 'all' ? 'Semua' : statusLabels[s]}
             </a>

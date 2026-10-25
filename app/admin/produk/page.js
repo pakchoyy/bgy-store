@@ -46,9 +46,12 @@ export default async function AdminProduk() {
   const { settings, products, categories, contentBlocks, appearance } = await getData()
 
   return (
-    <>
-      <SemesterSwitch products={products} settings={settings} />
-      <ProductBuilder products={products} categories={categories} contentBlocks={contentBlocks} appearance={appearance} />
-    </>
+    <ProductBuilder
+      products={products}
+      categories={categories}
+      contentBlocks={contentBlocks}
+      appearance={appearance}
+      semesterControl={<SemesterSwitch products={products} settings={settings} />}
+    />
   )
 }

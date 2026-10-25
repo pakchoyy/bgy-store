@@ -24,11 +24,36 @@ const BLOCK_ICON = {
   text: <span className="font-serif text-2xl font-bold leading-none">T</span>,
   link: <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>,
 }
+const ICON_PATHS = {
+  up: 'm6 15 6-6 6 6',
+  down: 'm6 9 6 6 6-6',
+  more: 'M12 5.5h.01M12 12h.01M12 18.5h.01',
+  edit: 'M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z M13.5 6.5l4 4',
+  trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3',
+  external: 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
+  plus: 'M12 5v14M5 12h14',
+  download: 'M12 4v11m0 0-4-4m4 4 4-4M5 20h14',
+  link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
+  chat: 'M4 19.5 5.4 16A8 8 0 1 1 8 18.6L4 19.5Z',
+  copy: 'M9 9h10v10H9zM5 15V5h10',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  bag: 'M5 8h14l-1 12H6L5 8Zm4 0V6a3 3 0 0 1 6 0v2',
+  search: 'm20 20-4.5-4.5M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z',
+}
+function Icon({ name, className = 'h-5 w-5' }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+      <path d={ICON_PATHS[name]} />
+    </svg>
+  )
+}
+const PRESS = 'transition-[background-color,color,transform] duration-150 active:scale-[0.94]'
+
 const DEMO_KEY = '_bgym_demo_products'
 const IS_DEMO = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url'
 const bySortOrder = (a, b) => (a.sort_order || 0) - (b.sort_order || 0)
 
-export default function ProductBuilder({ products: initialProducts, categories = [], contentBlocks: initialContentBlocks = [], appearance = {} }) {
+export default function ProductBuilder({ products: initialProducts, categories = [], contentBlocks: initialContentBlocks = [], appearance = {}, semesterControl = null }) {
   const { addToast } = useToast()
   const { confirm, promptText } = useConfirm()
   const [products, setProducts] = useState(() => [...initialProducts].sort(bySortOrder))
@@ -368,91 +393,82 @@ export default function ProductBuilder({ products: initialProducts, categories =
 
   return (
     <div className="space-y-4">
-      {/* Header ala Lynk */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-2 rounded-xl bg-emerald-50/70 px-3 py-2.5 text-sm">
-          <span className="text-slate-500">Toko:</span>
-          <span className="min-w-0 flex-1 truncate font-medium text-slate-800">{SITE_HOST}/produk</span>
+      {/* Bagian atas ringkas */}
+      <div className="space-y-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
+        <div className="flex items-center gap-2">
+          <a
+            href="/produk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl bg-slate-50 px-3 text-sm text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 ${PRESS}`}
+            aria-label="Buka toko di tab baru"
+          >
+            <span className="min-w-0 flex-1 truncate font-medium">{SITE_HOST}/produk</span>
+            <Icon name="external" className="h-4 w-4 shrink-0 text-slate-500" />
+          </a>
+          <Button onClick={() => setShowBlockPicker(true)} className="shrink-0 gap-1.5 px-4">
+            <Icon name="plus" className="h-5 w-5" /> Tambah
+          </Button>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button variant="outline" asChild><a href="/produk" target="_blank" rel="noopener noreferrer">↗ Lihat Toko</a></Button>
-          <Button asChild><Link href="/admin/produk/baru">+ Tambah Produk</Link></Button>
+        {semesterControl}
+        <div className="flex items-center gap-2">
+          <div className="flex shrink-0 gap-0.5 rounded-xl bg-slate-100 p-0.5">
+            {[['all', 'Semua'], ['free', 'Gratis'], ['paid', 'Berbayar']].map(([key, label]) => (
+              <button key={key} type="button" onClick={() => setTab(key)} aria-pressed={tab === key} className={`min-h-11 rounded-lg px-2.5 text-[13px] font-semibold ${PRESS} ${tab === key ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>{label}</button>
+            ))}
+          </div>
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Cari produk</span>
+            <Icon name="search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari..." className="pl-9" />
+          </label>
         </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5 items-start">
         {/* LEFT */}
         <div className="space-y-4 min-w-0">
-          {/* Tabs & Search */}
-          <div className="flex flex-wrap items-center gap-2">
-            {[['all', 'Semua'], ['free', 'Gratis'], ['paid', 'Berbayar']].map(([key, label]) => (
-              <button key={key} type="button" onClick={() => setTab(key)} className={`h-9 rounded-full px-4 text-sm font-semibold transition-colors ${tab === key ? 'bg-emerald-500 text-white shadow-sm' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>{label}</button>
-            ))}
-            <div className="flex-1" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari produk..."
-              className="w-full sm:w-48"
-            />
-          </div>
-
-          {/* Add block button */}
-          <div className="flex gap-2">
-            <Button onClick={() => setShowBlockPicker(true)} className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-400" size="lg">
-              <span className="mr-2 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white text-sm leading-none">+</span> Tambah Blok
-            </Button>
-            {orderDirty && (
-              <Button onClick={handleSaveOrder} disabled={saving} variant="outline" size="lg" className="px-4">
-                {saving ? 'Menyimpan...' : 'Simpan Urutan'}
-              </Button>
-            )}
-          </div>
+          {orderDirty && (
+            <div className="sticky top-14 z-20 flex items-center gap-3 rounded-2xl bg-amber-50 p-2 pl-4 ring-1 ring-amber-200">
+              <p className="flex-1 text-sm font-medium text-amber-900">Urutan berubah, belum disimpan</p>
+              <Button onClick={handleSaveOrder} disabled={saving}>{saving ? 'Menyimpan...' : 'Simpan Urutan'}</Button>
+            </div>
+          )}
 
           {/* Block picker dialog */}
           {showBlockPicker && (
             <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/40 p-4 backdrop-blur-sm" onClick={() => setShowBlockPicker(false)}>
               <Card className="my-auto flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-5 py-3">
-                  <div>
-                    <h2 className="text-base font-bold">Add new block</h2>
-                    <div className="mt-1 flex gap-4 text-xs font-semibold text-slate-500">
-                      <span className="text-slate-700">All Blocks</span>
-                      <span>Basic</span>
-                    </div>
-                  </div>
-                  <CloseButton onClick={() => setShowBlockPicker(false)} className="h-7 w-7" />
+                <div className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-100 px-5 py-3">
+                  <h2 className="text-base font-bold text-slate-900">Tambah ke toko</h2>
+                  <CloseButton onClick={() => setShowBlockPicker(false)} />
                 </div>
-                <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
-                  <div>
-                    <p className="text-xs font-bold text-slate-600 mb-3">Basic</p>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {[['image','Image','Add images'],['text','Text','Add headlines'],['link','Link','Add link shortcut']].map(([icon, title, description]) => (
-                        <button
-                          key={title}
-                          type="button"
-                          onClick={() => {
-                            setShowBlockPicker(false)
-                            setBlockModalType(icon)
-                          }}
-                          className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 text-left hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
-                        >
-                          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-600">{BLOCK_ICON[icon]}</span>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900">{title}</p>
-                            <p className="text-xs text-slate-500">{description}</p>
-                          </div>
-                        </button>
-                      ))}
-                      <Link href="/admin/produk/baru" onClick={() => setShowBlockPicker(false)} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 hover:border-emerald-300 hover:bg-emerald-50 transition-colors">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-600">▣</span>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-slate-900">Digital Product</p>
-                          <p className="text-xs text-slate-500">Sell files</p>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
+                <div className="flex-1 space-y-2 overflow-y-auto p-3">
+                  <Link href="/admin/produk/baru" onClick={() => setShowBlockPicker(false)} className={`flex min-h-16 items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 hover:bg-emerald-50 ${PRESS}`}>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-white"><Icon name="bag" /></span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-bold text-slate-900">Produk</span>
+                      <span className="block text-xs text-slate-600">Barang yang dijual atau dibagikan gratis (file, link)</span>
+                    </span>
+                  </Link>
+                  <p className="px-1 pt-2 text-xs font-semibold text-slate-500">Hiasan / info di halaman toko (bukan barang)</p>
+                  {[['image', 'Gambar', 'Banner atau foto pengumuman'], ['text', 'Teks', 'Judul pemisah atau keterangan'], ['link', 'Link', 'Tombol menuju WA, IG, atau situs lain']].map(([type, title, description]) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => {
+                        setShowBlockPicker(false)
+                        setBlockModalType(type)
+                      }}
+                      className={`flex min-h-14 w-full items-center gap-3 rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50 ${PRESS}`}
+                    >
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">{BLOCK_ICON[type]}</span>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-slate-900">{title}</span>
+                        <span className="block text-xs text-slate-500">{description}</span>
+                      </span>
+                    </button>
+                  ))}
                 </div>
               </Card>
             </div>
@@ -461,41 +477,41 @@ export default function ProductBuilder({ products: initialProducts, categories =
           {/* Block list */}
           <div>
             <div className="flex items-center justify-between px-1 pb-2">
-              <h2 className="text-lg font-semibold text-slate-600">Daftar Blok</h2>
-              <span className="text-xs text-slate-400">{mergedList.length} item · ▲▼ untuk urutkan</span>
+              <h2 className="text-base font-bold text-slate-800">Isi Toko</h2>
+              <span className="text-xs text-slate-500">{mergedList.length} item · panah untuk urutkan</span>
             </div>
             <div>{mergedList.length === 0 ? (
               <div className="px-4 py-12 text-center text-sm text-slate-500">
-                Belum ada produk. Klik <strong>Add new block</strong>.
+                Belum ada isi. Ketuk <strong>Tambah</strong> di atas.
               </div>
             ) : (
               <div className="space-y-2.5">{mergedList.map((item, idx) => {
                   if (item._kind === 'block') {
                     return (
                       <div key={`block-${item.id}`}>
-                        <div className="relative flex items-center gap-3 rounded-2xl bg-white px-2 py-3 shadow-[0_2px_10px_rgba(15,23,42,0.06)]">
-                          <div className="flex flex-col items-center shrink-0">
+                        <div className="relative flex items-center gap-3 rounded-2xl bg-white py-1 pl-1 pr-1 ring-1 ring-slate-100 shadow-[0_1px_3px_rgba(15,23,42,0.05)]">
+                          <div className="-my-1 flex shrink-0 flex-col items-center">
                             <button
                               type="button"
                               disabled={idx === 0}
                               onClick={() => moveItem(item.id, 'block', 'up')}
                               aria-label="Pindah block ke atas"
-                              className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                              className={`flex h-11 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-25 disabled:hover:bg-transparent ${PRESS}`}
                             >
-                              ▲
+                              <Icon name="up" className="h-4 w-4" />
                             </button>
                             <button
                               type="button"
                               disabled={idx === mergedList.length - 1}
                               onClick={() => moveItem(item.id, 'block', 'down')}
                               aria-label="Pindah block ke bawah"
-                              className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                              className={`flex h-11 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-25 disabled:hover:bg-transparent ${PRESS}`}
                             >
-                              ▼
+                              <Icon name="down" className="h-4 w-4" />
                             </button>
                           </div>
 
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-emerald-50 text-lg font-black text-emerald-500">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 text-lg font-black text-slate-500 ring-1 ring-slate-200/70">
                             {item.block_type === 'image' && item.image_path ? (
                               <img src={item.image_path} alt="" className="h-full w-full object-cover" />
                             ) : (
@@ -507,18 +523,18 @@ export default function ProductBuilder({ products: initialProducts, categories =
                             <p className="truncate text-[15px] font-medium leading-snug text-slate-700">
                               {item.title || (item.block_type === 'link' ? item.url : item.block_type === 'text' ? (item.text_content || '').replace(/<[^>]*>/g, '').trim().slice(0, 60) || 'Text' : 'Image')}
                             </p>
-                            <span className="text-[10px] text-slate-500 capitalize">{item.block_type} block</span>
+                            <span className="text-xs text-slate-500">{{ image: 'Gambar', text: 'Teks', link: 'Link' }[item.block_type] || 'Hiasan'} · hiasan toko</span>
                           </div>
 
                           <div className="flex shrink-0 items-center gap-2">
-                            <button type="button" onClick={() => setEditingBlock(item)} aria-label="Edit blok" className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100">✎</button>
+                            <button type="button" onClick={() => setEditingBlock(item)} aria-label="Edit blok" className={`flex h-11 w-11 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 ${PRESS}`}><Icon name="edit" /></button>
                             <button
                               type="button"
                               aria-label="Hapus blok"
-                              className="flex h-9 w-9 items-center justify-center rounded-lg text-red-500 hover:bg-red-50"
+                              className={`flex h-11 w-11 items-center justify-center rounded-xl text-red-600 hover:bg-red-50 ${PRESS}`}
                               onClick={async () => { const ok = await confirm({ title: 'Hapus block ini?', message: 'Block akan dihapus dari halaman.', confirmLabel: 'Ya, hapus', danger: true }); if (ok) deleteBlock(item.id) }}
                             >
-                              🗑
+                              <Icon name="trash" />
                             </button>
                           </div>
                         </div>
@@ -550,14 +566,14 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           setOverId(null)
                         }}
                         onClick={() => setSelectedId(p.id)}
-                        className={`relative flex cursor-pointer items-center gap-3 rounded-2xl bg-white px-2 py-3 shadow-[0_2px_10px_rgba(15,23,42,0.06)] transition-all ${
+                        className={`relative flex cursor-pointer items-center gap-3 rounded-2xl bg-white py-1 pl-1 pr-1 ring-1 ring-slate-100 shadow-[0_1px_3px_rgba(15,23,42,0.05)] transition-all ${
                           active ? 'ring-2 ring-emerald-400/60' : 'hover:bg-slate-50'
                         } ${isOver ? 'ring-2 ring-inset ring-emerald-500/40' : ''} ${
                           dragId === p.id ? 'opacity-40' : ''
                         } ${p.is_featured ? 'bgy-highlight-block ring-2 ring-amber-300/80 shadow-[0_0_22px_rgba(251,191,36,0.22)]' : ''}
                         `}
                       >
-                      <div className="flex flex-col items-center shrink-0">
+                      <div className="-my-1 flex shrink-0 flex-col items-center">
                         <button
                           type="button"
                           disabled={idx === 0}
@@ -566,13 +582,10 @@ export default function ProductBuilder({ products: initialProducts, categories =
                             moveItem(p.id, 'product', 'up')
                           }}
                           aria-label={`Pindah ${p.title} ke atas`}
-                          className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                          className={`flex h-11 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-25 disabled:hover:bg-transparent ${PRESS}`}
                         >
-                          ▲
+                          <Icon name="up" className="h-4 w-4" />
                         </button>
-                        <span className="text-gray-300 cursor-grab active:cursor-grabbing select-none text-lg px-0.5 hidden sm:inline-flex">
-                          ⠿
-                        </span>
                         <button
                           type="button"
                           disabled={idx === mergedList.length - 1}
@@ -581,17 +594,17 @@ export default function ProductBuilder({ products: initialProducts, categories =
                             moveItem(p.id, 'product', 'down')
                           }}
                           aria-label={`Pindah ${p.title} ke bawah`}
-                          className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                          className={`flex h-11 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-25 disabled:hover:bg-transparent ${PRESS}`}
                         >
-                          ▼
+                          <Icon name="down" className="h-4 w-4" />
                         </button>
                       </div>
 
-                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-orange-50">
+                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl ring-1 ring-slate-200/70">
                         {p.cover_path ? (
                           <img src={p.cover_path} alt="" className="h-full w-full object-cover" />
                         ) : (
-                          <div className={`flex h-full w-full items-center justify-center ${p.type === 'free' ? 'bg-emerald-50 text-emerald-500' : 'bg-orange-50 text-orange-400'}`}>
+                          <div className={`flex h-full w-full items-center justify-center ${p.type === 'free' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-600'}`}>
                             {p.type === 'free' ? (
                               <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14" /></svg>
                             ) : (
@@ -602,11 +615,11 @@ export default function ProductBuilder({ products: initialProducts, categories =
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="line-clamp-2 break-words text-[15px] font-medium leading-snug text-slate-700">
+                        <p className="line-clamp-2 break-words text-[15px] font-semibold leading-snug text-slate-800">
                           {p.title}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                          <span className={`text-xs font-semibold ${p.type === 'free' ? 'text-emerald-600' : 'text-slate-500'}`}>{priceLabel(p)}</span>
+                          <span className={`text-xs font-bold ${p.type === 'free' ? 'text-emerald-700' : 'text-slate-700'}`}>{priceLabel(p)}</span>
                           {cat && (
                             <span className="text-[10px] text-slate-500">{cat.name}</span>
                           )}
@@ -623,21 +636,24 @@ export default function ProductBuilder({ products: initialProducts, categories =
                         type="button"
                         role="switch"
                         aria-checked={!!p.is_active}
-                        aria-label={`${p.is_active ? 'Matikan' : 'Aktifkan'} ${p.title}`}
+                        aria-label={`${p.is_active ? 'Sembunyikan' : 'Tampilkan'} ${p.title} di toko`}
                         onClick={(e) => {
                           e.stopPropagation()
                           toggleActive(p.id)
                         }}
-                        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${p.is_active ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                        className="flex min-h-11 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl hover:bg-slate-50"
                       >
-                        <span className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${p.is_active ? 'translate-x-5' : ''}`} />
+                        <span className={`relative h-6 w-11 rounded-full transition-colors duration-150 ${p.is_active ? 'bg-emerald-600' : 'bg-slate-300'}`}>
+                          <span className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-150 ${p.is_active ? 'translate-x-5' : ''}`} />
+                        </span>
+                        <span className={`text-[10px] font-semibold leading-none ${p.is_active ? 'text-emerald-800' : 'text-slate-500'}`}>{p.is_active ? 'Tampil' : 'Disembunyikan'}</span>
                       </button>
 
                       <div className="relative shrink-0">
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-9 w-8 text-xl text-slate-500"
+                          className="h-11 w-9 text-slate-500"
                           onClick={(e) => {
                             e.stopPropagation()
                             setOpenMenuId((current) => (current === p.id ? null : p.id))
@@ -646,7 +662,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           aria-haspopup="dialog"
                           aria-expanded={openMenuId === p.id}
                         >
-                          ⋮
+                          <Icon name="more" />
                         </Button>
                       </div>
                       </div>
@@ -681,10 +697,10 @@ export default function ProductBuilder({ products: initialProducts, categories =
           )}
         </div>
 
-        {/* RIGHT: phone preview (desktop saja; di HP pakai tombol Lihat Toko) */}
-        <div className="hidden xl:sticky xl:top-16 xl:block">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
-            Page Preview
+        {/* RIGHT: preview langsung (di HP muncul di bawah daftar) */}
+        <div className="xl:sticky xl:top-16">
+          <p className="mb-2 px-1 text-base font-bold text-slate-800 xl:text-xs xl:font-semibold xl:text-slate-500">
+            Preview langsung
           </p>
           <div className="mx-auto w-[290px]">
             <div className="relative rounded-[2.2rem] border-[10px] border-gray-900 bg-gray-900 shadow-2xl overflow-hidden">
@@ -749,25 +765,25 @@ export default function ProductBuilder({ products: initialProducts, categories =
               </button>
               <div className="my-1 border-t border-slate-100" />
               <Link href={`/admin/produk/${menuProduct.id}/edit`} className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50">
-                <span aria-hidden="true">✎</span> Edit produk
+                <Icon name="edit" className="h-5 w-5 shrink-0 text-slate-500" /> Edit produk
               </Link>
               <a href={`/api/admin/products/file?id=${menuProduct.id}&mode=download`} target="_blank" rel="noopener noreferrer" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50">
-                <span aria-hidden="true">⬇</span> Download / buka file produk
+                <Icon name="download" className="h-5 w-5 shrink-0 text-slate-500" /> Download / buka file produk
               </a>
               <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { shareProductFile(menuProduct, 'copy'); setOpenMenuId(null) }}>
-                <span aria-hidden="true">🔗</span> Salin link file (berlaku 7 hari)
+                <Icon name="link" className="h-5 w-5 shrink-0 text-slate-500" /> Salin link file (berlaku 7 hari)
               </button>
               <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { shareProductFile(menuProduct, 'wa'); setOpenMenuId(null) }}>
-                <span aria-hidden="true">💬</span> Kirim link file via WhatsApp
+                <Icon name="chat" className="h-5 w-5 shrink-0 text-slate-500" /> Kirim link file via WhatsApp
               </button>
               <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { duplicateProduct(menuProduct); setOpenMenuId(null) }}>
-                <span aria-hidden="true">⧉</span> Duplikat
+                <Icon name="copy" className="h-5 w-5 shrink-0 text-slate-500" /> Duplikat
               </button>
               <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { const target = menuProduct; setOpenMenuId(null); createVariants(target) }}>
-                <span aria-hidden="true">⊞</span> Buat varian (Kelas 1, 2, 3…)
+                <Icon name="grid" className="h-5 w-5 shrink-0 text-slate-500" /> Buat varian (Kelas 1, 2, 3…)
               </button>
               <button type="button" className="flex min-h-12 w-full items-center gap-3 px-4 text-sm font-semibold text-red-600 hover:bg-red-50" onClick={async () => { const target = menuProduct; setOpenMenuId(null); const ok = await confirm({ title: `Hapus "${target.title}"?`, message: 'Produk dipindahkan ke Recycle Bin.', confirmLabel: 'Ya, hapus', danger: true }); if (ok) deleteProduct(target.id) }}>
-                <span aria-hidden="true">⌫</span> Hapus produk
+                <Icon name="trash" className="h-5 w-5 shrink-0" /> Hapus produk
               </button>
             </div>
           </div>

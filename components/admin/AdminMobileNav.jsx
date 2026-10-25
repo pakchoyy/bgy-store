@@ -46,10 +46,10 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const bottomItems = [
-    { href: '/admin', label: 'Home', icon: 'layout-dashboard' },
+    { href: '/admin', label: 'Home', icon: 'home' },
     { href: '/admin/produk', label: 'Produk', icon: 'package' },
     { href: '/admin/pesanan', label: 'Pesanan', icon: 'shopping-cart', count: counts.orders },
-    { href: '/admin/homepage', label: 'Tampilan', icon: 'home', also: ['/admin/theme'] },
+    { href: '/admin/homepage', label: 'Tampilan', icon: 'palette', also: ['/admin/theme'] },
   ];
   const activeBottom = bottomItems.find((item) => isActive(pathname, item.href, item.also));
   const title = activeBottom?.label || menuGroups.flatMap((group) => group.items).find((item) => isActive(pathname, item.href, item.also))?.label || 'Admin';
@@ -62,15 +62,11 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
     <div className="lg:hidden">
       <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/95 px-3 py-2 backdrop-blur">
         <div className="flex min-h-12 items-center justify-between gap-3 text-slate-800">
-          <button type="button" onClick={() => setOpen(true)} aria-label="Buka menu admin" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 transition-transform duration-150 active:scale-[0.96]">
+          <button type="button" onClick={() => setOpen(true)} aria-label="Buka menu admin" className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 transition-transform duration-150 active:scale-[0.96]">
             <Icon name="menu" className="h-6 w-6" />
           </button>
           <p className="flex min-w-0 flex-1 items-center justify-center gap-2 truncate text-base font-bold"><img src="/logo-kreacy.svg" alt="" className="h-6 w-6" />{title}</p>
-          <form action="/auth/signout" method="post">
-            <button type="submit" aria-label="Keluar dari admin" className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-red-500 shadow-md ring-1 ring-slate-100 transition-transform duration-150 active:scale-[0.96]">
-              <Icon name="logout" className="h-5 w-5" />
-            </button>
-          </form>
+          <span className="h-11 w-11 shrink-0" aria-hidden="true" />
         </div>
       </header>
 
@@ -115,6 +111,17 @@ export default function AdminMobileNav({ menuGroups, counts = {} }) {
                 </div>
               ))}
             </nav>
+            <form
+              action="/auth/signout"
+              method="post"
+              className="border-t border-slate-100 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
+              onSubmit={(e) => { if (!window.confirm('Yakin keluar dari admin?')) e.preventDefault(); }}
+            >
+              <button type="submit" className="flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50">
+                <Icon name="logout" />
+                <span>Keluar</span>
+              </button>
+            </form>
           </aside>
         </div>
       )}
