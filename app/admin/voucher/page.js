@@ -19,8 +19,11 @@ async function createVoucher(formData) {
   const endsAt = rawEndsAt ? new Date(/[zZ]|[+-]\d\d:\d\d$/.test(rawEndsAt) ? rawEndsAt : `${rawEndsAt}:00+07:00`).toISOString() : null
 
   if (!code || !name || !discountValue) redirect('/admin/voucher?toast=error')
+  // Kosong = berlaku untuk semua produk (kolom product_ids, SQL 025).
+  const productIds = formData.getAll('product_ids').map(String).filter(Boolean)
 
   const { error } = await supabase.from('vouchers').insert({
+    ...(productIds.length ? { product_ids: productIds } : {}),
     code,
     name,
     discount_type: discountType === 'fixed' ? 'fixed' : 'percent',
@@ -91,10 +94,12 @@ export default async function AdminVoucher({ searchParams }) {
   const supabase = await createClient()
   const toast = searchParams?.toast
   const tab = searchParams?.tab === 'kupon' ? 'kupon' : 'voucher'
-  const [{ data, error }, { data: promoRows }] = await Promise.all([
+  const [{ data, error }, { data: promoRows }, { data: paidProducts }] = await Promise.all([
     supabase.from('vouchers').select('*').order('created_at', { ascending: false }),
     supabase.from('settings').select('key, value').in('key', ['promo_after_download_code', 'promo_after_download_text', 'pdf_watermark_enabled', 'referral_discount_percent', 'referral_share_text']),
+    supabase.from('products').select('id, title').eq('type', 'paid').is('deleted_at', null).order('sort_order'),
   ])
+  const productTitle = Object.fromEntries((paidProducts || []).map((p) => [p.id, p.title]))
 
   const vouchers = data || []
   const promo = Object.fromEntries((promoRows || []).map((row) => [row.key, row.value]))
@@ -237,6 +242,15 @@ export default async function AdminVoucher({ searchParams }) {
             <input name="ends_at" type="datetime-local" className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[#25bd83] focus:ring-2 focus:ring-emerald-100" />
             <span className="mt-1 block text-xs text-slate-500">Setelah tanggal & jam ini voucher otomatis tidak berlaku. Kosongkan = selamanya.</span>
           </label>
+          <fieldset className="sm:col-span-2">
+            <legend className="text-sm font-semibold text-slate-700">Hanya untuk produk <span className="font-normal text-slate-400">(opsional)</span></legend>
+            <span className="mt-1 block text-xs text-slate-500">Tidak dicentang = berlaku untuk semua produk. Potongan hanya dihitung dari produk yang dicentang.</span>
+            <div className="mt-2 grid max-h-56 gap-1 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-2 sm:grid-cols-2">
+              {(paidProducts || []).map((p) => (
+                <label key={p.id} className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="product_ids" value={p.id} className="h-4 w-4 accent-emerald-600" />{p.title}</label>
+              ))}
+            </div>
+          </fieldset>
           <p className="rounded-xl bg-amber-50 px-3 py-2.5 text-xs leading-relaxed text-amber-800 sm:col-span-2">
             Catatan: total setelah diskon harus minimal <b>Rp1.000</b> (batas pembayaran online) atau tepat <b>Rp0</b> (gratis, file langsung didapat tanpa bayar).
           </p>
@@ -267,7 +281,7 @@ export default async function AdminVoucher({ searchParams }) {
                     <span className="min-w-0 break-words">{voucher.name}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${kind.cls}`}>{kind.label}</span>
                   </p>
-                  <p className="text-xs text-slate-400"><span className="font-bold text-emerald-700">{voucher.code}</span> - Diskon {formatDiscount(voucher)}</p>
+                  <p className="text-xs text-slate-400"><span className="font-bold text-emerald-700">{voucher.code}</span> - Diskon {formatDiscount(voucher)}{voucher.product_ids?.length ? ` · Khusus: ${voucher.product_ids.map((id) => productTitle[id] || 'produk terhapus').join(', ')}` : ''}</p>
                 </div>
                 <span className="text-sm text-slate-400">{`Dipakai ${voucher.used_count || 0}×`} · {remaining === null ? 'Tanpa batas' : `Sisa ${remaining}`}{voucher.ends_at ? ` · s/d ${new Date(voucher.ends_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}` : ''}</span>
                 <form action={toggleVoucher}>

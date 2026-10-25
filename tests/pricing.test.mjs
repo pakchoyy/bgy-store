@@ -31,3 +31,11 @@ test('voucher kedaluwarsa, belum mulai, kuota habis, atau minimal belanja ditola
   assert.ok(computeTotal(items, { discount_type: 'fixed', discount_value: 1000, max_uses: 5, used_count: 5 }, now).error)
   assert.ok(computeTotal(items, { discount_type: 'fixed', discount_value: 1000, min_order_amount: 50000 }, now).error)
 })
+
+test('voucher khusus produk: potongan hanya dari produk yang cocok', () => {
+  const v = { discount_type: 'fixed', discount_value: 15000, product_ids: ['a'] }
+  assert.deepEqual(computeTotal([paid(17000, { id: 'a' })], v, now), { subtotal: 17000, discount: 15000, total: 2000 })
+  assert.ok(computeTotal([paid(17000, { id: 'b' })], v, now).error)
+  assert.deepEqual(computeTotal([paid(17000, { id: 'a' }), paid(5000, { id: 'b' })], { ...v, discount_value: 20000 }, now), { subtotal: 22000, discount: 17000, total: 5000 })
+  assert.deepEqual(computeTotal([paid(17000, { id: 'b' })], { ...v, product_ids: null }, now), { subtotal: 17000, discount: 15000, total: 2000 })
+})

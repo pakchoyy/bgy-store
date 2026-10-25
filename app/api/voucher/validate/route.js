@@ -12,12 +12,23 @@ export async function GET(request) {
     const amount = Math.max(0, Math.floor(Number(searchParams.get('amount')) || 0))
     if (!code) return NextResponse.json({ error: 'Masukkan kode voucher.' }, { status: 400 })
 
+    const ids = String(searchParams.get('product_ids') || '').split(',').filter((id) => /^[0-9a-f-]{36}$/i.test(id)).slice(0, 20)
+
     const supabase = await createTrustedServerClient()
-    const { data: voucher, error } = await supabase.from('vouchers').select('code, discount_type, discount_value, min_order_amount, starts_at, ends_at, max_uses, used_count').eq('code', code).eq('is_active', true).maybeSingle()
+    const cols = 'code, discount_type, discount_value, min_order_amount, starts_at, ends_at, max_uses, used_count'
+    const voucherQuery = (c) => supabase.from('vouchers').select(c).eq('code', code).eq('is_active', true).maybeSingle()
+    // Kolom product_ids mungkin belum ada (SQL belum dijalankan): ulangi tanpa kolom itu.
+    let { data: voucher, error } = await voucherQuery(`${cols}, product_ids`)
+    if (error) ({ data: voucher, error } = await voucherQuery(cols))
     if (error || !voucher) return NextResponse.json({ error: 'Voucher tidak ditemukan atau sudah tidak aktif.' }, { status: 404 })
     // Aturan voucher sama persis dengan checkout (lib/pricing.mjs)
     const { computeTotal } = await import('@/lib/pricing.mjs')
-    const result = computeTotal([{ type: 'paid', sale_price: amount }], voucher)
+    let items = [{ type: 'paid', sale_price: amount }]
+    if (ids.length) {
+      const { data: found } = await supabase.from('products').select('id, type, sale_price').in('id', ids)
+      if (found?.length) items = found
+    }
+    const result = computeTotal(items, voucher)
     if (result.error) return NextResponse.json({ error: result.error }, { status: 400 })
     const { discount, total } = result
     return NextResponse.json({ discount, code, message: total === 0 ? `Voucher ${code} berhasil dipakai. Produk ini jadi gratis!` : `Voucher ${code} berhasil dipakai. Hemat Rp ${discount.toLocaleString('id-ID')}.` })

@@ -50,7 +50,7 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
     }
     setVoucherState({ status: 'loading', message: '', discount: 0 });
     try {
-      const response = await fetch(`/api/voucher/validate?code=${encodeURIComponent(code)}&amount=${price}`);
+      const response = await fetch(`/api/voucher/validate?code=${encodeURIComponent(code)}&amount=${price}&product_ids=${product.id}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Voucher tidak dapat digunakan.');
       setVoucherState({ status: 'success', message: data.message, discount: Number(data.discount || 0) });
