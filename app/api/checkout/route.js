@@ -126,6 +126,8 @@ export async function POST(request) {
         await markOrderPaid(supabase, fullOrder, { voucherClaimed })
       } catch (e) {
         console.error('free voucher order error:', e)
+        // kembalikan jatah voucher yang sudah diambil
+        if (voucherClaimed) await supabase.rpc('release_voucher_use', { p_code: voucherCode })
         return NextResponse.json({ error: 'Gagal memproses voucher. Hubungi admin.' }, { status: 500 })
       }
       return NextResponse.json({ redirect_url: `/terima-kasih?order=${order.id}`, order_id: order.id })

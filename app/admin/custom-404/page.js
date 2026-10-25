@@ -125,7 +125,7 @@ export default async function AdminCustom404({ searchParams }) {
             </div>
           </div>
           <div className="flex justify-end">
-            <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
+            <button type="submit" className="bg-emerald-700 hover:bg-emerald-800 text-white min-h-11 text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
               Simpan
             </button>
           </div>
@@ -138,7 +138,7 @@ export default async function AdminCustom404({ searchParams }) {
                 <div className="text-6xl font-extrabold text-gray-200 mb-2">404</div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
                 <p className="text-sm text-gray-500 mb-4 max-w-md mx-auto">{description}</p>
-                <div className="inline-block bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg">
+                <div className="inline-block bg-emerald-700 hover:bg-emerald-800 text-white min-h-11 text-sm font-semibold px-5 py-2.5 rounded-lg">
                   {ctaText}
                 </div>
               </div>

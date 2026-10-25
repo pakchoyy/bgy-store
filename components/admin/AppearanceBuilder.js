@@ -162,7 +162,7 @@ export default function AppearanceBuilder({
             type="button"
             onClick={handleSave}
             disabled={saving || !!uploading}
-            className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-bold px-5 py-2 rounded-xl hover:opacity-90 disabled:opacity-50"
+            className="bg-emerald-700 hover:bg-emerald-800 text-white min-h-11 text-sm font-bold px-5 py-2 rounded-xl hover:opacity-90 disabled:opacity-50"
           >
             {saving ? 'Menyimpan...' : 'Simpan'}
           </button>

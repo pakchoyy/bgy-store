@@ -132,7 +132,7 @@ export default async function AdminTheme({ searchParams }) {
           </div>
         </div>
         <div className="flex justify-end">
-          <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
+          <button type="submit" className="bg-emerald-700 hover:bg-emerald-800 text-white min-h-11 text-sm font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity">
             Simpan
           </button>
         </div>

@@ -135,7 +135,7 @@ export default async function AdminDashboard() {
             <Link href="/admin/homepage" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">Appearance</Link>
           </div>
         </div>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#25bd83] via-[#43cfa0] to-[#65ddb8] p-5 text-white shadow-sm">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 to-emerald-600 p-5 text-white shadow-sm">
           <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/12" />
           <div className="absolute -bottom-10 left-20 h-24 w-24 rounded-full bg-white/10" />
           <div className="relative flex items-start gap-4">

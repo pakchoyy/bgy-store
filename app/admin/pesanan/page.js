@@ -196,7 +196,7 @@ export default async function AdminPesanan({ searchParams }) {
             <a
               key={s}
               href={`/admin/pesanan?${baseQuery({ status: s })}`}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition-colors ${statusFilter === s ? 'bg-emerald-700 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
+              className={`inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold transition-colors ${statusFilter === s ? 'bg-emerald-700 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
             >
               {s === 'all' ? 'Semua' : statusLabels[s]}
             </a>
@@ -207,7 +207,7 @@ export default async function AdminPesanan({ searchParams }) {
             <a
               key={t}
               href={`/admin/pesanan?${baseQuery({ type: t })}`}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition-colors ${typeFilter === t ? 'bg-slate-800 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
+              className={`inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold transition-colors ${typeFilter === t ? 'bg-slate-800 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
             >
               {t === 'all' ? 'Semua Tipe' : typeLabels[t]}
             </a>
@@ -373,7 +373,7 @@ export default async function AdminPesanan({ searchParams }) {
               </div>
               <form action={generateLink}>
                 <input type="hidden" name="id" value={selectedOrder.id} />
-                <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-700 px-4 py-2.5 text-sm font-bold text-white">
+                <button type="submit" className="w-full rounded-xl bg-emerald-700 hover:bg-emerald-800 min-h-11 px-4 py-2.5 text-sm font-bold text-white">
                   Generate Ulang Link
                 </button>
               </form>
@@ -454,7 +454,7 @@ export default async function AdminPesanan({ searchParams }) {
           <div className="mt-6 pt-4 border-t border-gray-100 flex flex-wrap gap-2">
             <form action={generateLink}>
               <input type="hidden" name="id" value={selectedOrder.id} />
-              <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+              <button type="submit" className="bg-emerald-700 hover:bg-emerald-800 text-white min-h-11 text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
                 Generate Ulang Link Download
               </button>
             </form>

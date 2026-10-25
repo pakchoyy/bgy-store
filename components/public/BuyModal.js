@@ -175,8 +175,8 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
               </div>
             </section>
 
-            <label className="flex items-start gap-2 text-xs text-slate-700">
-              <input required type="checkbox" className="mt-0.5 h-4 w-4 accent-emerald-600" />
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-1 text-sm text-slate-700">
+              <input required type="checkbox" className="h-5 w-5 shrink-0 accent-emerald-600" />
               <span>Saya menyetujui <a href="/halaman/syarat-dan-ketentuan" target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 underline underline-offset-2">Syarat dan Ketentuan</a>.</span>
             </label>
 

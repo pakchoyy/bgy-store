@@ -174,7 +174,7 @@ export default function DownloadModal({ product, isOpen, onClose, settings }) {
               <div className="flex items-center gap-3 mb-2">
                 {product.category && (
                   <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    className="text-xs font-bold px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: `${product.category.color}20`, color: product.category.color }}
                   >
                     {product.category.name}

@@ -19,3 +19,16 @@ REVOKE ALL ON FUNCTION claim_voucher_use(text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION claim_voucher_use(text) TO service_role;
 
 NOTIFY pgrst, 'reload schema';
+
+-- Kembalikan 1 jatah bila pesanan gratis gagal diproses.
+CREATE OR REPLACE FUNCTION release_voucher_use(p_code text)
+RETURNS void
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  UPDATE vouchers SET used_count = GREATEST(used_count - 1, 0), updated_at = now() WHERE code = p_code;
+$$;
+REVOKE ALL ON FUNCTION release_voucher_use(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION release_voucher_use(text) TO service_role;
+NOTIFY pgrst, 'reload schema';

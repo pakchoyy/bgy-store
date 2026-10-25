@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { rateLimited, tooMany } from '@/lib/rate-limit'
 import { normalizeWebhookPayload } from '@/lib/mayar-webhook.mjs'
 
 export async function POST(request) {
@@ -45,6 +46,8 @@ export async function POST(request) {
     }
 
     if (!trusted) {
+      // Tanpa tanda tangan: cek ulang ke Mayar, dibatasi supaya tidak bisa dipakai menghabiskan kuota API.
+      if (rateLimited(request, 'webhook-unsigned', 30, 60 * 1000)) return tooMany()
       await syncOrderWithMayar(supabase, order)
     } else if (normalized.isPaid) {
       await markOrderPaid(supabase, order, { mayarId: normalized.mayarId, paymentId: normalized.paymentId })
