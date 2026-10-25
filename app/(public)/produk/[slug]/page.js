@@ -160,7 +160,7 @@ export default async function ProdukDetailPage({ params }) {
           <div className="absolute top-3 left-3 flex flex-wrap gap-2">
             <ProductBadge badge={product.badge} badgeCustom={product.badge_custom} />
             {isSoldOut && (
-              <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
+              <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
                 Sold Out
               </span>
             )}

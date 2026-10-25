@@ -167,7 +167,7 @@ export default function CheckoutPage({ products, waUrl }) {
           </section>
 
           <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80 sm:p-4">
-            <label className="flex items-start gap-2 text-xs text-slate-700"><input required type="checkbox" className="mt-0.5 h-4 w-4 accent-emerald-600" /><span>Saya menyetujui <a href="/halaman/syarat-dan-ketentuan" target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 underline underline-offset-2">Syarat dan Ketentuan</a>.</span></label>
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-1 text-sm text-slate-700"><input required type="checkbox" className="h-5 w-5 shrink-0 accent-emerald-600" /><span>Saya menyetujui <a href="/halaman/syarat-dan-ketentuan" target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 underline underline-offset-2">Syarat dan Ketentuan</a>.</span></label>
           </section>
 
           {tooSmall && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">Total pembayaran online minimal {formatRupiah(MIN_PAYMENT)}. {voucherState.discount > 0 ? 'Hapus atau ganti voucher.' : 'Hubungi admin untuk produk ini.'}</p>}

@@ -1,3 +1,4 @@
+import { fetchAll } from '@/lib/fetch-all'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { SITE_HOST } from '@/lib/site'
@@ -12,8 +13,8 @@ async function getDashboardData() {
     const since = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
     const [{ data: products }, { data: orders }, { data: events }] = await Promise.all([
       supabase.from('products').select('*, category:categories(*)').is('deleted_at', null),
-      supabase.from('orders').select('*').order('created_at', { ascending: false }),
-      supabase.from('analytics_events').select('event_type, created_at').gte('created_at', since).limit(50000),
+      fetchAll(() => supabase.from('orders').select('*').order('created_at', { ascending: false }).order('id')),
+      fetchAll(() => supabase.from('analytics_events').select('event_type, created_at').gte('created_at', since).order('id'), 50000),
     ])
     return { products: products || [], orders: orders || [], events: events || [] }
   } catch {}
@@ -134,7 +135,7 @@ export default async function AdminDashboard() {
             <Link href="/admin/homepage" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">Appearance</Link>
           </div>
         </div>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#25bd83] via-[#43cfa0] to-[#65ddb8] p-5 text-white shadow-sm">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 to-emerald-600 p-5 text-white shadow-sm">
           <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/12" />
           <div className="absolute -bottom-10 left-20 h-24 w-24 rounded-full bg-white/10" />
           <div className="relative flex items-start gap-4">

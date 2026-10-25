@@ -72,7 +72,7 @@ export default function FreePageClient({ products, categories, settings }) {
                 key={c.id}
                 type="button"
                 onClick={() => handleCategoryClick(c.slug)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                className={`inline-flex min-h-11 items-center px-4 rounded-full text-sm font-bold transition-all ${
                   selectedCategory === c.slug
                     ? 'bg-white text-[#0d7a8a] shadow'
                     : 'bg-white/20 text-white'

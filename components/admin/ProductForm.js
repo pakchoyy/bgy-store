@@ -424,7 +424,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 key={value || 'none'}
                 type="button"
                 onClick={() => updateField('semester', value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${form.semester === value ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${form.semester === value ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}
               >
                 {label}
               </button>
@@ -443,7 +443,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 onClick={() => toggleBadge(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                   form.badges.includes(opt.value)
-                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
                     : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                 }`}
               >
@@ -535,7 +535,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 <span className="flex h-14 w-full flex-col justify-center gap-1 rounded-lg bg-gray-50 p-1.5">
                   {layout.value === 'compact' && [0, 1, 2].map((i) => <span key={i} className="flex items-center gap-1"><span className={`h-2.5 w-2.5 ${bar}`} /><span className={`h-1.5 flex-1 ${bar}`} /></span>)}
                   {layout.value === 'landscape' && [0, 1].map((i) => <span key={i} className="flex items-center gap-1"><span className={`h-4 w-4 ${bar}`} /><span className={`h-2 flex-1 ${bar}`} /></span>)}
-                  {layout.value === 'square' && <span className="grid grid-cols-3 gap-1">{[0, 1, 2, 3, 4, 5].map((i) => <span key={i} className={`aspect-square ${bar}`} />)}</span>}
+                  {layout.value === 'square' && <span className="grid grid-cols-2 gap-1">{[0, 1, 2, 3].map((i) => <span key={i} className={`aspect-square ${bar}`} />)}</span>}
                   {layout.value === 'portrait' && <span className="grid grid-cols-3 gap-1">{[0, 1, 2].map((i) => <span key={i} className={`h-9 ${bar}`} />)}</span>}
                   {layout.value === 'wide' && <><span className={`h-6 ${bar}`} /><span className={`h-1.5 w-2/3 ${bar}`} /></>}
                 </span>

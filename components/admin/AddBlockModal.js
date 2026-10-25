@@ -136,7 +136,7 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
                 )}
                 <label className="mt-3 inline-block">
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={uploading} />
-                  <span className="inline-flex cursor-pointer items-center rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d9488]">
+                  <span className="inline-flex cursor-pointer items-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">
                     {uploading ? 'Mengunggah...' : 'Upload Image'}
                   </span>
                 </label>

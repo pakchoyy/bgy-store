@@ -38,7 +38,7 @@ export default function ShareButtons({ productUrl, title }) {
       <span className="text-sm text-gray-500 font-medium mr-1">Bagikan:</span>
       <button
         onClick={shareWhatsApp}
-        className="w-9 h-9 flex items-center justify-center rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
+        className="w-11 h-11 flex items-center justify-center rounded-full bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
         aria-label="Bagikan WhatsApp"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -47,7 +47,7 @@ export default function ShareButtons({ productUrl, title }) {
       </button>
       <button
         onClick={shareTelegram}
-        className="w-9 h-9 flex items-center justify-center rounded-full bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
+        className="w-11 h-11 flex items-center justify-center rounded-full bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
         aria-label="Bagikan Telegram"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -56,7 +56,7 @@ export default function ShareButtons({ productUrl, title }) {
       </button>
       <button
         onClick={copyLink}
-        className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors relative"
+        className="w-11 h-11 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors relative"
         aria-label="Salin Tautan"
       >
         {copied ? (

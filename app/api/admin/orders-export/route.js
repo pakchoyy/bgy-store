@@ -1,3 +1,4 @@
+import { fetchAll } from '@/lib/fetch-all'
 import { createClient } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { csvRow, csvResponse } from '@/lib/csv'
@@ -15,6 +16,9 @@ export async function GET(request) {
   const status = params.get('status')
   const type = params.get('type')
 
+  const from = /^\d{4}-\d{2}-\d{2}$/.test(params.get('from') || '') ? params.get('from') : ''
+  const to = /^\d{4}-\d{2}-\d{2}$/.test(params.get('to') || '') ? params.get('to') : ''
+  const buildQuery = () => {
   let query = supabase
     .from('orders')
     .select('id, created_at, buyer_name, buyer_whatsapp, buyer_email, amount, status, voucher_code, product_id, product:products(title)')
@@ -22,11 +26,16 @@ export async function GET(request) {
   if (status && STATUS[status]) query = query.eq('status', status)
   if (type === 'produk') query = query.not('product_id', 'is', null)
   if (type === 'donasi') query = query.is('product_id', null)
-  const { data: orders, error } = await query
+  // tanggal dalam WIB (UTC+7)
+  if (from) query = query.gte('created_at', `${from}T00:00:00+07:00`)
+  if (to) query = query.lte('created_at', `${to}T23:59:59.999+07:00`)
+  return query.order('id')
+  }
+  const { data: orders, error } = await fetchAll(buildQuery)
   if (error) return Response.json({ error: error.message }, { status: 500 })
 
   const itemsByOrder = {}
-  const { data: items, error: itemsError } = await supabase.from('order_items').select('order_id, title')
+  const { data: items, error: itemsError } = await fetchAll(() => supabase.from('order_items').select('order_id, title').order('id'))
   if (!itemsError) for (const item of items || []) (itemsByOrder[item.order_id] ||= []).push(item.title)
 
   const lines = [

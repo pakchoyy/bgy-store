@@ -8,6 +8,8 @@ import SocialIcons from '@/components/public/SocialIcons'
 import { navigationHref, uniqueNavigationItems } from '@/lib/navigation'
 import { CART_UPDATED_EVENT, getCartItems, removeCartItem } from '@/lib/cart'
 import { CloseButton } from '@/components/ui/close-button'
+import Image from 'next/image'
+import { canOptimize } from '@/components/public/ProductCard'
 
 function formatCartPrice(value) {
   const amount = Number(value || 0)
@@ -119,7 +121,7 @@ export default function LynkShell({
             </span>
           </summary>
           <div className="absolute left-0 top-12 w-56 overflow-hidden rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-black/5">
-            <p className="border-b border-slate-100 px-4 py-3 text-[11px] font-semibold text-slate-400">Pages</p>
+            <p className="border-b border-slate-100 px-4 py-3 text-xs font-semibold text-slate-500">Pages</p>
             <nav className="max-h-72 overflow-y-auto py-1">
               {menuItems.map((item) => (
                 <a key={item.key} href={item.href} className="block px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50">
@@ -219,9 +221,11 @@ export default function LynkShell({
 
       <div className="max-w-md mx-auto px-4 pt-8 pb-6">
         <header className="text-center text-white mb-4">
-          <div className="w-20 h-20 mx-auto rounded-full border-[3px] border-white/50 shadow-lg overflow-hidden bg-white/20 mb-3">
+          <div className="relative w-20 h-20 mx-auto rounded-full border-[3px] border-white/50 shadow-lg overflow-hidden bg-white/20 mb-3">
             {profileAvatarUrl ? (
-              <img src={profileAvatarUrl} alt={profileName} className="w-full h-full object-cover" />
+              canOptimize(profileAvatarUrl)
+                ? <Image src={profileAvatarUrl} alt={profileName} width={80} height={80} sizes="80px" priority className="w-full h-full object-cover" />
+                : <img src={profileAvatarUrl} alt={profileName} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xl font-semibold">
                 {(profileName || 'Kreacy').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 3).toUpperCase() || 'Kreacy'}

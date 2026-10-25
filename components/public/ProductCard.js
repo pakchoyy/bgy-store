@@ -4,7 +4,7 @@ import Image from 'next/image'
 const SUPABASE_PUBLIC = (() => {
   try { return `https://${new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname}/storage/v1/object/public/` } catch { return null }
 })()
-const canOptimize = (src) => typeof src === 'string' && (src.startsWith('/') || (SUPABASE_PUBLIC && src.startsWith(SUPABASE_PUBLIC)))
+export const canOptimize = (src) => typeof src === 'string' && (src.startsWith('/') || (SUPABASE_PUBLIC && src.startsWith(SUPABASE_PUBLIC)))
 import { getCardLayout } from '@/lib/utils'
 
 const fmt = (value) => `Rp${Number(value || 0).toLocaleString('id-ID')}`
@@ -14,10 +14,10 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
   return (
     <span className={`flex shrink-0 flex-col items-end gap-0.5 ${className}`}>
       {product.flash_active && !isSoldOut && (
-        <span className="rounded-md bg-gradient-to-r from-amber-400 to-orange-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">⚡ Flash sale</span>
+        <span className="rounded-md bg-gradient-to-r from-amber-400 to-orange-500 px-1.5 py-0.5 text-[11px] font-bold uppercase text-white">⚡ Flash sale</span>
       )}
       {hasDiscount && !isSoldOut && (
-        <span className="font-numeric text-[10px] font-semibold text-gray-500 line-through">{fmt(product.original_price)}</span>
+        <span className="font-numeric text-xs font-semibold text-gray-500 line-through">{fmt(product.original_price)}</span>
       )}
       <span
         className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
@@ -37,15 +37,15 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
 function DownloadCount({ product, isFree }) {
   const count = Number(isFree ? product.download_count : product.sold_count) || 0
   if (count < 1) return null
-  return <span className="block text-[11px] font-medium text-gray-500">{count.toLocaleString('id-ID')}× {isFree ? 'diunduh' : 'terjual'}</span>
+  return <span className="block text-xs font-medium text-gray-600">{count.toLocaleString('id-ID')}× {isFree ? 'diunduh' : 'terjual'}</span>
 }
 
-function Thumb({ product, isFree, className, large = false }) {
+function Thumb({ product, isFree, className, large = false, sizes = '64px' }) {
   if (product.cover_path) {
     return (
       <span className={`relative flex shrink-0 overflow-hidden bg-gray-100 ${className}`}>
         {canOptimize(product.cover_path) ? (
-          <Image src={product.cover_path} alt="" fill sizes={large ? '(max-width: 640px) 100vw, 480px' : '64px'} className="object-cover" />
+          <Image src={product.cover_path} alt="" fill sizes={sizes} className="object-cover" />
         ) : (
           <img src={product.cover_path} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
         )}
@@ -61,9 +61,16 @@ function Thumb({ product, isFree, className, large = false }) {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2zM9 13h6M9 17h4" />
       </svg>
       {large && <span className="mt-1 line-clamp-2 px-2 text-center text-xs font-bold leading-snug text-white/95">{product.title}</span>}
-      <span className={`font-bold uppercase tracking-wider text-white/80 ${large ? 'mt-1 text-[9px]' : 'mt-0.5 text-[8px]'}`}>{isFree ? 'Gratis' : 'Premium'}</span>
+      <span className={`font-bold uppercase tracking-wider text-white/80 ${large ? 'mt-1 text-[11px]' : 'mt-0.5 text-[10px]'}`}>{isFree ? 'Gratis' : 'Premium'}</span>
     </span>
   )
+}
+
+// Lebar gambar sebenarnya per bentuk kartu (toko maks ~480px), supaya HP tidak mengunduh gambar kebesaran.
+const CARD_SIZES = {
+  square: '(max-width: 520px) 50vw, 240px',
+  portrait: '(max-width: 520px) 34vw, 160px',
+  wide: '(max-width: 520px) 100vw, 480px',
 }
 
 export default function ProductCard({ product, onSelect, className = '' }) {
@@ -87,7 +94,7 @@ export default function ProductCard({ product, onSelect, className = '' }) {
   ) : (
     <span className="flex h-full flex-col">
       <span className={`relative block overflow-hidden ${layout.aspect}`}>
-        <Thumb product={product} isFree={isFree} className="h-full w-full" large />
+        <Thumb product={product} isFree={isFree} className="h-full w-full" large sizes={CARD_SIZES[layout.value] || CARD_SIZES.wide} />
       </span>
       <span className={`flex flex-1 gap-1.5 p-2 ${layout.value === 'wide' ? 'items-center' : 'flex-col'}`}>
         <span className="min-w-0 flex-1">

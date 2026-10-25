@@ -72,6 +72,7 @@ function Sidebar({ counts }) {
       items: [
         { href: '/admin/produk', label: 'Produk', icon: 'package' },
         { href: '/admin/pesanan', label: 'Pesanan', icon: 'shopping-cart', countKey: 'orders' },
+        { href: '/admin/pelanggan', label: 'Pelanggan', icon: 'users' },
         { href: '/admin/analytics', label: 'Analytics', icon: 'chart' },
         { href: '/admin/reviews', label: 'Review & Notifikasi', icon: 'star', countKey: 'reviews', also: ['/admin/notifikasi'] },
         { href: '/admin/halaman', label: 'Halaman, Menu, Kategori', icon: 'file-text', also: ['/admin/navigation', '/admin/kategori'] },
@@ -80,7 +81,7 @@ function Sidebar({ counts }) {
     {
       label: 'Tampilan',
       items: [
-        { href: '/admin/homepage', label: 'Tampilan Toko', icon: 'home', also: ['/admin/theme'] },
+        { href: '/admin/homepage', label: 'Tampilan Toko', icon: 'palette', also: ['/admin/theme'] },
         { href: '/admin/footer', label: 'Footer', icon: 'rectangle' },
         { href: '/admin/announcement', label: 'Pengumuman', icon: 'megaphone' },
       ],
@@ -89,7 +90,7 @@ function Sidebar({ counts }) {
       label: 'Lainnya',
       items: [
         { href: '/admin/voucher', label: 'Voucher & Kupon', icon: 'ticket' },
-        { href: '/admin/settings', label: 'Pengaturan', icon: 'settings' },
+        { href: '/admin/settings', label: 'Sistem', icon: 'settings' },
         { href: '/admin/seo', label: 'SEO', icon: 'search' },
       ],
     },

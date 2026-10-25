@@ -1,9 +1,9 @@
-import { rateLimited, tooMany } from '@/lib/rate-limit'
+import { rateLimitedShared, tooMany } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 import { SITE_URL, SITE_HOST } from '@/lib/site'
 
 export async function POST(request) {
-  if (rateLimited(request, 'traktir', 10, 10 * 60 * 1000)) return tooMany()
+  if (await rateLimitedShared(request, 'traktir', 10, 10 * 60 * 1000)) return tooMany()
   try {
     const body = await request.json()
     const cleanAmount = Math.floor(Number(body.amount) || 0)

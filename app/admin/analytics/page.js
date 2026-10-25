@@ -1,3 +1,4 @@
+import { fetchAll } from '@/lib/fetch-all'
 import { createClient } from '@/lib/supabase-server'
 import { formatRupiah } from '@/lib/utils'
 
@@ -39,8 +40,8 @@ async function getData() {
     const supabase = await createClient()
     const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
     const [{ data: orders }, { data: events }, { data: allProducts }] = await Promise.all([
-      supabase.from('orders').select('id, product_id, amount, status, created_at'),
-      supabase.from('analytics_events').select('event_type, path, product_id').gte('created_at', since).limit(50000),
+      fetchAll(() => supabase.from('orders').select('id, product_id, amount, status, created_at').order('id')),
+      fetchAll(() => supabase.from('analytics_events').select('event_type, path, product_id').gte('created_at', since).order('id'), 50000),
       supabase.from('products').select('id, title, slug, type, is_active').is('deleted_at', null),
     ])
     const titleOf = (id) => allProducts?.find(p => p.id === id)?.title || 'Produk dihapus'
@@ -64,7 +65,7 @@ async function getData() {
     const topPages = countBy(views, 'path').map(([path, count]) => ({ label: path, count }))
     const topClicked = countBy(clicks, 'product_id').map(([id, count]) => ({ label: titleOf(id), count }))
 
-    const { data: itemRows, error: itemsError } = await supabase.from('order_items').select('order_id, product_id')
+    const { data: itemRows, error: itemsError } = await fetchAll(() => supabase.from('order_items').select('order_id, product_id').order('id'))
     const itemsByOrder = {}
     if (!itemsError) for (const row of itemRows || []) (itemsByOrder[row.order_id] ||= []).push(row.product_id)
     const productIdsOf = (o) => itemsByOrder[o.id]?.length ? itemsByOrder[o.id].filter(Boolean) : o.product_id ? [o.product_id] : []

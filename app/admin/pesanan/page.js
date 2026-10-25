@@ -1,3 +1,4 @@
+import { fetchAll } from '@/lib/fetch-all'
 import { assertAdminAction } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
@@ -88,16 +89,18 @@ export default async function AdminPesanan({ searchParams }) {
   const statusFilter = searchParams?.status || 'all'
   const typeFilter = searchParams?.type || 'all'
   const search = searchParams?.search || ''
+  const isDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || '')
+  const from = isDate(searchParams?.from) ? searchParams.from : ''
+  const to = isDate(searchParams?.to) ? searchParams.to : ''
   const selected = searchParams?.selected
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
 
   let orders = []
   if (!isDemo) {
-    // Pesanan yang tidak dibayar lebih dari 48 jam ditandai kedaluwarsa supaya daftar Pending tetap bersih.
-    // Bila pembeli ternyata membayar belakangan, webhook / cek status tetap mengubahnya jadi lunas.
-    await supabase.from('orders').update({ status: 'expired' }).eq('status', 'pending').lt('created_at', new Date(Date.now() - 48 * 3600 * 1000).toISOString())
-    const { data } = await supabase.from('orders').select('*, product:products(title)').order('created_at', { ascending: false })
-    const { data: itemRows, error: itemsError } = await supabase.from('order_items').select('order_id, title')
+    // Pending lebih dari 48 jam ditampilkan sebagai kedaluwarsa; status di database diubah oleh cron harian (/api/cron/daily).
+    const staleBefore = Date.now() - 48 * 3600 * 1000
+    const { data } = await fetchAll(() => supabase.from('orders').select('*, product:products(title)').order('created_at', { ascending: false }).order('id'))
+    const { data: itemRows, error: itemsError } = await fetchAll(() => supabase.from('order_items').select('order_id, title').order('id'))
     const itemsByOrder = {}
     if (!itemsError) for (const row of itemRows || []) (itemsByOrder[row.order_id] ||= []).push(row.title)
     if (data && data.length > 0) {
@@ -115,8 +118,9 @@ export default async function AdminPesanan({ searchParams }) {
               ? `${itemsByOrder[o.id].length} produk: ${itemsByOrder[o.id].join(', ')}`
               : (o.product_title || o.product?.title || 'Produk dihapus'),
           price: o.price || o.amount || 0,
-          status: o.status || 'pending',
-          date: o.created_at ? o.created_at.slice(0, 10) : '2026-01-01',
+          status: o.status === 'pending' && o.created_at && new Date(o.created_at).getTime() < staleBefore ? 'expired' : (o.status || 'pending'),
+          // tanggal WIB (UTC+7)
+          date: o.created_at ? new Date(new Date(o.created_at).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 10) : '2026-01-01',
           download_token: o.download_token || null,
           unread: o.admin_read_at === null,
         }
@@ -131,6 +135,8 @@ export default async function AdminPesanan({ searchParams }) {
   if (typeFilter !== 'all') {
     filtered = filtered.filter(o => o.type === typeFilter)
   }
+  if (from) filtered = filtered.filter(o => o.date >= from)
+  if (to) filtered = filtered.filter(o => o.date <= to)
   if (search) {
     const q = search.toLowerCase()
     filtered = filtered.filter(o =>
@@ -145,7 +151,7 @@ export default async function AdminPesanan({ searchParams }) {
   const statuses = ['all', 'pending', 'paid', 'failed', 'expired']
   const types = ['all', 'produk', 'donasi']
   const baseQuery = (overrides = {}) => {
-    const base = { status: statusFilter, type: typeFilter, search, ...overrides }
+    const base = { status: statusFilter, type: typeFilter, search, from, to, ...overrides }
     const params = new URLSearchParams()
     for (const [key, value] of Object.entries(base)) {
       if (value) params.set(key, value)
@@ -164,7 +170,7 @@ export default async function AdminPesanan({ searchParams }) {
         {unreadCount > 0 && (
           <form action={markRead}>
             <input type="hidden" name="back" value={baseQuery({ toast: '' })} />
-            <button type="submit" className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600">
+            <button type="submit" className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800">
               ✓ Tandai semua dibaca
             </button>
           </form>
@@ -172,6 +178,8 @@ export default async function AdminPesanan({ searchParams }) {
         <form method="GET" action="/api/admin/orders-export">
           <input type="hidden" name="status" value={statusFilter} />
           <input type="hidden" name="type" value={typeFilter} />
+          {from && <input type="hidden" name="from" value={from} />}
+          {to && <input type="hidden" name="to" value={to} />}
           <button type="submit" className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -188,7 +196,7 @@ export default async function AdminPesanan({ searchParams }) {
             <a
               key={s}
               href={`/admin/pesanan?${baseQuery({ status: s })}`}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition-colors ${statusFilter === s ? 'bg-emerald-500 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
+              className={`inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold transition-colors ${statusFilter === s ? 'bg-emerald-700 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
             >
               {s === 'all' ? 'Semua' : statusLabels[s]}
             </a>
@@ -199,13 +207,13 @@ export default async function AdminPesanan({ searchParams }) {
             <a
               key={t}
               href={`/admin/pesanan?${baseQuery({ type: t })}`}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition-colors ${typeFilter === t ? 'bg-slate-800 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
+              className={`inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold transition-colors ${typeFilter === t ? 'bg-slate-800 text-white' : 'bg-white text-gray-500 ring-1 ring-gray-200'}`}
             >
               {t === 'all' ? 'Semua Tipe' : typeLabels[t]}
             </a>
           ))}
         </div>
-        <form method="GET" action="/admin/pesanan" className="w-full sm:w-auto sm:flex-1 sm:max-w-xs">
+        <form method="GET" action="/admin/pesanan" className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-1 sm:flex-wrap sm:items-end">
           <input type="hidden" name="status" value={statusFilter} />
           <input type="hidden" name="type" value={typeFilter} />
           <input
@@ -213,9 +221,24 @@ export default async function AdminPesanan({ searchParams }) {
             name="search"
             defaultValue={search}
             placeholder="Cari nama, WA, atau email..."
-            className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm"
+            className="col-span-2 h-11 w-full rounded-xl border border-gray-300 bg-white px-3 text-sm sm:max-w-xs"
           />
+          <label className="text-xs font-semibold text-gray-500">Dari tanggal
+            <input type="date" name="from" defaultValue={from} className="mt-1 block h-11 w-full rounded-xl border border-gray-300 bg-white px-2 text-sm text-gray-900" />
+          </label>
+          <label className="text-xs font-semibold text-gray-500">Sampai tanggal
+            <input type="date" name="to" defaultValue={to} className="mt-1 block h-11 w-full rounded-xl border border-gray-300 bg-white px-2 text-sm text-gray-900" />
+          </label>
+          <button type="submit" className="h-11 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800">Terapkan</button>
+          {(from || to || search) && (
+            <a href={`/admin/pesanan?${baseQuery({ from: '', to: '', search: '' })}`} className="flex h-11 items-center justify-center rounded-xl bg-white px-4 text-sm font-semibold text-gray-600 ring-1 ring-gray-200">Reset</a>
+          )}
         </form>
+        {(from || to) && (
+          <p className="w-full text-xs text-gray-500">
+            {filtered.length} pesanan · lunas {formatRupiah(filtered.filter(o => o.status === 'paid').reduce((sum, o) => sum + Number(o.price || 0), 0))}
+          </p>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-2 md:hidden">
@@ -350,7 +373,7 @@ export default async function AdminPesanan({ searchParams }) {
               </div>
               <form action={generateLink}>
                 <input type="hidden" name="id" value={selectedOrder.id} />
-                <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-700 px-4 py-2.5 text-sm font-bold text-white">
+                <button type="submit" className="w-full rounded-xl bg-emerald-700 hover:bg-emerald-800 min-h-11 px-4 py-2.5 text-sm font-bold text-white">
                   Generate Ulang Link
                 </button>
               </form>
@@ -431,7 +454,7 @@ export default async function AdminPesanan({ searchParams }) {
           <div className="mt-6 pt-4 border-t border-gray-100 flex flex-wrap gap-2">
             <form action={generateLink}>
               <input type="hidden" name="id" value={selectedOrder.id} />
-              <button type="submit" className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+              <button type="submit" className="bg-emerald-700 hover:bg-emerald-800 text-white min-h-11 text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
                 Generate Ulang Link Download
               </button>
             </form>
