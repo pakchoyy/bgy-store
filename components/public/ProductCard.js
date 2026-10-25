@@ -35,7 +35,7 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
 }
 
 function DownloadCount({ product, isFree }) {
-  const count = Number(isFree ? product.download_count : product.sold_count) || 0
+  const count = (Number(isFree ? product.download_count : 0) || 0) + (Number(product.sold_count) || 0)
   if (count < 1) return null
   return <span className="block text-xs font-medium text-gray-600">{count.toLocaleString('id-ID')}× {isFree ? 'diunduh' : 'terjual'}</span>
 }
