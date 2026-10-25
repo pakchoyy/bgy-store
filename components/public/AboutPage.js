@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Books, Tools, Folders, Bulb, ArrowRight } from 'tabler-icons-react'
+import { Books, Tools, Folders, Bulb, ArrowRight } from '@/components/ui/tabler'
 
 const pillars = [
   {

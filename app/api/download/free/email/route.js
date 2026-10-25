@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { rateLimited, tooMany } from '@/lib/rate-limit';
+import { rateLimitedShared, tooMany } from '@/lib/rate-limit';
 
 // Kirim link produk gratis (tipe tautan) ke email, hanya bila pengunjung memintanya.
 export async function POST(request) {
-  if (rateLimited(request, 'free-link-email', 3, 60 * 60 * 1000)) return tooMany();
+  if (await rateLimitedShared(request, 'free-link-email', 3, 60 * 60 * 1000)) return tooMany();
   try {
     const { product_id, email } = await request.json().catch(() => ({}));
     const to = String(email || '').trim().slice(0, 254);

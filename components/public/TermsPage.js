@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Download, CircleCheck, CircleX, CreditCard, Refresh, BrandWhatsapp, ShieldCheck } from 'tabler-icons-react'
+import { Download, CircleCheck, CircleX, CreditCard, Refresh, BrandWhatsapp, ShieldCheck } from '@/components/ui/tabler'
 
 const allowed = [
   'Dipakai untuk pembelajaran di kelas sendiri',

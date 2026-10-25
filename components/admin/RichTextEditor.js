@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   Bold, Italic, Underline, Strikethrough, Eraser, List, ListNumbers, AlignLeft, AlignCenter, AlignRight, AlignJustified,
   Link as LinkIcon, Photo, BrandYoutube, Maximize, Minimize, Code, MoodSmile, Wand, Palette, ArrowBackUp, ArrowForwardUp, ChevronDown,
-} from 'tabler-icons-react'
+} from '@/components/ui/tabler'
 import { uploadMedia } from '@/lib/upload-media'
 
 const BLOCKS = [

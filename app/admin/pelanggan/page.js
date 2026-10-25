@@ -1,3 +1,4 @@
+import { fetchAll } from '@/lib/fetch-all'
 import { assertAdminAction } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
@@ -33,13 +34,16 @@ async function saveMessage(formData) {
 }
 
 async function getCustomers(supabase) {
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('id, buyer_name, buyer_whatsapp, buyer_email, product_id, product_title, price, created_at, product:products(title)')
-    .eq('status', 'paid')
-    .not('product_id', 'is', null)
-    .order('created_at', { ascending: false })
-  const { data: items } = await supabase.from('order_items').select('order_id, title')
+  const [{ data: orders }, { data: items }] = await Promise.all([
+    fetchAll(() => supabase
+      .from('orders')
+      .select('id, buyer_name, buyer_whatsapp, buyer_email, product_id, amount, created_at, product:products(title)')
+      .eq('status', 'paid')
+      .not('product_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .order('id')),
+    fetchAll(() => supabase.from('order_items').select('order_id, title, orders!inner(status)').eq('orders.status', 'paid').order('id')),
+  ])
   const itemsByOrder = {}
   for (const row of items || []) (itemsByOrder[row.order_id] ||= []).push(row.title)
 
@@ -49,9 +53,9 @@ async function getCustomers(supabase) {
     const phone = waPhone(o.buyer_whatsapp)
     const key = phone || String(o.buyer_email || '').toLowerCase() || o.id
     const c = map.get(key) || { key, name: o.buyer_name || 'Tanpa nama', phone, email: o.buyer_email || '', total: 0, count: 0, products: [], last: o.created_at }
-    c.total += Number(o.price || 0)
+    c.total += Number(o.amount || 0)
     c.count += 1
-    for (const t of itemsByOrder[o.id] || [o.product_title || o.product?.title || 'Produk']) if (!c.products.includes(t)) c.products.push(t)
+    for (const t of itemsByOrder[o.id] || [o.product?.title || 'Produk']) if (!c.products.includes(t)) c.products.push(t)
     map.set(key, c)
   }
   return [...map.values()]

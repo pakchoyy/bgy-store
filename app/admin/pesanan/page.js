@@ -1,3 +1,4 @@
+import { fetchAll } from '@/lib/fetch-all'
 import { assertAdminAction } from '@/lib/admin-auth'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
@@ -96,11 +97,10 @@ export default async function AdminPesanan({ searchParams }) {
 
   let orders = []
   if (!isDemo) {
-    // Pesanan yang tidak dibayar lebih dari 48 jam ditandai kedaluwarsa supaya daftar Pending tetap bersih.
-    // Bila pembeli ternyata membayar belakangan, webhook / cek status tetap mengubahnya jadi lunas.
-    await supabase.from('orders').update({ status: 'expired' }).eq('status', 'pending').lt('created_at', new Date(Date.now() - 48 * 3600 * 1000).toISOString())
-    const { data } = await supabase.from('orders').select('*, product:products(title)').order('created_at', { ascending: false })
-    const { data: itemRows, error: itemsError } = await supabase.from('order_items').select('order_id, title')
+    // Pending lebih dari 48 jam ditampilkan sebagai kedaluwarsa; status di database diubah oleh cron harian (/api/cron/daily).
+    const staleBefore = Date.now() - 48 * 3600 * 1000
+    const { data } = await fetchAll(() => supabase.from('orders').select('*, product:products(title)').order('created_at', { ascending: false }).order('id'))
+    const { data: itemRows, error: itemsError } = await fetchAll(() => supabase.from('order_items').select('order_id, title').order('id'))
     const itemsByOrder = {}
     if (!itemsError) for (const row of itemRows || []) (itemsByOrder[row.order_id] ||= []).push(row.title)
     if (data && data.length > 0) {
@@ -118,7 +118,7 @@ export default async function AdminPesanan({ searchParams }) {
               ? `${itemsByOrder[o.id].length} produk: ${itemsByOrder[o.id].join(', ')}`
               : (o.product_title || o.product?.title || 'Produk dihapus'),
           price: o.price || o.amount || 0,
-          status: o.status || 'pending',
+          status: o.status === 'pending' && o.created_at && new Date(o.created_at).getTime() < staleBefore ? 'expired' : (o.status || 'pending'),
           // tanggal WIB (UTC+7)
           date: o.created_at ? new Date(new Date(o.created_at).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 10) : '2026-01-01',
           download_token: o.download_token || null,
@@ -178,6 +178,8 @@ export default async function AdminPesanan({ searchParams }) {
         <form method="GET" action="/api/admin/orders-export">
           <input type="hidden" name="status" value={statusFilter} />
           <input type="hidden" name="type" value={typeFilter} />
+          {from && <input type="hidden" name="from" value={from} />}
+          {to && <input type="hidden" name="to" value={to} />}
           <button type="submit" className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

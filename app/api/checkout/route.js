@@ -1,9 +1,9 @@
-import { rateLimited, tooMany } from '@/lib/rate-limit'
+import { rateLimitedShared, tooMany } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 import { SITE_URL } from '@/lib/site'
 
 export async function POST(request) {
-  if (rateLimited(request, 'checkout', 15, 10 * 60 * 1000)) return tooMany()
+  if (await rateLimitedShared(request, 'checkout', 15, 10 * 60 * 1000)) return tooMany()
   try {
     const body = await request.json()
     const { product_id, product_ids, buyer_name, buyer_whatsapp, buyer_email, voucher_code } = body
@@ -110,8 +110,20 @@ export async function POST(request) {
     if (amount === 0) {
       const { data: fullOrder } = await supabase.from('orders').select('*, product:products(*)').eq('id', order.id).single()
       const { markOrderPaid } = await import('@/lib/orders')
+      // Voucher 100%: ambil jatah dulu secara atomik supaya tidak bisa dipakai melebihi batas (SQL 023).
+      let voucherClaimed = false
+      if (voucherCode) {
+        const { data: claimed, error: claimError } = await supabase.rpc('claim_voucher_use', { p_code: voucherCode })
+        if (!claimError) {
+          if (claimed !== true) {
+            await supabase.from('orders').delete().eq('id', order.id)
+            return NextResponse.json({ error: 'Jatah voucher ini sudah habis.' }, { status: 400 })
+          }
+          voucherClaimed = true
+        }
+      }
       try {
-        await markOrderPaid(supabase, fullOrder, {})
+        await markOrderPaid(supabase, fullOrder, { voucherClaimed })
       } catch (e) {
         console.error('free voucher order error:', e)
         return NextResponse.json({ error: 'Gagal memproses voucher. Hubungi admin.' }, { status: 500 })

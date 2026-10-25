@@ -1,3 +1,4 @@
+import { fetchAll } from '@/lib/fetch-all'
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { SITE_HOST } from '@/lib/site'
@@ -12,8 +13,8 @@ async function getDashboardData() {
     const since = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
     const [{ data: products }, { data: orders }, { data: events }] = await Promise.all([
       supabase.from('products').select('*, category:categories(*)').is('deleted_at', null),
-      supabase.from('orders').select('*').order('created_at', { ascending: false }),
-      supabase.from('analytics_events').select('event_type, created_at').gte('created_at', since).limit(50000),
+      fetchAll(() => supabase.from('orders').select('*').order('created_at', { ascending: false }).order('id')),
+      fetchAll(() => supabase.from('analytics_events').select('event_type, created_at').gte('created_at', since).order('id'), 50000),
     ])
     return { products: products || [], orders: orders || [], events: events || [] }
   } catch {}
