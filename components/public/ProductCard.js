@@ -6,11 +6,13 @@ const SUPABASE_PUBLIC = (() => {
 })()
 export const canOptimize = (src) => typeof src === 'string' && (src.startsWith('/') || (SUPABASE_PUBLIC && src.startsWith(SUPABASE_PUBLIC)))
 import { getCardLayout } from '@/lib/utils'
+import { isFlexiblePrice, lowestPrice } from '@/lib/pricing.mjs'
+import EventCountdown from '@/components/public/EventCountdown'
 
 const fmt = (value) => `Rp${Number(value || 0).toLocaleString('id-ID')}`
 
 function PricePill({ product, isFree, isSoldOut, className = '' }) {
-  const hasDiscount = !isFree && product.original_price && product.original_price > product.sale_price
+  const hasDiscount = !isFree && !isFlexiblePrice(product) && product.original_price && product.original_price > product.sale_price
   return (
     <span className={`flex shrink-0 flex-col items-end gap-0.5 ${className}`}>
       {product.flash_active && !isSoldOut && (
@@ -28,7 +30,7 @@ function PricePill({ product, isFree, isSoldOut, className = '' }) {
               : 'bg-emerald-700 text-white shadow-sm shadow-emerald-600/30'
         }`}
       >
-        {isSoldOut ? 'Habis' : isFree ? 'Gratis' : fmt(product.sale_price)}
+        {isSoldOut ? 'Habis' : isFree ? 'Gratis' : isFlexiblePrice(product) ? `Mulai ${fmt(lowestPrice(product))}` : fmt(product.sale_price)}
       </span>
     </span>
   )
@@ -88,6 +90,7 @@ export default function ProductCard({ product, onSelect, className = '' }) {
       <span className="min-w-0 flex-1">
         <span className="text-sm font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
         <DownloadCount product={product} isFree={isFree} />
+        {product.event_at && <EventCountdown eventAt={product.event_at} compact />}
       </span>
       <PricePill product={product} isFree={isFree} isSoldOut={isSoldOut} />
     </span>
@@ -100,6 +103,7 @@ export default function ProductCard({ product, onSelect, className = '' }) {
         <span className="min-w-0 flex-1">
           <span className="text-xs font-semibold leading-snug text-gray-900 line-clamp-2">{product.title}</span>
           <DownloadCount product={product} isFree={isFree} />
+          {product.event_at && <EventCountdown eventAt={product.event_at} compact />}
         </span>
         <PricePill product={product} isFree={isFree} isSoldOut={isSoldOut} className={layout.value === 'wide' ? '' : 'items-start'} />
       </span>

@@ -25,8 +25,11 @@ export async function GET(request) {
     const { computeTotal } = await import('@/lib/pricing.mjs')
     let items = [{ type: 'paid', sale_price: amount }]
     if (ids.length) {
-      const { data: found } = await supabase.from('products').select('id, type, sale_price').in('id', ids)
-      if (found?.length) items = found
+      let { data: found, error: foundError } = await supabase.from('products').select('id, type, sale_price, flash_price, flash_ends_at, price_options, allow_custom_price, min_price').in('id', ids)
+      if (foundError) ({ data: found } = await supabase.from('products').select('id, type, sale_price').in('id', ids))
+      // Produk nominal pilihan: pakai nominal yang dipilih pembeli (amount).
+      const { isFlexiblePrice } = await import('@/lib/pricing.mjs')
+      if (found?.length) items = found.map((p) => (isFlexiblePrice(p) ? { ...p, sale_price: amount, flash_price: null } : p))
     }
     const result = computeTotal(items, voucher)
     if (result.error) return NextResponse.json({ error: result.error }, { status: 400 })

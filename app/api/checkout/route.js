@@ -6,7 +6,7 @@ export async function POST(request) {
   if (await rateLimitedShared(request, 'checkout', 15, 10 * 60 * 1000)) return tooMany()
   try {
     const body = await request.json()
-    const { product_id, product_ids, buyer_name, buyer_whatsapp, buyer_email, voucher_code } = body
+    const { product_id, product_ids, buyer_name, buyer_whatsapp, buyer_email, voucher_code, amount: chosenAmount } = body
     const requestedIds = [...new Set((Array.isArray(product_ids) && product_ids.length ? product_ids : [product_id]).filter((id) => typeof id === 'string' && id.length <= 64))].slice(0, 20)
     const cleanWhatsapp = String(buyer_whatsapp || '').replace(/[^\d+]/g, '')
 
@@ -38,7 +38,7 @@ export async function POST(request) {
       .in('id', requestedIds)
       .eq('is_active', true)
       .is('deleted_at', null)
-    let { data: found, error: productError } = await productQuery('id, title, type, sale_price, stock_type, stock_qty, flash_price, flash_ends_at')
+    let { data: found, error: productError } = await productQuery('id, title, type, sale_price, stock_type, stock_qty, flash_price, flash_ends_at, price_options, allow_custom_price, min_price')
     if (productError) ({ data: found, error: productError } = await productQuery('id, title, type, sale_price, stock_type, stock_qty'))
 
     const items = requestedIds.map((id) => (found || []).find((p) => p.id === id)).filter(Boolean)
@@ -49,6 +49,15 @@ export async function POST(request) {
     if (notPaid) return NextResponse.json({ error: `${notPaid.title} adalah produk gratis, tidak perlu dibeli.` }, { status: 400 })
     const soldOut = items.find((p) => p.stock_type === 'limited' && p.stock_qty <= 0)
     if (soldOut) return NextResponse.json({ error: `${soldOut.title} sudah habis.` }, { status: 400 })
+    // Nominal pilihan pembeli (SQL 026): hanya untuk beli satu produk, harga dicek ulang di server.
+    const { isFlexiblePrice, resolveChosenPrice } = await import('@/lib/pricing.mjs')
+    const flexible = items.find((p) => isFlexiblePrice(p))
+    if (flexible && items.length > 1) return NextResponse.json({ error: `${flexible.title} punya pilihan nominal, beli langsung dari halaman produknya ya.` }, { status: 400 })
+    if (flexible) {
+      const chosen = resolveChosenPrice(flexible, chosenAmount)
+      if (chosen.error) return NextResponse.json({ error: chosen.error }, { status: 400 })
+      items[0] = { ...flexible, sale_price: chosen.price, flash_price: null, flash_ends_at: null }
+    }
     const product = items[0]
     const isCart = items.length > 1
 

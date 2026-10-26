@@ -133,3 +133,8 @@ body {
   scroll-behavior: auto !important;
 }
 [data-motion='off'] .bgy-highlight-block { animation: none !important; }
+
+/* Tombol "ke atas" naik di atas bar Beli Sekarang */
+body:has(.bgy-sticky-buy) .bgy-scroll-top { bottom: calc(7rem + env(safe-area-inset-bottom)); }
+/* Ruang di bawah halaman selama bar Beli Sekarang tampil, supaya footer tidak tertutup */
+body:has(.bgy-sticky-buy) { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }

@@ -48,6 +48,16 @@ function sanitizeProduct(body) {
           flash_ends_at: body.type === 'paid' && body.flash_ends_at ? toWibIso(body.flash_ends_at) : null,
         }
       : {}),
+    ...('price_options' in body
+      ? {
+          price_options: body.type === 'paid' && Array.isArray(body.price_options)
+            ? [...new Set(body.price_options.map((n) => Math.round(Number(n))).filter((n) => Number.isFinite(n) && n >= 1000 && n <= 100000000))].sort((a, b) => a - b).slice(0, 6)
+            : [],
+          allow_custom_price: body.type === 'paid' && !!body.allow_custom_price,
+          min_price: body.type === 'paid' && body.allow_custom_price && Number(body.min_price) > 0 ? Math.max(1000, Math.round(Number(body.min_price))) : null,
+        }
+      : {}),
+    ...('event_at' in body ? { event_at: body.event_at ? toWibIso(body.event_at) : null } : {}),
     ...('sold_manual' in body ? { sold_manual: Math.max(0, Math.min(10000000, Math.round(Number(body.sold_manual) || 0))) } : {}),
     ...('show_on_home' in body ? { show_on_home: body.show_on_home !== false } : {}),
     ...('semester' in body ? { semester: [1, 2].includes(Number(body.semester)) ? Number(body.semester) : null } : {}),
@@ -70,6 +80,10 @@ const OPTIONAL_COLUMNS = [
   { key: 'semester', sql: '018', label: 'Semester' },
   { key: 'show_on_home', sql: '020', label: 'Tampil di Beranda' },
   { key: 'sold_manual', sql: '022', label: 'Tambahan terjual' },
+  { key: 'price_options', sql: '026', label: 'Nominal pilihan' },
+  { key: 'allow_custom_price', sql: '026', label: 'Nominal pilihan' },
+  { key: 'min_price', sql: '026', label: 'Nominal pilihan' },
+  { key: 'event_at', sql: '026', label: 'Waktu acara' },
 ]
 
 async function withoutMissingBundleColumn(run, product) {

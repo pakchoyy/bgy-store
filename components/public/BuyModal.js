@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { readRememberedVoucher } from '@/lib/voucher-memory';
 import { CloseButton } from '@/components/ui/close-button';
 import WhatsAppBuyButton from '@/components/public/WhatsAppBuyButton';
+import { isFlexiblePrice, priceChoices, customMinimum, resolveChosenPrice } from '@/lib/pricing.mjs';
 
 const paymentLogos = [
   { name: 'QRIS', src: '/logos/qris.svg' },
@@ -29,9 +30,21 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const price = Number(product?.sale_price || 0);
+  // Nominal pilihan (webinar dll.): pembeli pilih salah satu atau isi sendiri.
+  const flexible = isFlexiblePrice(product);
+  const choices = flexible ? priceChoices(product) : [];
+  const [chosen, setChosen] = useState(() => (flexible ? (choices[0] || customMinimum(product)) : 0));
+  const [customText, setCustomText] = useState('');
+  const chosenCheck = flexible ? resolveChosenPrice(product, chosen) : { price: Number(product?.sale_price || 0) };
+  const price = chosenCheck.price || 0;
   const total = Math.max(0, price - voucherState.discount);
   const tooSmall = total > 0 && total < MIN_PAYMENT;
+
+  // Ganti nominal = voucher dihitung ulang
+  useEffect(() => {
+    if (flexible && voucherState.status === 'success') applyVoucher();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chosen]);
 
   useEffect(() => {
     const remembered = readRememberedVoucher();
@@ -61,6 +74,10 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
 
   async function submitCheckout(event) {
     event.preventDefault();
+    if (flexible && chosenCheck.error) {
+      setError(chosenCheck.error);
+      return;
+    }
     setBusy(true);
     setError('');
     try {
@@ -68,7 +85,7 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...fields, product_id: product.id }),
+        body: JSON.stringify({ ...fields, product_id: product.id, ...(flexible ? { amount: price } : {}) }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Pembayaran belum dapat diproses. Silakan coba lagi.');
@@ -123,6 +140,42 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
                 <p className="shrink-0 text-sm font-bold">{formatRupiah(price)}</p>
               </div>
             </section>
+
+            {flexible && (
+              <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80" aria-labelledby="nominal-title">
+                <p id="nominal-title" className="text-sm font-semibold text-slate-700">Pilih nominal</p>
+                {choices.length > 0 && (
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    {choices.map((value) => (
+                      <button key={value} type="button" aria-pressed={!customText && chosen === value} onClick={() => { setCustomText(''); setChosen(value); }} className={`min-h-11 rounded-xl px-2 text-sm font-bold transition-colors ${!customText && chosen === value ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-800 ring-1 ring-slate-200'}`}>
+                        {formatRupiah(value)}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {product.allow_custom_price && (
+                  <label className="mt-3 block text-sm text-slate-700">
+                    {choices.length > 0 ? 'Atau isi nominal sendiri' : 'Isi nominal'} <span className="text-slate-500">(minimal {formatRupiah(customMinimum(product))})</span>
+                    <span className="mt-1 flex h-11 items-center rounded-xl border border-slate-300 bg-white px-3 focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-100">
+                      <span className="text-sm font-semibold text-slate-500">Rp</span>
+                      <input
+                        inputMode="numeric"
+                        value={customText}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 9);
+                          setCustomText(digits ? Number(digits).toLocaleString('id-ID') : '');
+                          setChosen(digits ? Number(digits) : (choices[0] || 0));
+                        }}
+                        placeholder={customMinimum(product).toLocaleString('id-ID')}
+                        className="min-w-0 flex-1 bg-transparent px-2 text-[15px] font-bold text-slate-900 outline-none"
+                        aria-label="Nominal sendiri"
+                      />
+                    </span>
+                  </label>
+                )}
+                {chosenCheck.error && <p role="alert" className="mt-2 text-xs font-semibold text-red-600">{chosenCheck.error}</p>}
+              </section>
+            )}
 
             <section className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/80">
               <div className="grid gap-2.5">
@@ -191,7 +244,7 @@ export default function BuyModal({ product, isOpen, onClose, waUrl }) {
               </p>
             )}
 
-            <button disabled={busy || tooSmall} className="h-12 w-full rounded-xl bg-emerald-700 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60">
+            <button disabled={busy || tooSmall || (flexible && !!chosenCheck.error)} className="h-12 w-full rounded-xl bg-emerald-700 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60">
               {busy ? 'Memproses...' : total === 0 ? 'Ambil Gratis dengan Voucher' : `Beli sekarang - ${formatRupiah(total)}`}
             </button>
             <WhatsAppBuyButton waUrl={waUrl} product={product} className="pt-1 pb-[env(safe-area-inset-bottom)]" />

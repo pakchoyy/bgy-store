@@ -24,7 +24,7 @@ export default function PageTabs({ items = [] }) {
   if (!tabs.length) return null
 
   return (
-    <div className="sticky top-0 z-20 -mx-1 px-1 py-2 bg-inherit/80 backdrop-blur-sm">
+    <div className="-mx-1 px-1 py-2">
       <div className="flex flex-wrap justify-center gap-2 pb-1">
         {tabs.map((item) => {
           const href = resolveNavHref(item).replace(/\/+$/, '') || '/'

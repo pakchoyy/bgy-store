@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { isFlexiblePrice, lowestPrice } from '@/lib/pricing.mjs';
 
 export default function StickyBuyBar({ product, onAddToCart }) {
   const [visible, setVisible] = useState(false);
@@ -27,11 +28,12 @@ export default function StickyBuyBar({ product, onAddToCart }) {
 
   const isSoldOut = product.stock_type === 'limited' && product.stock_qty <= 0;
   const isFree = product.type === 'free';
+  const flexible = isFlexiblePrice(product);
 
   const fmt = (val) => `Rp${Number(val).toLocaleString('id-ID')}`;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/95 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur animate-slideUp md:bottom-4 md:left-1/2 md:right-auto md:w-[min(100%-2rem,42rem)] md:-translate-x-1/2 md:rounded-2xl md:border md:shadow-2xl">
+    <div className="bgy-sticky-buy fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/95 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur animate-slideUp md:bottom-4 md:left-1/2 md:right-auto md:w-[min(100%-2rem,42rem)] md:-translate-x-1/2 md:rounded-2xl md:border md:shadow-2xl">
       <div className="flex items-center justify-between gap-3 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <div className="min-w-0">
           {product.original_price && product.original_price > product.sale_price ? (
@@ -39,6 +41,8 @@ export default function StickyBuyBar({ product, onAddToCart }) {
               <span className="font-numeric text-xs line-through text-gray-500">{fmt(product.original_price)}</span>
               <span className="font-numeric text-base font-semibold text-emerald-700">{fmt(product.sale_price)}</span>
             </div>
+          ) : flexible ? (
+            <span className="font-numeric text-base font-semibold text-emerald-700">Mulai {fmt(lowestPrice(product))}</span>
           ) : isFree || !Number(product.sale_price) ? (
             <span className="text-base font-semibold text-[#0ea5a0]">Gratis</span>
           ) : (
@@ -46,7 +50,7 @@ export default function StickyBuyBar({ product, onAddToCart }) {
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {!isFree && !isSoldOut && (
+          {!isFree && !isSoldOut && !flexible && (
             <button
               type="button"
               onClick={onAddToCart}

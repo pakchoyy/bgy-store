@@ -1,4 +1,6 @@
 import { sanitizeHtml } from '@/lib/sanitize-html'
+import EventCountdown from '@/components/public/EventCountdown'
+import { isFlexiblePrice, lowestPrice } from '@/lib/pricing.mjs'
 import LynkShell from '@/components/public/LynkShell'
 import ProductBadge from '@/components/public/ProductBadge'
 import CategoryBadge from '@/components/public/CategoryBadge'
@@ -175,9 +177,17 @@ export default async function ProdukDetailPage({ params }) {
             </div>
             <h1 className="text-2xl font-semibold text-gray-950 leading-tight">{product.title}</h1>
             <div className="mt-3">
-              <PriceBlock salePrice={product.sale_price} originalPrice={product.original_price} />
-              {product.flash_active && <FlashCountdown endsAt={product.flash_ends_at} className="mt-3" />}
+              {isFlexiblePrice(product) ? (
+                <p className="text-sm text-gray-600">
+                  Mulai <span className="font-numeric text-2xl font-bold text-emerald-700">Rp{lowestPrice(product).toLocaleString('id-ID')}</span>
+                  <span className="block text-xs text-gray-500">Kamu bisa pilih nominal saat membeli.</span>
+                </p>
+              ) : (
+                <PriceBlock salePrice={product.sale_price} originalPrice={product.original_price} />
+              )}
+              {product.flash_active && !isFlexiblePrice(product) && <FlashCountdown endsAt={product.flash_ends_at} className="mt-3" />}
             </div>
+            {product.event_at && <div className="mt-4"><EventCountdown eventAt={product.event_at} /></div>}
           </div>
 
           {product.description && (
@@ -242,6 +252,9 @@ export default async function ProdukDetailPage({ params }) {
               type: product.type,
               sale_price: product.sale_price,
               original_price: product.original_price,
+              price_options: product.price_options,
+              allow_custom_price: product.allow_custom_price,
+              min_price: product.min_price,
               cover_path: product.cover_path,
               stock_type: product.stock_type,
               stock_qty: product.stock_qty,

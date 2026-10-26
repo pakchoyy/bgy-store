@@ -39,3 +39,20 @@ test('voucher khusus produk: potongan hanya dari produk yang cocok', () => {
   assert.deepEqual(computeTotal([paid(17000, { id: 'a' }), paid(5000, { id: 'b' })], { ...v, discount_value: 20000 }, now), { subtotal: 22000, discount: 17000, total: 5000 })
   assert.deepEqual(computeTotal([paid(17000, { id: 'b' })], { ...v, product_ids: null }, now), { subtotal: 17000, discount: 15000, total: 2000 })
 })
+
+import { isFlexiblePrice, resolveChosenPrice, lowestPrice } from '../lib/pricing.mjs'
+
+test('nominal pilihan: pilihan tetap, isi sendiri, batas minimal', () => {
+  const webinar = { type: 'paid', sale_price: 20000, price_options: [50000, 20000, 40000], allow_custom_price: true, min_price: 15000 }
+  assert.equal(isFlexiblePrice(webinar), true)
+  assert.deepEqual(resolveChosenPrice(webinar, 40000), { price: 40000 })
+  assert.deepEqual(resolveChosenPrice(webinar, 17500), { price: 17500 })
+  assert.ok(resolveChosenPrice(webinar, 10000).error)
+  assert.ok(resolveChosenPrice(webinar, undefined).error)
+  assert.equal(lowestPrice(webinar), 15000)
+  const fixedOnly = { ...webinar, allow_custom_price: false }
+  assert.ok(resolveChosenPrice(fixedOnly, 30000).error)
+  assert.equal(lowestPrice(fixedOnly), 20000)
+  // produk biasa: nominal dari pembeli diabaikan
+  assert.deepEqual(resolveChosenPrice({ type: 'paid', sale_price: 17000 }, 1), { price: 17000 })
+})

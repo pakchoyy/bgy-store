@@ -26,6 +26,16 @@ const BADGE_OPTIONS = [
   { value: 'custom', label: 'Kustom' },
 ]
 
+// "20000, 40.000, 50rb" -> [20000, 40000, 50000] (min Rp1.000, maks 6 pilihan)
+function parsePriceOptions(text) {
+  const list = String(text || '').split(/[,;\s]+/).map((part) => {
+    const t = part.toLowerCase().replace(/\./g, '')
+    const n = parseInt(t.replace(/[^0-9]/g, ''), 10)
+    return /rb|k$/.test(t) ? n * 1000 : n
+  }).filter((n) => Number.isFinite(n) && n >= 1000)
+  return [...new Set(list)].sort((a, b) => a - b).slice(0, 6)
+}
+
 export default function ProductForm({ initialData, categories = [], productOptions = [] }) {
   const router = useRouter()
   const { addToast } = useToast()
@@ -66,6 +76,12 @@ export default function ProductForm({ initialData, categories = [], productOptio
     preview_images: parsePreviewImages(initialData?.preview_path),
     bundle_product_ids: Array.isArray(initialData?.bundle_product_ids) ? initialData.bundle_product_ids : [],
     semester: initialData?.semester ? String(initialData.semester) : '',
+    price_options_text: Array.isArray(initialData?.price_options) ? initialData.price_options.join(', ') : '',
+    allow_custom_price: !!initialData?.allow_custom_price,
+    min_price: initialData?.min_price ?? '',
+    event_at: initialData?.event_at
+      ? new Date(new Date(initialData.event_at).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 16)
+      : '',
     flash_price: initialData?.flash_price ?? '',
     flash_ends_at: initialData?.flash_ends_at
       ? new Date(new Date(initialData.flash_ends_at).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 16)
@@ -173,6 +189,10 @@ export default function ProductForm({ initialData, categories = [], productOptio
       cover_path: form.cover_path || null,
       preview_path: form.preview_images?.length ? JSON.stringify(form.preview_images) : null,
       bundle_product_ids: form.type === 'paid' ? form.bundle_product_ids || [] : [],
+      price_options: form.type === 'paid' ? parsePriceOptions(form.price_options_text) : [],
+      allow_custom_price: form.type === 'paid' && !!form.allow_custom_price,
+      min_price: form.type === 'paid' && form.allow_custom_price && form.min_price !== '' ? Number(form.min_price) : null,
+      event_at: form.event_at || null,
       flash_price: form.type === 'paid' && form.flash_price !== '' ? Number(form.flash_price) : null,
       flash_ends_at: form.type === 'paid' && form.flash_price !== '' ? form.flash_ends_at || null : null,
       semester: form.semester ? Number(form.semester) : null,
@@ -519,6 +539,43 @@ export default function ProductForm({ initialData, categories = [], productOptio
         </CardSection>
       )}
       {/* Bentuk kartu */}
+      <CardSection title="📅 Webinar / Acara (opsional)">
+        <p className="text-xs leading-relaxed text-gray-500">
+          Isi tanggal &amp; jam acara supaya muncul hitung mundur dan produk tampil di halaman <b>/webinar</b>. Kosongkan kalau bukan acara.
+        </p>
+        <label className="mt-3 block text-sm font-medium text-gray-700">
+          Waktu acara (WIB)
+          <input type="datetime-local" value={form.event_at} onChange={e => updateField('event_at', e.target.value)} className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" />
+        </label>
+        {form.event_at && <button type="button" onClick={() => updateField('event_at', '')} className="mt-2 min-h-11 text-sm font-semibold text-red-600">Hapus waktu acara</button>}
+      </CardSection>
+
+      {form.type === 'paid' && (
+        <CardSection title="💰 Nominal Pilihan Pembeli (opsional)">
+          <p className="text-xs leading-relaxed text-gray-500">
+            Pembeli memilih sendiri nominal yang dibayar, cocok untuk webinar atau donasi. Kosongkan dua-duanya kalau harga tetap (pakai Harga Jual).
+          </p>
+          <label className="mt-3 block text-sm font-medium text-gray-700">
+            Pilihan nominal (Rp), pisahkan dengan koma
+            <input inputMode="numeric" value={form.price_options_text} onChange={e => updateField('price_options_text', e.target.value)} placeholder="Contoh: 20000, 40000, 50000" className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" />
+          </label>
+          {parsePriceOptions(form.price_options_text).length > 0 && (
+            <p className="mt-1 text-xs text-emerald-700">Tampil: {parsePriceOptions(form.price_options_text).map((n) => `Rp${n.toLocaleString('id-ID')}`).join(' · ')}</p>
+          )}
+          <label className="mt-3 flex min-h-11 items-center gap-3 text-sm font-medium text-gray-700">
+            <input type="checkbox" checked={form.allow_custom_price} onChange={e => updateField('allow_custom_price', e.target.checked)} className="h-5 w-5 accent-emerald-600" />
+            Boleh isi nominal sendiri
+          </label>
+          {form.allow_custom_price && (
+            <label className="mt-2 block text-sm font-medium text-gray-700">
+              Nominal minimal (Rp)
+              <input type="number" min="1000" value={form.min_price} onChange={e => updateField('min_price', e.target.value === '' ? '' : parseInt(e.target.value) || 0)} placeholder="Contoh: 20000" className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" />
+              <span className="mt-1 block text-xs text-gray-500">Paling kecil Rp1.000 (batas pembayaran online).</span>
+            </label>
+          )}
+        </CardSection>
+      )}
+
       <CardSection title="Bentuk Kartu di Toko">
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           {CARD_LAYOUTS.map((layout) => {
