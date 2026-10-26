@@ -24,8 +24,9 @@ export default function PageTabs({ items = [] }) {
   if (!tabs.length) return null
 
   return (
-    <div className="-mx-1 px-1 py-2">
-      <div className="flex flex-wrap justify-center gap-2 pb-1">
+    <nav aria-label="Halaman toko" className="py-2">
+      {/* Satu baris rata lebar seperti tombol segmen; lebih dari 4 tab bisa digeser */}
+      <div className={`rounded-full bg-black/10 p-1 ${tabs.length > 4 ? 'flex gap-1 overflow-x-auto [scrollbar-width:none]' : 'grid grid-flow-col auto-cols-fr gap-1'}`}>
         {tabs.map((item) => {
           const href = resolveNavHref(item).replace(/\/+$/, '') || '/'
           const label = item.label
@@ -38,10 +39,11 @@ export default function PageTabs({ items = [] }) {
             <Link
               key={item.id}
               href={href}
-              className={`shrink-0 min-h-11 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+              aria-current={active ? 'page' : undefined}
+              className={`flex h-11 min-w-0 shrink-0 items-center justify-center whitespace-nowrap rounded-full px-3 text-sm font-semibold transition-colors duration-150 ${
                 active
-                  ? 'bg-white text-[#0d7a8a] shadow-md'
-                  : 'bg-white/15 text-white hover:bg-white/25'
+                  ? 'bg-white text-[#0d7a8a] shadow-sm'
+                  : 'text-white hover:bg-white/15'
               }`}
             >
               {label}
@@ -49,6 +51,6 @@ export default function PageTabs({ items = [] }) {
           )
         })}
       </div>
-    </div>
+    </nav>
   )
 }
