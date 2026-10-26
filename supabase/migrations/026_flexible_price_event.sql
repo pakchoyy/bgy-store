@@ -11,3 +11,7 @@ ALTER TABLE products ADD CONSTRAINT products_min_price_check CHECK (min_price IS
 CREATE INDEX IF NOT EXISTS idx_products_event_at ON products(event_at) WHERE event_at IS NOT NULL;
 
 NOTIFY pgrst, 'reload schema';
+
+-- Pengunjung (anon) hanya boleh membaca kolom tertentu: izinkan kolom baru ini (data publik).
+GRANT SELECT (price_options, allow_custom_price, min_price, event_at) ON products TO anon;
+NOTIFY pgrst, 'reload schema';
