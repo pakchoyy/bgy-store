@@ -88,6 +88,13 @@ export default function ProductForm({ initialData, categories = [], productOptio
       : '',
   })
 
+  // Dari tombol Tambah > Webinar: langsung produk berbayar dan lompat ke bagian Webinar
+  useEffect(() => {
+    if (initialData || new URLSearchParams(window.location.search).get('jenis') !== 'webinar') return
+    setForm((f) => ({ ...f, type: 'paid', allow_custom_price: true }))
+    setTimeout(() => document.getElementById('bagian-webinar')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
+  }, [initialData])
+
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deliveryMode, setDeliveryMode] = useState(initialData?.file_url ? 'link' : 'upload')
@@ -539,6 +546,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
         </CardSection>
       )}
       {/* Bentuk kartu */}
+      <div id="bagian-webinar" className="scroll-mt-20" />
       <CardSection title="📅 Webinar / Acara (opsional)">
         <p className="text-xs leading-relaxed text-gray-500">
           Isi tanggal &amp; jam acara supaya muncul hitung mundur dan produk tampil di halaman <b>/webinar</b>. Kosongkan kalau bukan acara.
@@ -547,6 +555,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
           Waktu acara (WIB)
           <input type="datetime-local" value={form.event_at} onChange={e => updateField('event_at', e.target.value)} className="mt-1 w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-[var(--input-bg)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" />
         </label>
+        {!form.event_at && <p className="mt-1 text-xs text-gray-500">Ketuk kotak di atas untuk memilih tanggal dan jam.</p>}
         {form.event_at && <button type="button" onClick={() => updateField('event_at', '')} className="mt-2 min-h-11 text-sm font-semibold text-red-600">Hapus waktu acara</button>}
       </CardSection>
 
@@ -592,7 +601,7 @@ export default function ProductForm({ initialData, categories = [], productOptio
                 <span className="flex h-14 w-full flex-col justify-center gap-1 rounded-lg bg-gray-50 p-1.5">
                   {layout.value === 'compact' && [0, 1, 2].map((i) => <span key={i} className="flex items-center gap-1"><span className={`h-2.5 w-2.5 ${bar}`} /><span className={`h-1.5 flex-1 ${bar}`} /></span>)}
                   {layout.value === 'landscape' && [0, 1].map((i) => <span key={i} className="flex items-center gap-1"><span className={`h-4 w-4 ${bar}`} /><span className={`h-2 flex-1 ${bar}`} /></span>)}
-                  {layout.value === 'square' && <span className="grid grid-cols-2 gap-1">{[0, 1, 2, 3].map((i) => <span key={i} className={`aspect-square ${bar}`} />)}</span>}
+                  {layout.value === 'square' && <span className="mx-auto grid w-12 grid-cols-2 gap-1">{[0, 1, 2, 3].map((i) => <span key={i} className={`h-4 ${bar}`} />)}</span>}
                   {layout.value === 'portrait' && <span className="grid grid-cols-3 gap-1">{[0, 1, 2].map((i) => <span key={i} className={`h-9 ${bar}`} />)}</span>}
                   {layout.value === 'wide' && <><span className={`h-6 ${bar}`} /><span className={`h-1.5 w-2/3 ${bar}`} /></>}
                 </span>

@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import crypto from 'crypto'
 import { formatRupiah } from '@/lib/utils'
 import AdminToast from '@/components/admin/AdminToast'
+import { DEFAULT_WA_MESSAGE, getWaMessage, waPhone } from '@/lib/wa-message'
 import { PrintButton, FollowUpButton, CopyLinkButton, ConfirmSubmitButton } from '@/components/admin/OrderActions'
 
 async function generateLink(formData) {
@@ -96,8 +97,10 @@ export default async function AdminPesanan({ searchParams }) {
   const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL
 
   let orders = []
+  let waMessage = DEFAULT_WA_MESSAGE
   if (!isDemo) {
     // Pending lebih dari 48 jam ditampilkan sebagai kedaluwarsa; status di database diubah oleh cron harian (/api/cron/daily).
+    waMessage = await getWaMessage(supabase)
     const staleBefore = Date.now() - 48 * 3600 * 1000
     const { data } = await fetchAll(() => supabase.from('orders').select('*, product:products(title)').order('created_at', { ascending: false }).order('id'))
     const { data: itemRows, error: itemsError } = await fetchAll(() => supabase.from('order_items').select('order_id, title').order('id'))
@@ -191,7 +194,7 @@ export default async function AdminPesanan({ searchParams }) {
       </div>
       <AdminToast toast={toast === 'read' || toast === 'deleted' ? 'success' : toast} message={toast === 'read' ? 'Pesanan ditandai sudah dibaca' : toast === 'deleted' ? 'Pesanan dihapus' : toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
           {statuses.map(s => (
             <a
               key={s}
@@ -202,7 +205,7 @@ export default async function AdminPesanan({ searchParams }) {
             </a>
           ))}
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
           {types.map(t => (
             <a
               key={t}
@@ -229,7 +232,7 @@ export default async function AdminPesanan({ searchParams }) {
           <label className="text-xs font-semibold text-gray-500">Sampai tanggal
             <input type="date" name="to" defaultValue={to} className="mt-1 block h-11 w-full rounded-xl border border-gray-300 bg-white px-2 text-sm text-gray-900" />
           </label>
-          <button type="submit" className="h-11 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800">Terapkan</button>
+          <button type="submit" className={`h-11 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 ${from || to || search ? '' : 'col-span-2'}`}>Terapkan</button>
           {(from || to || search) && (
             <a href={`/admin/pesanan?${baseQuery({ from: '', to: '', search: '' })}`} className="flex h-11 items-center justify-center rounded-xl bg-white px-4 text-sm font-semibold text-gray-600 ring-1 ring-gray-200">Reset</a>
           )}
@@ -243,10 +246,10 @@ export default async function AdminPesanan({ searchParams }) {
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-2 md:hidden">
         {filtered.map(order => (
+          <div key={order.id} className={`flex items-center gap-2 rounded-xl bg-white pr-2 shadow-sm ${selectedOrder?.id === order.id ? 'ring-2 ring-emerald-400' : ''}`}>
           <a
-            key={order.id}
             href={`/admin/pesanan?${baseQuery({ selected: order.id, toast: '' })}`}
-            className={`flex items-center gap-3 rounded-xl bg-white px-3 py-2.5 shadow-sm ${selectedOrder?.id === order.id ? 'ring-2 ring-emerald-400' : ''}`}
+            className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5"
           >
             <span className="min-w-0 flex-1">
               <span className={`flex items-center gap-1.5 truncate text-sm ${order.unread ? 'font-bold text-gray-950' : 'font-medium text-gray-800'}`}>
@@ -257,9 +260,22 @@ export default async function AdminPesanan({ searchParams }) {
             </span>
             <span className="flex shrink-0 flex-col items-end gap-1">
               <span className="text-sm font-semibold text-gray-900">{order.price === 0 ? 'Gratis' : formatRupiah(order.price)}</span>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColors[order.status] || 'bg-gray-100 text-gray-600'}`}>{statusLabels[order.status] || order.status}</span>
+              <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${statusColors[order.status] || 'bg-gray-100 text-gray-600'}`}>{statusLabels[order.status] || order.status}</span>
             </span>
           </a>
+          {/* Ucapan WA untuk pembeli produk digital yang sudah lunas */}
+          {order.type === 'produk' && order.status === 'paid' && waPhone(order.whatsapp).length >= 10 && (
+            <a
+              href={`https://wa.me/${waPhone(order.whatsapp)}?text=${encodeURIComponent(waMessage)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Kirim ucapan WA ke ${order.buyer_name}`}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 active:scale-[0.96]"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5 5.4 16A8 8 0 1 1 8 18.6L4 19.5Z" /></svg>
+            </a>
+          )}
+          </div>
         ))}
         {filtered.length === 0 && <div className="rounded-xl bg-white p-6 text-center text-sm text-gray-400">Tidak ada pesanan ditemukan</div>}
       </div>

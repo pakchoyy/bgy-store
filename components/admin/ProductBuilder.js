@@ -112,6 +112,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
     let list = [...products]
     if (tab === 'free') list = list.filter((p) => p.type === 'free')
     if (tab === 'paid') list = list.filter((p) => p.type === 'paid')
+    if (tab === 'webinar') list = list.filter((p) => p.event_at)
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter((p) => p.title?.toLowerCase().includes(q))
@@ -250,6 +251,7 @@ export default function ProductBuilder({ products: initialProducts, categories =
             sort_order: current.sort_order || 1,
             is_active: patch.is_active ?? current.is_active,
             is_featured: patch.is_featured ?? current.is_featured,
+            ...('show_on_home' in patch ? { show_on_home: patch.show_on_home } : {}),
           }],
         }),
       })
@@ -265,6 +267,11 @@ export default function ProductBuilder({ products: initialProducts, categories =
   function toggleActive(id) {
     const product = products.find((p) => p.id === id)
     if (product) patchProduct(id, { is_active: !product.is_active })
+  }
+
+  function toggleHome(id) {
+    const product = products.find((p) => p.id === id)
+    if (product) patchProduct(id, { show_on_home: product.show_on_home === false })
   }
 
   function toggleHighlight(id) {
@@ -410,13 +417,13 @@ export default function ProductBuilder({ products: initialProducts, categories =
           </Button>
         </div>
         {semesterControl}
-        <div className="flex items-center gap-2">
-          <div className="flex shrink-0 gap-0.5 rounded-xl bg-slate-100 p-0.5">
-            {[['all', 'Semua'], ['free', 'Gratis'], ['paid', 'Berbayar']].map(([key, label]) => (
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="grid w-full grid-cols-4 gap-0.5 rounded-xl bg-slate-100 p-0.5 sm:flex sm:w-auto">
+            {[['all', 'Semua'], ['free', 'Gratis'], ['paid', 'Berbayar'], ['webinar', 'Webinar']].map(([key, label]) => (
               <button key={key} type="button" onClick={() => setTab(key)} aria-pressed={tab === key} className={`min-h-11 rounded-lg px-2.5 text-[13px] font-semibold ${PRESS} ${tab === key ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>{label}</button>
             ))}
           </div>
-          <label className="relative min-w-0 flex-1">
+          <label className="relative min-w-0 flex-1 basis-full sm:basis-0">
             <span className="sr-only">Cari produk</span>
             <Icon name="search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari..." className="pl-9" />
@@ -450,8 +457,15 @@ export default function ProductBuilder({ products: initialProducts, categories =
                       <span className="block text-xs text-slate-600">Barang yang dijual atau dibagikan gratis (file, link)</span>
                     </span>
                   </Link>
+                  <Link href="/admin/produk/baru?jenis=webinar" onClick={() => setShowBlockPicker(false)} className={`flex min-h-16 items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-3 hover:bg-amber-50 ${PRESS}`}>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-xl text-white" aria-hidden="true">📅</span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-bold text-slate-900">Webinar</span>
+                      <span className="block text-xs text-slate-600">Acara online dengan hitung mundur &amp; pilihan nominal, tampil di halaman Webinar</span>
+                    </span>
+                  </Link>
                   <p className="px-1 pt-2 text-xs font-semibold text-slate-500">Hiasan / info di halaman toko (bukan barang)</p>
-                  {[['image', 'Gambar', 'Banner atau foto pengumuman'], ['text', 'Teks', 'Judul pemisah atau keterangan'], ['link', 'Link', 'Tombol menuju WA, IG, atau situs lain']].map(([type, title, description]) => (
+                  {[['image', 'Gambar', 'Banner atau foto pengumuman'], ['text', 'Teks / Judul bagian', 'Pemisah bagian + bisa "Lihat selengkapnya" agar toko tidak kepanjangan'], ['link', 'Link', 'Tombol menuju WA, IG, atau situs lain']].map(([type, title, description]) => (
                     <button
                       key={type}
                       type="button"
@@ -622,8 +636,14 @@ export default function ProductBuilder({ products: initialProducts, categories =
                           {cat && (
                             <span className="text-[10px] text-slate-500">{cat.name}</span>
                           )}
+                          {p.show_on_home === false && (
+                            <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">Tidak di Beranda</span>
+                          )}
+                          {p.event_at && (
+                            <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[11px] font-bold text-amber-800">Webinar</span>
+                          )}
                           {p.semester && (
-                            <span className="rounded-full bg-sky-50 px-1.5 py-0.5 text-[10px] font-bold text-sky-800">Smt {p.semester}</span>
+                            <span className="rounded-full bg-sky-50 px-1.5 py-0.5 text-[11px] font-bold text-sky-800">Smt {p.semester}</span>
                           )}
                           {p.is_featured && (
                             <Badge variant="secondary" className="text-[10px] bg-emerald-50 text-emerald-700">Highlight</Badge>
@@ -733,6 +753,12 @@ export default function ProductBuilder({ products: initialProducts, categories =
                 <span>Tampilkan di toko</span>
                 <span className={`h-5 w-9 rounded-full p-0.5 ${menuProduct.is_active ? 'bg-emerald-600' : 'bg-slate-200'}`}>
                   <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${menuProduct.is_active ? 'translate-x-4' : ''}`} />
+                </span>
+              </button>
+              <button type="button" className="flex min-h-12 w-full items-center justify-between px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { toggleHome(menuProduct.id); setOpenMenuId(null) }}>
+                <span>Tampil di Beranda <span className="block text-xs font-normal text-slate-500">Halaman Gratis, Produk &amp; Webinar tetap otomatis</span></span>
+                <span className={`h-5 w-9 shrink-0 rounded-full p-0.5 ${menuProduct.show_on_home !== false ? 'bg-emerald-600' : 'bg-slate-200'}`}>
+                  <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${menuProduct.show_on_home !== false ? 'translate-x-4' : ''}`} />
                 </span>
               </button>
               <button type="button" className="flex min-h-12 w-full items-center justify-between px-4 text-sm font-medium text-slate-800 hover:bg-slate-50" onClick={() => { toggleHighlight(menuProduct.id); setOpenMenuId(null) }}>

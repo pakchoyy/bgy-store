@@ -147,9 +147,10 @@ export default async function ProdukDetailPage({ params }) {
     <LynkShell appearance={appearance} navItems={navItems} footerConfig={footerConfig} announcement={announcement} pageHasHeading topBarTitle={product.title}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
       <article className="bg-white/95 rounded-[1.6rem] shadow-sm overflow-hidden mb-20 ring-1 ring-white/60">
-        <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
+        {/* Cover tampil utuh (tidak dipotong), tinggi mengikuti gambar */}
+        <div className={`relative bg-gradient-to-br from-gray-100 to-gray-200 ${product.cover_path ? '' : 'aspect-[4/3]'}`}>
           {product.cover_path ? (
-            <img src={product.cover_path} alt={product.title} className="w-full h-full object-cover" />
+            <img src={product.cover_path} alt={product.title} className="block h-auto w-full" />
           ) : (
             <div className={`flex h-full w-full flex-col items-center justify-center px-8 text-center text-white ${product.type === 'free' ? 'bg-gradient-to-br from-emerald-400 to-teal-600' : 'bg-gradient-to-br from-teal-600 to-[#123b35]'}`}>
               <svg aria-hidden="true" className="h-12 w-12 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -4,24 +4,9 @@ import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { formatRupiah } from '@/lib/utils'
 import AdminToast from '@/components/admin/AdminToast'
+import { DEFAULT_WA_MESSAGE as DEFAULT_MESSAGE, waPhone } from '@/lib/wa-message'
 
 export const dynamic = 'force-dynamic'
-
-function waPhone(value) {
-  const digits = String(value || '').replace(/\D/g, '')
-  if (digits.startsWith('0')) return `62${digits.slice(1)}`
-  if (digits.startsWith('8')) return `62${digits}`
-  return digits
-}
-
-const DEFAULT_MESSAGE = `Halo Bapak/Ibu Guru Hebat! 👋
-
-Terima kasih sudah beli aplikasi kami.😊
-
-Untuk info aplikasi terbaru, bantuan, kendala, atau memberikan masukan, silakan bergabung ke grup pengguna BGY:
-👉 https://bit.ly/4bQZUW5
-
-Terima kasih! 🙏`
 
 async function saveMessage(formData) {
   'use server'

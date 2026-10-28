@@ -225,6 +225,7 @@ export async function PATCH(request) {
             sort_order: typeof product.sort_order === 'number' ? product.sort_order : index + 1,
             is_active: product.is_active !== false,
             is_featured: !!product.is_featured,
+            ...(typeof product.show_on_home === 'boolean' ? { show_on_home: product.show_on_home } : {}),
           })
           .eq('id', product.id)
       )

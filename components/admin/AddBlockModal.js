@@ -11,15 +11,15 @@ import { uploadMedia } from '@/lib/upload-media'
 import { safeUrl } from '@/lib/utils'
 
 const TITLES = {
-  image: 'Add Image',
-  text: 'Add Text',
-  link: 'Add Link',
+  image: 'Tambah Gambar',
+  text: 'Tambah Teks',
+  link: 'Tambah Link',
 }
 
 const EDIT_TITLES = {
-  image: 'Edit Image',
-  text: 'Edit Text',
-  link: 'Edit Link',
+  image: 'Simpan Gambar',
+  text: 'Simpan Teks',
+  link: 'Simpan Link',
 }
 
 export default function AddBlockModal({ type, initialBlock, onClose, onCreated, onUpdated }) {
@@ -153,11 +153,11 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
           {type === 'link' && (
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title here" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tulisan tombol</label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Contoh: Gabung grup WA" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Alamat link</label>
                 <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." />
               </div>
             </div>
@@ -166,11 +166,11 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
           {type === 'text' && (
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title (opsional)</label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Judul" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Judul bagian (opsional)</label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Contoh: Terbaru 👇" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Text</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Isi teks</label>
                 <RichTextEditor
                   value={textContent}
                   onChange={setTextContent}
@@ -179,7 +179,7 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Background Color</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Warna latar</label>
                 <div className="flex flex-wrap items-center gap-3">
                   <input
                     type="color"
@@ -204,24 +204,27 @@ export default function AddBlockModal({ type, initialBlock, onClose, onCreated, 
                     >
                       <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${transparent ? 'translate-x-4' : ''}`} />
                     </button>
-                    Transparent
+                    Tanpa latar
                   </label>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
-            <label htmlFor="collapse-after" className="block text-sm font-medium text-gray-700">Produk di bawah blok ini</label>
-            <select id="collapse-after" value={collapseAfter} onChange={(e) => setCollapseAfter(e.target.value)} className="mt-1 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm">
-              <option value="">Tampilkan semua</option>
-              {[2, 3, 4, 5, 6, 8, 10].map((n) => <option key={n} value={n}>Tampilkan {n} dulu, sisanya &quot;Lihat selengkapnya&quot;</option>)}
-            </select>
-            <p className="mt-1 text-xs text-gray-500">Berlaku untuk produk sampai blok berikutnya. Butuh SQL 020.</p>
-          </div>
+          {/* "Lihat selengkapnya" hanya untuk blok Teks (judul bagian). Blok lama yang sudah memakainya tetap bisa diubah. */}
+          {(type === 'text' || collapseAfter !== '') && (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+              <label htmlFor="collapse-after" className="block text-sm font-medium text-gray-700">Produk di bagian ini</label>
+              <select id="collapse-after" value={collapseAfter} onChange={(e) => setCollapseAfter(e.target.value)} className="mt-1 h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm">
+                <option value="">Tampilkan semua</option>
+                {[2, 3, 4, 5, 6, 8, 10].map((n) => <option key={n} value={n}>Tampilkan {n}, sisanya di tombol &quot;Lihat selengkapnya&quot;</option>)}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">Berlaku untuk produk di bawah judul ini sampai judul berikutnya, supaya toko tidak terlalu panjang.</p>
+            </div>
+          )}
 
           <div className="flex gap-3 pt-1">
-            <Button variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
+            <Button variant="outline" className="flex-1" onClick={onClose}>Batal</Button>
             <Button className="flex-1" onClick={handleSubmit} disabled={saving}>
               {saving ? 'Menyimpan...' : isEdit ? (EDIT_TITLES[type] || 'Simpan') : TITLES[type]}
             </Button>

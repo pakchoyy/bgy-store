@@ -14,13 +14,13 @@ const siteDescription = 'Download modul ajar, ATP, media pembelajaran, tools gur
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'Kreacy — Teman Praktis Guru dan Pendidik',
+  title: 'Kreacy — Kebutuhan Digital Guru',
   description: siteDescription,
   openGraph: {
     type: 'website',
     locale: 'id_ID',
     siteName: 'Kreacy',
-    title: 'Kreacy — Teman Praktis Guru dan Pendidik',
+    title: 'Kreacy — Kebutuhan Digital Guru',
     description: siteDescription,
   },
   twitter: { card: 'summary_large_image' },
