@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient, hasServiceRole } from '@/lib/supabase-server'
+import { syncBgyReviews } from '@/lib/bgy-reviews-sync'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,5 +23,9 @@ export async function GET(request) {
   // Sisa hitungan rate limit lama (tabel dari SQL 021; abaikan bila belum ada).
   await supabase.from('rate_limits').delete().lt('reset_at', new Date(Date.now() - 24 * 3600 * 1000).toISOString())
 
-  return NextResponse.json({ expired: expired?.length || 0, error: error?.message || null })
+  // Ulasan aplikasi BGY ikut tampil di produk lisensinya.
+  let reviews
+  try { reviews = await syncBgyReviews(supabase) } catch (e) { reviews = { error: e.message } }
+
+  return NextResponse.json({ expired: expired?.length || 0, reviews, error: error?.message || null })
 }
