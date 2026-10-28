@@ -238,7 +238,7 @@ export default async function ProdukDetailPage({ params }) {
 
           {product.type !== 'free' && (
             <section className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h2 className="mb-4 text-xl font-semibold text-gray-950">Review dari Pembeli</h2>
+              <h2 className="mb-4 text-xl font-semibold text-gray-950">Review Pengguna</h2>
               <ProductReviewList productId={product.id} />
             </section>
           )}
