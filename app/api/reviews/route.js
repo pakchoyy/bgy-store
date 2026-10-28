@@ -138,7 +138,10 @@ export async function GET(request) {
       .eq('is_approved', true)
       .order('created_at', { ascending: false })
       .limit(limit)
-    let { data: reviews, error: reviewsError } = await reviewQuery('id, reviewer_name, reviewer_institution, rating, comment, created_at')
+    let { data: reviews, error: reviewsError } = await reviewQuery('id, reviewer_name, reviewer_institution, rating, comment, created_at, source')
+    if (reviewsError && /source/.test(reviewsError.message || '')) {
+      ;({ data: reviews, error: reviewsError } = await reviewQuery('id, reviewer_name, reviewer_institution, rating, comment, created_at'))
+    }
     if (reviewsError && /reviewer_institution/.test(reviewsError.message || '')) {
       ;({ data: reviews, error: reviewsError } = await reviewQuery('id, reviewer_name, rating, comment, created_at'))
     }
@@ -152,11 +155,16 @@ export async function GET(request) {
     }
 
     // Calculate stats
-    const { data: stats } = await supabase
+    let { data: stats, error: statsError } = await supabase
+      .from('product_reviews')
+      .select('rating, source')
+      .eq('product_id', product_id)
+      .eq('is_approved', true)
+    if (statsError) ({ data: stats } = await supabase
       .from('product_reviews')
       .select('rating')
       .eq('product_id', product_id)
-      .eq('is_approved', true)
+      .eq('is_approved', true))
 
     const avgRating = stats && stats.length > 0
       ? (stats.reduce((sum, r) => sum + r.rating, 0) / stats.length).toFixed(1)
@@ -166,6 +174,7 @@ export async function GET(request) {
       reviews,
       stats: {
         total_reviews: stats?.length || 0,
+        from_bgy: stats?.filter(r => r.source === 'bgy').length || 0,
         average_rating: parseFloat(avgRating),
       },
     })

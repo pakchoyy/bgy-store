@@ -69,7 +69,7 @@ export default function ProductReviewList({ productId }) {
             </div>
             <div className="flex-1 text-sm text-gray-600">
               <p className="font-semibold">{stats.total_reviews} review</p>
-              <p className="text-xs">dari pembeli yang terverifikasi</p>
+              <p className="text-xs">{stats.from_bgy ? 'dari pembeli dan pengguna aplikasi Bantu Guru Yuk' : 'dari pembeli yang terverifikasi'}</p>
             </div>
           </div>
         </div>
@@ -115,9 +115,15 @@ export default function ProductReviewList({ productId }) {
 
             {/* Verified Badge */}
             <div className="mt-3 pt-3 border-t border-gray-100">
-              <span className="text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded-full inline-flex items-center gap-1">
-                ✓ Pembeli Terverifikasi
-              </span>
+              {review.source === 'bgy' ? (
+                <span className="text-xs font-medium text-teal-800 bg-teal-50 px-2 py-1 rounded-full inline-flex items-center gap-1">
+                  Pengguna aplikasi BGY
+                </span>
+              ) : (
+                <span className="text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded-full inline-flex items-center gap-1">
+                  ✓ Pembeli Terverifikasi
+                </span>
+              )}
             </div>
             </div>
           </ScrollReveal>
