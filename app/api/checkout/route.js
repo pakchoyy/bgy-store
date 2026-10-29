@@ -149,6 +149,8 @@ export async function POST(request) {
         name,
         description: isCart ? `Pembelian ${items.length} produk Kreacy` : `Pembelian ${name}`,
         redirectUrl,
+        // Tagihan berlaku 24 jam (bawaan Mayar hanya ~1 jam, pembeli sering telat bayar)
+        expiredAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
         customer: { name: buyer_name.trim(), email: buyer_email.trim(), phone: cleanWhatsapp },
       })
       const { paymentUrl, invoiceId, transactionId } = extractMayarInvoice(mayarResponse)

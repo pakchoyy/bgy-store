@@ -26,6 +26,30 @@ async function generateLink(formData) {
   redirect(`/admin/pesanan?toast=${error ? 'error' : 'success'}&selected=${id}`)
 }
 
+// Tandai lunas manual: dipakai kalau pembayaran sudah dicek benar masuk di dashboard Mayar tapi status toko masih pending.
+// Mengirim email link download ke pembeli seperti pembayaran biasa.
+async function markPaidManual(formData) {
+  'use server'
+  await assertAdminAction()
+  const id = String(formData.get('id') || '')
+  const back = formData.get('back') || ''
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !process.env.NEXT_PUBLIC_SUPABASE_URL) redirect(`/admin/pesanan?${back}`)
+  const { createServiceClient } = await import('@/lib/supabase-server')
+  const supabase = await createServiceClient()
+  const { data: order } = await supabase.from('orders').select('*, product:products(*)').eq('id', id).maybeSingle()
+  const params = new URLSearchParams(back)
+  params.set('selected', id)
+  if (!order || order.status === 'paid') {
+    params.set('toast', 'error')
+    redirect(`/admin/pesanan?${params.toString()}`)
+  }
+  const { markOrderPaid } = await import('@/lib/orders')
+  let ok = true
+  try { await markOrderPaid(supabase, order, {}) } catch (e) { console.error('[admin] tandai lunas gagal:', e); ok = false }
+  params.set('toast', ok ? 'paid' : 'error')
+  redirect(`/admin/pesanan?${params.toString()}`)
+}
+
 async function markRead(formData) {
   'use server'
   await assertAdminAction()
@@ -192,7 +216,7 @@ export default async function AdminPesanan({ searchParams }) {
         </form>
         </div>
       </div>
-      <AdminToast toast={toast === 'read' || toast === 'deleted' ? 'success' : toast} message={toast === 'read' ? 'Pesanan ditandai sudah dibaca' : toast === 'deleted' ? 'Pesanan dihapus' : toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
+      <AdminToast toast={toast === 'read' || toast === 'deleted' || toast === 'paid' ? 'success' : toast} message={toast === 'read' ? 'Pesanan ditandai sudah dibaca' : toast === 'paid' ? 'Pesanan ditandai lunas, email link download dikirim' : toast === 'deleted' ? 'Pesanan dihapus' : toast === 'success' ? 'Link berhasil dibuat ulang' : undefined} />
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
           {statuses.map(s => (
@@ -393,6 +417,19 @@ export default async function AdminPesanan({ searchParams }) {
                   Generate Ulang Link
                 </button>
               </form>
+              {selectedOrder.status !== 'paid' && selectedOrder.type === 'produk' && (
+                <form action={markPaidManual}>
+                  <input type="hidden" name="id" value={selectedOrder.id} />
+                  <input type="hidden" name="back" value={baseQuery({ toast: '' })} />
+                  <ConfirmSubmitButton
+                    title="Tandai sudah lunas?"
+                    message={`Pastikan uang ${formatRupiah(selectedOrder.price)} dari ${selectedOrder.buyer_name} sudah masuk di dashboard Mayar. Pembeli akan langsung dikirimi email link download.`}
+                    className="flex min-h-11 w-full items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-800 hover:bg-emerald-100"
+                  >
+                    ✓ Tandai Lunas (sudah dicek di Mayar)
+                  </ConfirmSubmitButton>
+                </form>
+              )}
               <form action={deleteOrder}>
                 <input type="hidden" name="id" value={selectedOrder.id} />
                 <input type="hidden" name="back" value={baseQuery({ toast: '' })} />

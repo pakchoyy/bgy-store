@@ -59,6 +59,8 @@ export async function POST(request) {
         name: 'Traktir Kopi',
         description: 'Traktir Kopi untuk Pak Choy - Kreacy',
         redirectUrl,
+        // Tagihan berlaku 24 jam (bawaan Mayar hanya ~1 jam, pembeli sering telat bayar)
+        expiredAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
         customer: { name: buyerName, email: buyerEmail, phone: cleanWhatsapp },
       })
       const { paymentUrl, invoiceId, transactionId } = extractMayarInvoice(mayarResponse)
