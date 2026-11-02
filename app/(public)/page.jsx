@@ -3,6 +3,7 @@ import ProductStack from '@/components/public/ProductStack'
 import { fetchStoreShell, demoShellData, hasSupabase } from '@/lib/store-shell'
 import { demoProducts } from '@/lib/demo-data'
 import Testimonials from '@/components/public/Testimonials'
+import { pickHomeReviews } from '@/lib/pick-reviews.mjs'
 
 export const revalidate = 30
 // Data toko sama untuk semua pengunjung; tanpa ini fetch Supabase membuat halaman selalu dinamis.
@@ -21,9 +22,9 @@ async function getData() {
   const products = (shell.products || []).filter((p) => p.show_on_home !== false).slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
 
   const { unstable_cache } = await import('next/cache')
-  const reviews = await unstable_cache(fetchHomeReviews, ['home-reviews-v1'], { revalidate: 300, tags: ['store'] })()
+  const reviews = await unstable_cache(fetchHomeReviews, ['home-reviews-v2'], { revalidate: 300, tags: ['store'] })()
 
-  return { ...shell, products, reviews: reviews.filter((r) => String(r.comment || '').trim().length >= 10) }
+  return { ...shell, products, reviews: pickHomeReviews(reviews, 8) }
 }
 
 export default async function HomePage() {
@@ -57,7 +58,7 @@ async function fetchHomeReviews() {
     .gte('rating', 4)
     .not('comment', 'is', null)
     .order('created_at', { ascending: false })
-    .limit(8)
+    .limit(80)
   let { data, error } = await reviewQuery('id, reviewer_name, reviewer_institution, rating, comment, product:products(title)')
   if (error) ({ data } = await reviewQuery('id, reviewer_name, rating, comment, product:products(title)'))
   return data || []
