@@ -171,7 +171,7 @@ export async function GET(request) {
       : 0
 
     return Response.json({
-      reviews,
+      reviews: (reviews || []).map(maskAnonymous),
       stats: {
         total_reviews: stats?.length || 0,
         from_bgy: stats?.filter(r => r.source === 'bgy').length || 0,
@@ -185,4 +185,15 @@ export async function GET(request) {
       { status: 500 }
     )
   }
+}
+
+// Ulasan aplikasi BGY tanpa nama: tampil sebagai nama tersamar (mis. "S***i"), tetap sama untuk ulasan yang sama.
+const ANON_NAME = 'Guru pengguna BGY'
+const AWAL = 'ABDEFHIKLMNPRSTWY'
+const AKHIR = 'aiouny'
+function maskAnonymous(review) {
+  if (review?.reviewer_name !== ANON_NAME) return review
+  let h = 0
+  for (const ch of String(review.id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+  return { ...review, reviewer_name: `${AWAL[h % AWAL.length]}***${AKHIR[(h >>> 8) % AKHIR.length]}` }
 }
