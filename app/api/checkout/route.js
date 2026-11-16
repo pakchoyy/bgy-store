@@ -2,6 +2,12 @@ import { rateLimitedShared, tooMany } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 import { SITE_URL } from '@/lib/site'
 
+// Kode affiliate Buat Soal dari cookie (diset VoucherCapture saat membuka link ?aff=KODE).
+function affRefFrom(request) {
+  const v = String(request.cookies?.get?.('bgy_aff')?.value || '').trim().toUpperCase()
+  return /^[A-Z0-9][A-Z0-9-]{2,14}$/.test(v) ? v : null
+}
+
 export async function POST(request) {
   if (await rateLimitedShared(request, 'checkout', 15, 10 * 60 * 1000)) return tooMany()
   try {
@@ -94,6 +100,7 @@ export async function POST(request) {
         amount,
         voucher_code: voucherCode,
         discount_amount: discountAmount,
+        aff_ref: affRefFrom(request),
         status: 'pending',
         payment_method: 'mayar',
       })

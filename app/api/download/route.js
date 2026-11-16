@@ -56,7 +56,7 @@ export async function GET(request) {
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('id, status, token_expires_at, product_id, buyer_name, buyer_email, product:products(file_url, file_path, file_name)')
+      .select('id, status, token_expires_at, product_id, buyer_name, buyer_email, aff_ref, product:products(file_url, file_path, file_name)')
       .eq('download_token', token)
       .maybeSingle();
 
@@ -77,7 +77,7 @@ export async function GET(request) {
       target = product;
     }
 
-    if (target.file_url) target = { ...target, file_url: fillOrderPlaceholders(target.file_url, order.id) };
+    if (target.file_url) target = { ...target, file_url: fillOrderPlaceholders(target.file_url, order.id, order.aff_ref) };
 
     const watermarked = await tryWatermarkedPdf(supabase, target, order);
     if (watermarked) return watermarked;
