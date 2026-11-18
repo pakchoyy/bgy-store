@@ -7,6 +7,7 @@ import { parseSocialLinks } from '@/lib/utils'
 import Link from 'next/link'
 import PaymentWaiter from '@/components/public/PaymentWaiter'
 import DownloadReady from '@/components/public/DownloadReady'
+import { isActivationProduct, orderDeliveryKind } from '@/lib/delivery-kind.mjs'
 import ClearPurchasedCart from '@/components/public/ClearPurchasedCart'
 import ReferralShare from '@/components/public/ReferralShare'
 
@@ -120,7 +121,7 @@ export default async function TerimaKasihPage({ searchParams }) {
     const { data: info } = await supabase.from('products').select('file_url, file_name').eq('id', freeFile.id).maybeSingle()
     freeFileInfo = info
   }
-  const deliveryOf = (info) => ({ isLink: !!info?.file_url, fileName: info?.file_url ? null : info?.file_name || null })
+  const deliveryOf = (info) => ({ isLink: !!info?.file_url, isActivation: isActivationProduct(info), fileName: info?.file_url ? null : info?.file_name || null })
   const isPaid = order?.status === 'paid' && (isDonation || order.download_token)
   const isPending = order?.status === 'pending'
   const isFailed = order && ['failed', 'expired'].includes(order.status)
@@ -155,7 +156,7 @@ export default async function TerimaKasihPage({ searchParams }) {
               </p>
               {items.length > 1 || (items.length === 1 && items[0].product_id !== order.product_id) ? (
                 <>
-                  <p className="mt-3 text-sm font-semibold text-gray-700">{items.length} produk siap diunduh:</p>
+                  <p className="mt-3 text-sm font-semibold text-gray-700">{items.length} produk siap {{ activation: 'diaktifkan', file: 'diunduh', mixed: 'diambil' }[orderDeliveryKind(items.map((item) => item.product))]}:</p>
                   {items.map((item) => (
                     <DownloadReady
                       key={item.product_id}
@@ -180,7 +181,7 @@ export default async function TerimaKasihPage({ searchParams }) {
               <p className="mt-1 text-sm text-gray-600">
                 {isDonation
                   ? 'Selesaikan pembayaran QRIS. Setelah berhasil, file langsung bisa diunduh di halaman ini.'
-                  : 'Selesaikan pembayaran di Mayar. Setelah berhasil, tombol download muncul otomatis di halaman ini.'}
+                  : `Selesaikan pembayaran di Mayar. Setelah berhasil, ${isActivationProduct(order?.product) ? 'tombol Ambil Kode Aktivasi' : 'tombol download'} muncul otomatis di halaman ini.`}
               </p>
               <PaymentWaiter orderId={order.id} />
               <div className="mt-4">
@@ -210,7 +211,7 @@ export default async function TerimaKasihPage({ searchParams }) {
               <StatusIcon tone="red">{alertPath}</StatusIcon>
               <h1 className="text-lg font-bold text-gray-900">Tautan Tidak Valid</h1>
               <p className="mt-1 mb-4 text-sm text-gray-600">
-                Tautan tidak valid atau kedaluwarsa. Sudah pernah bayar? Download ulang lewat Cek Pesanan.
+                Tautan tidak valid atau kedaluwarsa. Sudah pernah bayar? Buka lagi pesananmu lewat Cek Pesanan.
               </p>
               <Link href="/cek-pesanan" className={`${waButton} mb-2 w-full`}>Cek Pesanan</Link>
               <a

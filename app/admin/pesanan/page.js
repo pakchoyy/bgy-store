@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import crypto from 'crypto'
 import { formatRupiah } from '@/lib/utils'
 import AdminToast from '@/components/admin/AdminToast'
+import { isActivationProduct } from '@/lib/delivery-kind.mjs'
 import { DEFAULT_WA_MESSAGE, getWaMessage, waPhone } from '@/lib/wa-message'
 import { PrintButton, FollowUpButton, CopyLinkButton, ConfirmSubmitButton } from '@/components/admin/OrderActions'
 
@@ -126,7 +127,7 @@ export default async function AdminPesanan({ searchParams }) {
     // Pending lebih dari 48 jam ditampilkan sebagai kedaluwarsa; status di database diubah oleh cron harian (/api/cron/daily).
     waMessage = await getWaMessage(supabase)
     const staleBefore = Date.now() - 48 * 3600 * 1000
-    const { data } = await fetchAll(() => supabase.from('orders').select('*, product:products(title)').order('created_at', { ascending: false }).order('id'))
+    const { data } = await fetchAll(() => supabase.from('orders').select('*, product:products(title, file_url)').order('created_at', { ascending: false }).order('id'))
     const { data: itemRows, error: itemsError } = await fetchAll(() => supabase.from('order_items').select('order_id, title').order('id'))
     const itemsByOrder = {}
     if (!itemsError) for (const row of itemRows || []) (itemsByOrder[row.order_id] ||= []).push(row.title)
@@ -139,6 +140,8 @@ export default async function AdminPesanan({ searchParams }) {
           buyer_name: o.buyer_name || o.customer_name || 'Unknown',
           whatsapp: o.buyer_whatsapp || o.whatsapp || o.phone || '-',
           email: o.buyer_email || o.email || '-',
+          // produk lisensi: tombol dan pesan WA bertuliskan kode aktivasi, bukan download
+          activation: type === 'produk' && isActivationProduct(o.product),
           product_title: type === 'donasi'
             ? '☕ Traktir Kopi'
             : itemsByOrder[o.id]?.length > 1
@@ -451,7 +454,7 @@ export default async function AdminPesanan({ searchParams }) {
           {selectedOrder ? (
             <div className="mt-3 flex flex-wrap gap-2">
               <FollowUpButton order={selectedOrder} />
-              {selectedOrder.download_token && <CopyLinkButton downloadToken={selectedOrder.download_token} />}
+              {selectedOrder.download_token && <CopyLinkButton downloadToken={selectedOrder.download_token} activation={selectedOrder.activation} />}
             </div>
           ) : (
             <p className="mt-3 text-xs text-gray-400">Pilih pesanan untuk mengirim follow up.</p>
@@ -512,7 +515,7 @@ export default async function AdminPesanan({ searchParams }) {
               </button>
             </form>
             <FollowUpButton order={selectedOrder} />
-            <CopyLinkButton downloadToken={selectedOrder.download_token} />
+            <CopyLinkButton downloadToken={selectedOrder.download_token} activation={selectedOrder.activation} />
             <form action={deleteOrder}>
               <input type="hidden" name="id" value={selectedOrder.id} />
               <input type="hidden" name="back" value={baseQuery({ toast: '' })} />

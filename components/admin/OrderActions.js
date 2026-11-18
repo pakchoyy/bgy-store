@@ -28,18 +28,18 @@ export function FollowUpButton({ order }) {
     const phone = waPhone(order.whatsapp)
     if (!phone) return
     const message = order.status === 'paid'
-      ? `Halo ${order.buyer_name}, terima kasih sudah membeli *${order.product_title}* di Kreacy 🙏${order.download_token ? `\n\nFile bisa diunduh di sini (berlaku 7 hari):\n${thankYouLink(order.download_token)}` : ''}\n\nKalau ada kendala, balas pesan ini ya.`
+      ? `Halo ${order.buyer_name}, terima kasih sudah membeli *${order.product_title}* di Kreacy 🙏${order.download_token ? `\n\n${order.activation ? 'Kode aktivasi bisa diambil di sini' : 'File bisa diunduh di sini'} (berlaku 7 hari):\n${thankYouLink(order.download_token)}` : ''}\n\nKalau ada kendala, balas pesan ini ya.`
       : `Halo ${order.buyer_name}, pesanan *${order.product_title}* kamu masih menunggu pembayaran. Ada yang bisa kami bantu?`
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
   }
   return (
     <Button size="sm" variant="outline" onClick={handleClick}>
-      💬 {order.status === 'paid' ? 'Kirim link download via WA' : 'Follow Up WA'}
+      💬 {order.status === 'paid' ? (order.activation ? 'Kirim kode aktivasi via WA' : 'Kirim link download via WA') : 'Follow Up WA'}
     </Button>
   )
 }
 
-export function CopyLinkButton({ downloadToken }) {
+export function CopyLinkButton({ downloadToken, activation = false }) {
   const [copied, setCopied] = useState(false)
 
   const handleClick = async () => {
@@ -53,7 +53,7 @@ export function CopyLinkButton({ downloadToken }) {
 
   return (
     <Button size="sm" variant="outline" onClick={handleClick} disabled={!downloadToken}>
-      {copied ? '✓ Tersalin!' : '📋 Salin link download'}
+      {copied ? '✓ Tersalin!' : activation ? '📋 Salin link aktivasi' : '📋 Salin link download'}
     </Button>
   )
 }
