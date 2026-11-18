@@ -28,7 +28,10 @@ function mergeItems(products, contentBlocks) {
   return result
 }
 
-export default function ProductStack({ products = [], contentBlocks = [], emptyText = 'Belum ada produk', animate = true }) {
+const plainText = (html) => String(html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase()
+
+// beforeBlock = { text, node }: node (mis. ulasan pembeli) disisipkan tepat di atas blok yang tulisannya memuat `text`.
+export default function ProductStack({ products = [], contentBlocks = [], emptyText = 'Belum ada produk', animate = true, beforeBlock = null }) {
   const items = mergeItems(products, contentBlocks)
   const Wrap = animate ? ScrollReveal : StaticWrap
 
@@ -50,9 +53,16 @@ export default function ProductStack({ products = [], contentBlocks = [], emptyT
     hidden = []
   }
 
+  const marker = beforeBlock?.text ? beforeBlock.text.toLowerCase() : null
+  let inserted = false
+
   items.forEach((item, index) => {
     if (item._kind === 'block') {
       flush()
+      if (marker && !inserted && plainText(item.text_content || item.title).includes(marker)) {
+        nodes.push(<div key="sisipan" className="col-span-6">{beforeBlock.node}</div>)
+        inserted = true
+      }
       limit = item.collapse_after || null
       shown = 0
       nodes.push(
@@ -71,6 +81,8 @@ export default function ProductStack({ products = [], contentBlocks = [], emptyT
     else { nodes.push(node); shown++ }
   })
   flush()
+  // Blok penanda tidak ada: sisipan tampil di paling bawah.
+  if (beforeBlock?.node && marker && !inserted) nodes.push(<div key="sisipan" className="col-span-6">{beforeBlock.node}</div>)
 
   return <div className="grid grid-cols-6 gap-2.5">{nodes}</div>
 }

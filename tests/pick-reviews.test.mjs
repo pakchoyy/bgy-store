@@ -20,3 +20,11 @@ test('komentar terlalu pendek atau kosong dilewati, jumlah dibatasi', () => {
   assert.equal(picked.length, 8)
   assert.ok(picked.every((x) => x.id >= 10))
 })
+
+import { shortProductTitle } from '../lib/pick-reviews.mjs'
+
+test('judul produk di kartu ulasan tanpa harga', () => {
+  assert.equal(shortProductTitle('Presensi Siswa PRO 🚀 Rp27.000/semester'), 'Presensi Siswa PRO 🚀')
+  assert.equal(shortProductTitle('Buat Soal PRO · 6 Bulan'), 'Buat Soal PRO · 6 Bulan')
+  assert.equal(shortProductTitle(null), '')
+})

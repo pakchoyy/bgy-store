@@ -24,7 +24,7 @@ async function getData() {
   const { unstable_cache } = await import('next/cache')
   const reviews = await unstable_cache(fetchHomeReviews, ['home-reviews-v2'], { revalidate: 300, tags: ['store'] })()
 
-  return { ...shell, products, reviews: pickHomeReviews(reviews, 8) }
+  return { ...shell, products, reviews: pickHomeReviews(reviews, 16) }
 }
 
 export default async function HomePage() {
@@ -39,8 +39,12 @@ export default async function HomePage() {
       activeTabLabel="Last Updated 👇"
       topBarTitle="Home"
     >
-      <ProductStack products={products} contentBlocks={contentBlocks} emptyText="Belum ada produk ditampilkan" />
-      <Testimonials reviews={reviews} />
+      <ProductStack
+        products={products}
+        contentBlocks={contentBlocks}
+        emptyText="Belum ada produk ditampilkan"
+        beforeBlock={{ text: 'Hiasan Kelas', node: <Testimonials reviews={reviews} /> }}
+      />
     </LynkShell>
   )
 }
