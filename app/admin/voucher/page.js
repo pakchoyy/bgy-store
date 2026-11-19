@@ -270,31 +270,39 @@ export default async function AdminVoucher({ searchParams }) {
             const remaining = voucher.max_uses ? Math.max(0, voucher.max_uses - (voucher.used_count || 0)) : null
             const kind = voucherKind(voucher, kuponCode)
             return (
-              <div key={voucher.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2.2a2.8 2.8 0 0 0 0 5.6V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.2a2.8 2.8 0 0 0 0-5.6V7Zm8-1v12" />
-                  </svg>
+              <div key={voucher.id} className="px-4 py-4 sm:px-5 md:flex md:items-center md:gap-3">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2.2a2.8 2.8 0 0 0 0 5.6V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.2a2.8 2.8 0 0 0 0-5.6V7Zm8-1v12" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold leading-snug text-slate-800 [overflow-wrap:anywhere]">{voucher.name}</p>
+                    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+                      <span className="font-bold text-emerald-700">{voucher.code}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${kind.cls}`}>{kind.label}</span>
+                      <span>Diskon {formatDiscount(voucher)}</span>
+                    </p>
+                    {voucher.product_ids?.length ? (
+                      <p className="mt-1 text-xs leading-relaxed text-slate-500 [overflow-wrap:anywhere]">Khusus: {voucher.product_ids.map((id) => productTitle[id] || 'produk terhapus').join(', ')}</p>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="flex flex-wrap items-center gap-2 font-bold text-slate-800">
-                    <span className="min-w-0 break-words">{voucher.name}</span>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${kind.cls}`}>{kind.label}</span>
-                  </p>
-                  <p className="text-xs text-slate-400"><span className="font-bold text-emerald-700">{voucher.code}</span> - Diskon {formatDiscount(voucher)}{voucher.product_ids?.length ? ` · Khusus: ${voucher.product_ids.map((id) => productTitle[id] || 'produk terhapus').join(', ')}` : ''}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-2 md:mt-0 md:shrink-0">
+                  <span className="mr-auto text-xs text-slate-500 md:mr-2">{`Dipakai ${voucher.used_count || 0}×`} · {remaining === null ? 'Tanpa batas' : `Sisa ${remaining}`}{voucher.ends_at ? ` · s/d ${new Date(voucher.ends_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}` : ''}</span>
+                  <form action={toggleVoucher}>
+                    <input type="hidden" name="id" value={voucher.id} />
+                    <input type="hidden" name="is_active" value={String(voucher.is_active)} />
+                    <button className={`min-h-11 rounded-xl px-4 text-sm font-bold transition-transform active:scale-[0.96] ${voucher.is_active ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-100 text-slate-500'}`}>
+                      {voucher.is_active ? 'Aktif' : 'Off'}
+                    </button>
+                  </form>
+                  <form action={deleteVoucher}>
+                    <input type="hidden" name="id" value={voucher.id} />
+                    <button className="min-h-11 rounded-xl border border-red-200 px-4 text-sm font-bold text-red-600 transition-transform hover:bg-red-50 active:scale-[0.96]">Hapus</button>
+                  </form>
                 </div>
-                <span className="text-sm text-slate-400">{`Dipakai ${voucher.used_count || 0}×`} · {remaining === null ? 'Tanpa batas' : `Sisa ${remaining}`}{voucher.ends_at ? ` · s/d ${new Date(voucher.ends_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}` : ''}</span>
-                <form action={toggleVoucher}>
-                  <input type="hidden" name="id" value={voucher.id} />
-                  <input type="hidden" name="is_active" value={String(voucher.is_active)} />
-                  <button className={`rounded-xl px-3 py-1.5 text-xs font-bold ${voucher.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>
-                    {voucher.is_active ? 'Aktif' : 'Off'}
-                  </button>
-                </form>
-                <form action={deleteVoucher}>
-                  <input type="hidden" name="id" value={voucher.id} />
-                  <button className="rounded-xl border border-red-100 px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-50">Hapus</button>
-                </form>
               </div>
             )
           })}
